@@ -1,0 +1,8 @@
+# Ignore any .class files
+*.class
+
+# Ignore any .zip files (Usually the folder zipped after completion or resources)
+*.zip
+
+# Ignore test files
+test.java
