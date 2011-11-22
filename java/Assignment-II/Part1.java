@@ -1,8 +1,87 @@
+import java.util.Scanner;
 public class Part1 {	
 	public static void main (String[] args) {
 		boolean status;
-
+		Scanner scanner = new Scanner(System.in);
+		
+		/* Test randomSolver(n, m, c, numResets, numFixes) */
+		System.out.println("Enter nXm / c:");
+		int n = scanner.nextInt();
+		System.out.print(" X ");
+		int m = scanner.nextInt();
+		System.out.print("   / ");
+		int c = scanner.nextInt();
+		System.out.print("Resets: ");
+		int numResets = scanner.nextInt();
+		System.out.print("Fixes: ");
+		int numFixes = scanner.nextInt();
+		
+		int[][] board = randomSolver(n, m, c, numResets, numFixes);
+		if (board == null) {
+			System.out.println("Didn't find any matching board :(");
+		}
+		else { 
+			System.out.println("Found a match!");
+			for (int i = 0; i < board.length; ++i) {
+				System.out.println(join(",", board[i]));
+			}
+			System.out.println("----------------------");			
+		}
+		
+		/* Test randomFix(board, c, twoCorners) */
+		/*
+		int[] twoCorners = {0, 1, 1, 2};
+		int[][] board = {{3, 0, 0},
+						 {1, 0, 0}};
+		int c = 5;
+		
+		randomFix(board, c, twoCorners);
+		System.out.println("Random fixed board:");
+		for (int i = 0; i < board.length; ++i) {
+			System.out.println(join(",", board[i]));
+		}
+		System.out.println("----------------------");		
+		*/
+		
+		/* Test randomBoard(n, m, c) */
+		/*
+		System.out.println("Enter nXm / c:");
+		int n = scanner.nextInt();
+		System.out.print(" X ");
+		int m = scanner.nextInt();
+		System.out.print("   / ");
+		int c = scanner.nextInt();
+		int[][] result = randomBoard(n, m, c);
+		System.out.println("Random generated board:");
+		for (int i = 0; i < result.length; ++i) {
+			System.out.println(join(",", result[i]));
+		}
+		System.out.println("----------------------");		
+		*/
+		
+		/* Test solver(n, m, c) */
+		/*
+		System.out.println("Enter nXm / c:");
+		int n = scanner.nextInt();
+		System.out.print(" X ");
+		int m = scanner.nextInt();
+		System.out.print("   / ");
+		int c = scanner.nextInt();
+		int[][] result = solver(n, m, c);
+		if (result == null) {
+			System.out.println("Nope, no match for " + n + "x" + m + " / " + c);
+		}
+		else {
+			System.out.println("Found a match! result:");
+			for (int i = 0; i < result.length; ++i) {
+				System.out.println(join(",", result[i]));
+			}
+			System.out.println("----------------------");
+		}
+		*/
+		
 		/* Test isValidSolution(board, c) */
+		/*
 		int c = 3;
 		
 		int[][] board = {{0, 1, 2, 0},
@@ -23,6 +102,7 @@ public class Part1 {
 						 {1, 2, 1},
 						 {0, 1, 0}};
 		System.out.println("Testing fourth board, result: " + isValidSolution(board4, c));		
+		*/
 		
 		/* Test findSameColorRec(board) */
 		/*
@@ -259,8 +339,23 @@ public class Part1 {
 	 * *  Part 3 - Basic solver         * *
 	 * ********************************** */
 	public static int[][] solver(int n, int m, int c) {
-		int[][] board=null;
-		// YOUR CODE HERE
+		int[][] board = new int[n][m]; // create a board with the sizes defined by nXm.
+		boolean found; // holds whether we found a matching board or not
+		
+		// fill the board with zeros
+		for (int i = 0; i < n; ++i) {
+			for (int j = 0; j < m; ++j) {
+				board[i][j] = 0;
+			}
+		}
+		
+		// test new boards until we find a match or finish going over the board
+		while (!(found = isValidSolution(board, c)) && increment(board, c));
+		
+		if (!found) {
+			// reset the board back to null because we didn't find any match
+			board = null;
+		}
 		return board;
 	}
 
@@ -269,27 +364,59 @@ public class Part1 {
 	 * ********************************** */
 	// Task 4.1
 	public static int[][] randomBoard(int n, int m, int c) {
-		int[][] board=null;
-		// YOUR CODE HERE
+		int[][] board = new int[n][m];
+		
+		for (int i = 0; i < n; ++i) {
+			for (int j = 0; j < m; ++j) {
+				board[i][j] = (int)(Math.random()*c);
+			}
+		}
+		
 		return board;
 	}
 	
 	// Task 4.2
 	public static void randomFix(int[][] board, int c, int[] twoCorners) {
-		// YOUR CODE HERE
+		// choose a random corner from the rectangular
+		// meaning: choose a random value from [0]-[1] and a random value from [2]-[3]
+		int n = twoCorners[(int)(Math.random()*2)];
+		int m = twoCorners[(int)(Math.random()*2)+2];
+		
+		// set a variable with the previous color so we can keep rolling for a new one
+		int previous = board[n][m];
+		while (board[n][m] == previous) {
+			board[n][m] = (int)(Math.random()*(c-1));
+		}
 	}
 	
 	// Task 4.3
 	public static int[][] randomSolver(int n, int m, int c, int numFixes) {
-		int[][] board=null;
-		// YOUR CODE HERE
+		int[][] board = null;
+		boolean found = false;
+		while (!found && numFixes > 0) {
+			board = randomBoard(n, m, c);
+			found = isValidSolution(board, c);
+			if (!found) {
+				randomFix(board, c, findSameColorRec(board));
+				found = isValidSolution(board, c);
+			}
+			--numFixes;
+		}
+		
+		if (!found) {
+			board = null;
+		}
 		return board;
 	}
 	
 	// Task 4.3
 	public static int[][] randomSolver(int n, int m, int c, int numResets, int numFixes) {
-		int[][] board=null;
-		// YOUR CODE HERE
+		int[][] board = null;
+		while (board == null && numResets > 0) {
+			board = randomSolver(n, m, c, numFixes);
+			--numResets;
+		}
+
 		return board;
 	}
 
