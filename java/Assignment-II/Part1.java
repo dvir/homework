@@ -1,192 +1,5 @@
 import java.util.Scanner;
-public class Part1 {	
-	public static void main (String[] args) {
-		boolean status;
-		Scanner scanner = new Scanner(System.in);
-		
-		/* Test randomSolver(n, m, c, numResets, numFixes) */
-		System.out.println("Enter nXm / c:");
-		int n = scanner.nextInt();
-		System.out.print(" X ");
-		int m = scanner.nextInt();
-		System.out.print("   / ");
-		int c = scanner.nextInt();
-		System.out.print("Resets: ");
-		int numResets = scanner.nextInt();
-		System.out.print("Fixes: ");
-		int numFixes = scanner.nextInt();
-		
-		int[][] board = randomSolver(n, m, c, numResets, numFixes);
-		if (board == null) {
-			System.out.println("Didn't find any matching board :(");
-		}
-		else { 
-			System.out.println("Found a match!");
-			for (int i = 0; i < board.length; ++i) {
-				System.out.println(join(",", board[i]));
-			}
-			System.out.println("----------------------");			
-		}
-		
-		/* Test randomFix(board, c, twoCorners) */
-		/*
-		int[] twoCorners = {0, 1, 1, 2};
-		int[][] board = {{3, 0, 0},
-						 {1, 0, 0}};
-		int c = 5;
-		
-		randomFix(board, c, twoCorners);
-		System.out.println("Random fixed board:");
-		for (int i = 0; i < board.length; ++i) {
-			System.out.println(join(",", board[i]));
-		}
-		System.out.println("----------------------");		
-		*/
-		
-		/* Test randomBoard(n, m, c) */
-		/*
-		System.out.println("Enter nXm / c:");
-		int n = scanner.nextInt();
-		System.out.print(" X ");
-		int m = scanner.nextInt();
-		System.out.print("   / ");
-		int c = scanner.nextInt();
-		int[][] result = randomBoard(n, m, c);
-		System.out.println("Random generated board:");
-		for (int i = 0; i < result.length; ++i) {
-			System.out.println(join(",", result[i]));
-		}
-		System.out.println("----------------------");		
-		*/
-		
-		/* Test solver(n, m, c) */
-		/*
-		System.out.println("Enter nXm / c:");
-		int n = scanner.nextInt();
-		System.out.print(" X ");
-		int m = scanner.nextInt();
-		System.out.print("   / ");
-		int c = scanner.nextInt();
-		int[][] result = solver(n, m, c);
-		if (result == null) {
-			System.out.println("Nope, no match for " + n + "x" + m + " / " + c);
-		}
-		else {
-			System.out.println("Found a match! result:");
-			for (int i = 0; i < result.length; ++i) {
-				System.out.println(join(",", result[i]));
-			}
-			System.out.println("----------------------");
-		}
-		*/
-		
-		/* Test isValidSolution(board, c) */
-		/*
-		int c = 3;
-		
-		int[][] board = {{0, 1, 2, 0},
-						 {1, 2, 0, 1},
-						 {2, 1, 0, 2}};
-		System.out.println("Testing first board, result: " + isValidSolution(board, c));
-
-		int[][] board2 = {{0, 1, 2},
-						 {1, 2},
-						 {2, 1, 0}};
-		System.out.println("Testing second board, result: " + isValidSolution(board2, c));
-		
-		int[][] board3 = {{0, 1, 2},
-						 {1, 2, 3}};
-		System.out.println("Testing third board, result: " + isValidSolution(board3, c));
-
-		int[][] board4 = {{0, 1, 0},
-						 {1, 2, 1},
-						 {0, 1, 0}};
-		System.out.println("Testing fourth board, result: " + isValidSolution(board4, c));		
-		*/
-		
-		/* Test findSameColorRec(board) */
-		/*
-		int[][] board = {{2, 1, 2, 1},
-						 {1, 3, 3, 2},
-						 {3, 1, 2, 1},
-						 {1, 2, 3, 2}};
-
-		System.out.print("Trying a none c-colored board... result: ");
-		if (findSameColorRec(board) == null) {
-			System.out.println("null");
-		}
-		else {
-			System.out.println(join(",", findSameColorRec(board)));
-		}						 
-		
-		int[][] boardCColored = {{0, 1, 2},
-								 {1, 2, 0},
-								 {2, 1, 0}};
-
-		System.out.print("Trying a c-colored board... result: ");
-		if (findSameColorRec(boardCColored) == null) {
-			System.out.println("null");
-		}
-		else {
-			System.out.println(join(",", findSameColorRec(boardCColored)));
-		}
-		*/
-		
-		/* Test findSameColorRec(board, y, x) */
-		/*
-		int[][] board = {{2, 1, 2, 1},
-						 {1, 3, 3, 2},
-						 {3, 1, 2, 1},
-						 {1, 2, 3, 2}};
-		System.out.print("(0,0) -- ");
-		if (findSameColorRec(board, 0, 0) == null) {
-			System.out.println("null");
-		}
-		else {
-			System.out.println(" -- " + join(",", findSameColorRec(board, 0, 0)));
-		}
-		
-		System.out.print("(1,0) -- ");
-		if (findSameColorRec(board, 0, 1) == null) {
-			System.out.println("null");
-		}
-		else {
-			System.out.println(join(",", findSameColorRec(board, 0, 1)));
-		}
-		*/		
-		
-		/* Test increment on a matrix */
-		/*
-		int[][] testMatrix10 = {{0,4},{9,8,3},{7,9,9,9}};
-		int[][] testMatrix4 = {{0,1,2,3},{1,2,0,3},{3,3,3,3}};
-		int[][] testMatrix4_2 = {{3,3,3,3},{3,3,3},{3,3,3,3}};
-		status = increment(testMatrix10, 10);
-		System.out.println(status + " -- {" + join(",", "},{", testMatrix10) + "}");
-		
-		status = increment(testMatrix4, 4);
-		System.out.println(status + " -- {" + join(",", "},{", testMatrix4) + "}");		
-		
-		status = increment(testMatrix4_2, 4);
-		System.out.println(status + " -- {" + join(",", "},{", testMatrix4_2) + "}");		
-		*/
-		
-		/* Test increment on a single array */
-		/*
-		int[] testVec10 = {0, 2, 9, 9, 9};
-		int[] testVec4 = {1, 0, 1, 3, 3};
-		int[] testVec4_2 = {3, 3, 3, 3, 3};
-				
-		status = increment(testVec10, 10);
-		System.out.println(status + " -- " + join(",", testVec10));
-		
-		status = increment(testVec4, 4);
-		System.out.println(status + " -- " + join(",", testVec4));
-
-		status = increment(testVec4_2, 4);
-		System.out.println(status + " -- " + join(",", testVec4_2));		
-		*/
-	}	
-	
+public class Part1 {
 	public static String join (String delimiter, int[] array) {
 		String str = "";
 		if (array.length > 0) {
@@ -424,9 +237,9 @@ public class Part1 {
 	/* ********************************** *
 	 * *  Main you may want to use      * *
 	 * ********************************** */
-/*
+
 	public static void main(String[] args) {
-		int n=4, m=4, c=3;
+		int n=5, m=5, c=3;
 		long startTime=System.currentTimeMillis();
 		int[][] sol=solver(n, m, c);
 //		int[][] sol=randomSolver(n, m, c, n*m, n*m);
@@ -437,5 +250,5 @@ public class Part1 {
 			System.out.println("Valid solution: "+isValidSolution(sol,c));
 		}
 	}
-*/
+
 }
