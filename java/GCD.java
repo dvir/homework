@@ -1,4 +1,4 @@
-class test {
+public class test {
 	public static void main(String[] args) {
 		int m = 48, n = 30, r = m % n;
 		while (r != 0) {

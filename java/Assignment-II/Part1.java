@@ -1,27 +1,4 @@
-import java.util.Scanner;
-public class Part1 {
-	public static String join (String delimiter, int[] array) {
-		String str = "";
-		if (array.length > 0) {
-			str = Integer.toString(array[0]);
-			for (int i = 1; i < array.length; ++i) {
-				str += delimiter + Integer.toString(array[i]);
-			}
-		}
-		return str;
-	}
-	
-	public static String join (String delimiter, String arrayDelimiter, int[][] array) {
-		String str = "";
-		if (array.length > 0) {
-			str = join(",", array[0]);
-			for (int i = 1; i < array.length; ++i) {
-				str += arrayDelimiter + join(delimiter, array[i]);
-			}
-		}
-		return str;
-	}
-	
+public class Part1 {	
 	/* ********************************** *
 	 * *  Part 1 - increment            * *
 	 * ********************************** */
@@ -50,7 +27,7 @@ public class Part1 {
 	// Task 1.2
 	public static boolean increment(int[][] matrix, int base) {
 		boolean succ = true;
-		boolean keepIncreasing = true;
+		// keep increasing if we have a remainder from increasing a row
 		for (int i = matrix.length-1; i >= 0 && !increment(matrix[i], base); --i) {
 			if (i == 0) {
 				succ = false;
@@ -179,6 +156,7 @@ public class Part1 {
 	public static int[][] randomBoard(int n, int m, int c) {
 		int[][] board = new int[n][m];
 		
+		// go over the newly created n*m board and fill it with random values in the range [0-c)
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
 				board[i][j] = (int)(Math.random()*c);
@@ -198,25 +176,25 @@ public class Part1 {
 		// set a variable with the previous color so we can keep rolling for a new one
 		int previous = board[n][m];
 		while (board[n][m] == previous) {
-			board[n][m] = (int)(Math.random()*(c-1));
+			board[n][m] = (int)(Math.random()*c);
 		}
 	}
 	
 	// Task 4.3
 	public static int[][] randomSolver(int n, int m, int c, int numFixes) {
-		int[][] board = null;
-		boolean found = false;
-		while (!found && numFixes > 0) {
-			board = randomBoard(n, m, c);
+		int[][] board = randomBoard(n, m, c); // create a random board
+		boolean found = isValidSolution(board, c);
+		// keep trying to fix the board until we hit numFixes tries
+		for (; !found && numFixes > 0; --numFixes) {
+			// try to fix the board
+			randomFix(board, c, findSameColorRec(board));
+			
+			// test if the fixed solution is valid; if so we will exit the loop and return it
 			found = isValidSolution(board, c);
-			if (!found) {
-				randomFix(board, c, findSameColorRec(board));
-				found = isValidSolution(board, c);
-			}
-			--numFixes;
 		}
 		
 		if (!found) {
+			// reset the board back to null because we didn't find any match
 			board = null;
 		}
 		return board;
@@ -225,9 +203,10 @@ public class Part1 {
 	// Task 4.3
 	public static int[][] randomSolver(int n, int m, int c, int numResets, int numFixes) {
 		int[][] board = null;
-		while (board == null && numResets > 0) {
+		// keep creating new random boards for our n*m/c problem, in case we hit numFixes.
+		// run until we found a valid board or we hit numResets
+		for (; board == null && numResets > 0; --numResets) {
 			board = randomSolver(n, m, c, numFixes);
-			--numResets;
 		}
 
 		return board;
@@ -239,11 +218,18 @@ public class Part1 {
 	 * ********************************** */
 
 	public static void main(String[] args) {
-		int n=5, m=5, c=3;
+		int n=10, m=10, c=4;
+		if (args.length > 0) {
+			// we received arguments from command line.
+			n = Integer.parseInt(args[0]);
+			m = Integer.parseInt(args[1]);
+			c = Integer.parseInt(args[2]);
+		}
 		long startTime=System.currentTimeMillis();
-		int[][] sol=solver(n, m, c);
-//		int[][] sol=randomSolver(n, m, c, n*m, n*m);
+//		int[][] sol=solver(n, m, c);
+		int[][] sol=randomSolver(n, m, c, n*m, n*m);
 		long endTime=System.currentTimeMillis();
+		System.out.println("Solution for board " + n + "x" + m + " / " + c);
 		System.out.println("Solution time : "+(endTime-startTime)+" ms");
 		System.out.println("Solution found: "+(sol!=null));
 		if(sol!=null) {
