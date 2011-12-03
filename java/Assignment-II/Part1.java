@@ -32,7 +32,7 @@ public class Part1 {
 			if (i == 0) {
 				succ = false;
 			}
-		}
+		} 
 		return succ;
 	}
 	
@@ -169,9 +169,9 @@ public class Part1 {
 	// Task 4.2
 	public static void randomFix(int[][] board, int c, int[] twoCorners) {
 		// choose a random corner from the rectangular
-		// meaning: choose a random value from [0]-[1] and a random value from [2]-[3]
-		int n = twoCorners[(int)(Math.random()*2)];
-		int m = twoCorners[(int)(Math.random()*2)+2];
+		// meaning: choose a random value from [0]-[2] and a random value from [1]-[3]
+		int n = twoCorners[(int)(Math.random()*2)*2];
+		int m = twoCorners[(int)(Math.random()*2)*2+1];
 		
 		// set a variable with the previous color so we can keep rolling for a new one
 		int previous = board[n][m];
