@@ -37,7 +37,8 @@ public class Ex3 {
 	/******************** Task 1 ********************/
 	public static boolean canPut(int[] tile, int x, int y, int[][][] board) {
 		boolean ans = true;
-		if (x >= board[0].length || y >= board.length || board[y][x] != null) {
+		if (board[x][y] != null || y >= board.length || x >= board[0].length) {
+			System.out.println(board[x][y]);
 			return false;
 		}
 		
@@ -79,12 +80,15 @@ public class Ex3 {
 		// test indexes - the north, east, south and west squares around the square
 		
 		int testX, testY;
-		int[][] testIndexes = new int[][]{{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
-		int[] tileColors = new int[]{north(tile), east(tile), south(tile), west(tile)};
+		int[][] testIndexes = new int[][]{{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
 		for (int i = 0; i < testIndexes.length && ans; ++i) {
-			testX = testIndexes[i][1];
-			testY = testIndexes[i][0];
-			if (tileColors[i] != board[testY][testX][i]) {
+			testX = x+testIndexes[i][0];
+			testY = y+testIndexes[i][1];
+			if (testX < 0 || testY < 0 || testX >= board.length || testY >= board[0].length) {
+				continue;
+			}
+			
+			if (board[testX][testY] != null && tile[i] != board[testX][testY][(i+2)%4]) {
 				ans = false;
 			}
 		}
@@ -161,8 +165,8 @@ public class Ex3 {
 
 	public static void main(String[] args) {
 		int[][][] board = { { { 0, 2, 1, 0 }, null, { 1, 3, 0, 0 } },
-				{ { 0, 2, 4, 2 }, null, { 4, 4, 0, 3 } },
-				{ { 0, 0, 4, 2 }, { 4, 0, 3, 3 }, { 3, 0, 0, 4 } } };
+							{ { 0, 2, 4, 2 }, null, { 4, 4, 0, 3 } },
+							{ { 0, 0, 4, 2 }, { 4, 0, 3, 3 }, { 3, 0, 0, 4 } } };
 
 		// Test task 1
 		int[] test1tile = {1, 2, 1, 0};

@@ -19,15 +19,11 @@ public class Ex1 {
 
 	/******************** Task 1 ********************/
 	public static long tilesPack1a(int n) {
-		long res = 0;
-		if (n < 0) {
+		if (n < 2) {
 			return 1;
 		}
-		res += tilesPack1a(n-1);
-		if (n > 1) {
-			res += tilesPack1a(n-2);
-		}
-		return res;
+		
+		return tilesPack1a(n-1) + tilesPack1a(n-2);
 	}
 	
 	public static long tilesPack1b(int n) {
@@ -39,18 +35,12 @@ public class Ex1 {
 	}
 	
 	public static long tilesPack1b(int n, long[] mem) {
-		if (n <= 0) {
+		if (n < 2) {
 			return 1;
 		}
 		
 		if (mem[n] == -1) {
-			mem[n] = 0;
-			if (n > 0) {
-				mem[n] += tilesPack1b(n-1, mem);
-				if (n > 1) {
-					mem[n] += tilesPack1b(n-2, mem);
-				}
-			}
+			mem[n] = tilesPack1b(n-1, mem) + tilesPack1b(n-2, mem);
 		}
 		return mem[n];
 	}
@@ -70,21 +60,14 @@ public class Ex1 {
 	}
 	
 	static long tilesPack3(int n, long[] mem) {
-		if (n <= 0) {
+		if (n < 2) {
 			return 1;
 		}
 		
 		if (mem[n] == -1) {
-			mem[n] = 0;
-			if (n > 0) {
-				mem[n] += tilesPack3(n-1, mem);
-				if (n > 1) {
-					mem[n] += tilesPack3(n-2, mem);
-				}
-				
-				if (n > 2) {
-					mem[n] += tilesPack3(n-3, mem);
-				}				
+			mem[n] = tilesPack3(n-1, mem) + tilesPack3(n-2, mem);
+			if (n > 2) {
+				mem[n] += tilesPack3(n-3, mem);
 			}
 		}
 		return mem[n];		
