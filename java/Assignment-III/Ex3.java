@@ -42,53 +42,21 @@ public class Ex3 {
 			return false;
 		}
 		
-		if (x == 0) {
-			// check the west side
-			if (west(tile) != 0) {
-				// not grey!
-				return false;
-			}
-			
-			// check the north side if we are the on the highest row
-			if (y == 0 && north(tile) != 0) {
-				return false;
-			}
-			
-			// check the south side if we are on the lowest row
-			if (y == board.length-1 && south(tile) != 0) {
-				return false;
-			}
-		}
-		else if (x == board[0].length-1) {
-			// check the east side
-			if (east(tile) != 0) {
-				// not grey!
-				return false;
-			}
-			
-			// check the north side if we are the on the highest row
-			if (y == 0 && north(tile) != 0) {
-				return false;
-			}
-			
-			// check the south side if we are on the lowest row
-			if (y == board.length-1 && south(tile) != 0) {
-				return false;
-			}			
-		}
-		
 		// test indexes - the north, east, south and west squares around the square
-		
 		int testX, testY;
 		int[][] testIndexes = new int[][]{{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
 		for (int i = 0; i < testIndexes.length && ans; ++i) {
 			testX = x+testIndexes[i][0];
 			testY = y+testIndexes[i][1];
 			if (testX < 0 || testY < 0 || testX >= board.length || testY >= board[0].length) {
-				continue;
+				// we reached a square that is out of bounds; that means our tile is a side square
+				// which means we should check if the relevant side is gray.
+				if (tile[i] != 0) {
+					// not gray!
+					ans = false;
+				}
 			}
-			
-			if (board[testX][testY] != null && tile[i] != board[testX][testY][(i+2)%4]) {
+			else if (board[testX][testY] != null && tile[i] != board[testX][testY][(i+2)%4]) {
 				ans = false;
 			}
 		}
@@ -100,8 +68,17 @@ public class Ex3 {
 	/******************** Task 2 ********************/
 	public static int[][][] put(int[] tile, int x, int y, int[][][] board) {
 		int n = board.length;
-		int[][][] newBoard= new int[n][n][];
-		// YOUR CODE HERE
+		int[][][] newBoard = new int[n][n][];
+		for (int iX = 0; iX < board.length; ++iX) {
+			for (int iY = 0; iY < board[iX].length; ++iY) {
+				if (iX == x && iY == y) {
+					newBoard[iX][iY] = tile;
+				}
+				else {
+					newBoard[iX][iY] = board[iX][iY];
+				}
+			}
+		}
 		return newBoard;
 	}
 
@@ -109,14 +86,21 @@ public class Ex3 {
 
 	/******************** Task 3 ********************/
 	public static int[][] delete(int i, int[][] tiles) {
-		int[][] restTiles = null;
-		// YOUR CODE HERE
+		int[][] restTiles = new int[tiles.length-1][4];
+		for (int j = 0, k = 0; j < tiles.length; ++j) {
+			if (j != i) {
+				restTiles[k++] = tiles[j];
+			}
+		}
 		return restTiles;
 	}
 
 	public static int[] rotate(int j, int[] tile){
-		int[] nextTile = null;
-		// YOUR CODE HERE
+		int[] nextTile = new int[4];
+		// rotate the tile j times
+		for (int i = 0; i < 4; ++i) {
+			nextTile[(j+i)%4] = tile[i];
+		}
 		return nextTile;
 	}
 
@@ -130,9 +114,31 @@ public class Ex3 {
 	}
 
 	public static int[][][] solve(int[][][] board, int[][] tiles){
+		if (tiles == null || tiles.length == 0) {
+			return board;
+		}
+		
 		int[][][] solution = null;
-		// YOUR CODE HERE
-		return solution;
+		// go over all the open spaces and the available tiles and try to match them
+		for (int x = 0; x < board.length; ++x) {
+			for (int y = 0; y < board[x].length; ++y) {
+				if (board[x][y] == null) {
+					// open slot. try to fit a tile in it.
+					for (int i = 0; i < tiles.length; ++i) {
+						for (int k = 0; k < 4; ++k) {
+							if (canPut(rotate(k, tiles[i]), x, y, board)) {
+								solution = solve(put(rotate(k, tiles[i]), x, y, board), delete(i, tiles));
+								if (solution != null) {
+									return solution;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		return null;
 	}
 
 	/******************** Auxiliary functions ********************/
@@ -205,5 +211,20 @@ public class Ex3 {
 		int[][] test7exp = {{1, 2, 3, 4}, {5, 2, 5, 1}};
 		System.out.println("Test 7: expected=" + Ex2.matrixToString(test7exp)  + 
 				" actual=" + Ex2.matrixToString(delete(1, test7tiles)));
+		
+		int[][] tiles1 = new int[][]{{3,1,0,2},{3,2,0,1},{2,0,0,2},{0,2,1,0},{0,0,1,1},{1,3,1,0},
+				{4,4,3,3},{2,0,2,3},{3,3,3,4},{1,2,0,0},{1,4,1,0},{0,2,4,2},
+				{0,1,4,2},{4,3,4,4},{4,4,3,3},{1,0,2,4}};
+		
+		int[][] tiles2 = new int[][]
+				{{3,1,0,2},{0,1,3,2},{0,0,2,2},{0,2,1,0},{0,0,1,1},{1,3,1,0},
+				{4,4,3,3},{2,0,2,3},{3,3,3,4},{0,0,1,2},{1,4,1,0},{0,2,4,2},
+				{0,1,4,2},{4,3,4,4},{4,4,3,3},{1,0,2,4}};
+		
+		int[][] tiles3 = new int[][]{{2,0,2,3},{3,3,3,4},{0,0,1,2},{1,4,1,0}};
+
+		//EternityPrint.showBoard(solve(tiles1)); // showing a game board
+		EternityPrint.showBoard(solve(tiles2)); // showing a game board
+		//EternityPrint.showBoard(solve(tiles3)); // showing a game board
 	}
 }
