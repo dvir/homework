@@ -195,9 +195,6 @@ public class Ex2 {
 	}
 
 	public static int[][] filterPointsByRange(double fromX, double toX, int[][] points) {
-		int[][] res = null; // a new array that holds only the points that has an x coordinate in the range of fromX <= x <= toX
-		
-		
 		int pointsAmount = 0; // holds the amount of points in the fromX <= x <= toX range
 		for (int i = 0; i < points.length; ++i) {
 			if (points[i][0] >= fromX && points[i][0] <= toX) {
@@ -205,9 +202,11 @@ public class Ex2 {
 			}
 		}
 		
+		// a new array that holds only the points that has an x coordinate in the range of fromX <= x <= toX
+		int[][] res = new int[pointsAmount][2]; // we pre-calculated the array size earlier
+		
 		// if we have more than one point, create the new array that will hold only the points in the range
 		if (pointsAmount > 0) {
-			res = new int[pointsAmount][2]; // we pre-calculated the array size earlier
 			int j = 0;
 			for (int i = 0; i < points.length; ++i) {
 				// if the x coordinate is in the correct range, add it to the new array
