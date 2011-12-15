@@ -3,8 +3,8 @@
  *                                                 *
  * This class is for assignment #3 - Part 0        *
  *                                                 *
- * Author(s): ### YOUR NAME(S) AND EMAIL(S). ##### *
- * Date: ##/##/####                                *
+ * Author(s): ### Dvir Azulay (dvirazu@post.bgu.ac.il), Ory Band (@post.bgu.ac.il) ##### *
+ * Date: 20/12/2011                                *
  *                                                 *
  ***************************************************/
 
@@ -19,12 +19,15 @@ public class Ex0 {
 
 	public static int f(int x) {
 		if (x <= 0) {
+			// stopping condition
 			return 1;
 		}
 		else if (x % 3 == 0){
+			// x divides by 3, execute this formula and divide it by 3 (so we get to end condition at some point)
 			return 2*x * f(x / 3);
 		}
 		else {
+			// otherwise, just sum the result with the x-1 result.
 			return x + f(x - 1);
 		}
 	}
