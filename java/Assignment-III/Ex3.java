@@ -106,7 +106,7 @@ public class Ex3 {
 		return restTiles;
 	}
 
-	public static int[] rotate(int j, int[] tile){
+	public static int[] rotate(int j, int[] tile){ 
 		// create a new tile
 		int[] nextTile = new int[4];
 		
@@ -130,28 +130,27 @@ public class Ex3 {
 
 	public static int[][][] solve(int[][][] board, int[][] tiles){
 		// if we are out of tiles, return the board as we have nothing to do with it.
-		if (tiles == null || tiles.length == 0) {
+		if (tiles.length == 0) {
 			return board;
 		}
 		
 		int[][][] solution = null;
-		// go over all the open spaces and the available tiles and try to match them
+		
+		// go over all the open spaces and try to match the first tile to them
 		for (int x = 0; x < board.length; ++x) {
 			for (int y = 0; y < board[x].length; ++y) {
 				if (board[x][y] == null) {
 					// open slot. try to fit a tile in it.
-					for (int i = 0; i < tiles.length; ++i) {
-						// try and rotate the tile k times (0<=k<4)
-						for (int k = 0; k < 4; ++k) {
-							// check if we can place the tile after rotating it k times
-							if (canPut(rotate(k, tiles[i]), x, y, board)) {
-								// check if we can solve the board by placing the tile in this slot
-								solution = solve(put(rotate(k, tiles[i]), x, y, board), delete(i, tiles));
-								if (solution != null) {
-									// the solution for placing the tile in this open slot
-									// is valid! return the solved board.
-									return solution;
-								}
+					// try and rotate the tile k times (0<=k<4)
+					for (int k = 0; k < 4; ++k) {
+						// check if we can place the tile after rotating it k times
+						if (canPut(rotate(k, tiles[0]), x, y, board)) {
+							// check if we can solve the board by placing the tile in this slot
+							solution = solve(put(rotate(k, tiles[0]), x, y, board), delete(0, tiles));
+							if (solution != null) {
+								// the solution for placing the tile in this open slot
+								// is valid! return the solved board.
+								return solution;
 							}
 						}
 					}
@@ -245,8 +244,10 @@ public class Ex3 {
 		
 		int[][] tiles3 = new int[][]{{2,0,2,3},{3,3,3,4},{0,0,1,2},{1,4,1,0}};
 
-		//EternityPrint.showBoard(solve(tiles1)); // showing a game board
+		EternityPrint.showBoard(solve(tiles3)); // showing a game board
+		EternityPrint.showBoard(solve(tiles2)); // showing a game board
 		EternityPrint.showBoard(solve(tiles1)); // showing a game board
-		//EternityPrint.showBoard(solve(tiles3)); // showing a game board
+		
+		
 	}
 }
