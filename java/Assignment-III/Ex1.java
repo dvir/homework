@@ -3,7 +3,7 @@
  *                                                 *
  * This class is for assignment #3 - Part 1        *
  *                                                 *
- * Author(s): ### Dvir Azulay (dvirazu@post.bgu.ac.il), Ory Band (@post.bgu.ac.il) ##### *
+ * Author(s): ### Dvir Azulay (dvirazu@post.bgu.ac.il), Ory Band (oryb@post.bgu.ac.il) ##### *
  * Date: 20/12/2011                                *
  *                                                 *
  ***************************************************/

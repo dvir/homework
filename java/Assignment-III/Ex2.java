@@ -3,7 +3,7 @@
  *                                                 *
  * This class is for assignment #3 - Part 2        *
  *                                                 *
- * Author(s): ### Dvir Azulay (dvirazu@post.bgu.ac.il), Ory Band (@post.bgu.ac.il) ##### *
+ * Author(s): ### Dvir Azulay (dvirazu@post.bgu.ac.il), Ory Band (oryb@post.bgu.ac.il) ##### *
  * Date: 20/12/2011                                *
  *                                                 *
  ***************************************************/
@@ -186,6 +186,7 @@ public class Ex2 {
 		for (int i = 0; i < points.length-1; ++i) {
 			for (int j = i + 1; j < points.length; ++j) {
 				if (points[i][0] == points[j][0] && points[i][1] == points[j][1]) {
+					// we found a duplicate point! return it
 					return new int[]{points[i][0], points[i][1]};
 				}
 			}
@@ -276,7 +277,7 @@ public class Ex2 {
 			int[][] middle = sortByY(filterPointsByRange(mX-distance, mX+distance, points));
 			for (int i = 0; i < middle.length-1; ++i) {
 				for (int j = i + 1; j < middle.length; ++j) {
-					// if the differences between the Y coords is equal or larger than distance,
+					// if the differences between the Y coordinates is equal or larger than distance,
 					// halt the search as we know it won't be closer than the one we already found.
 					if (middle[j][1] - middle[i][1] >= distance) {
 						return res;

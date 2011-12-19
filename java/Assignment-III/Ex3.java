@@ -3,7 +3,7 @@
  *                                                 *
  * This class is for assignment #3 - Part 3        *
  *                                                 *
- * Author(s): ### Dvir Azulay (dvirazu@post.bgu.ac.il), Ory Band (@post.bgu.ac.il) ##### *
+ * Author(s): ### Dvir Azulay (dvirazu@post.bgu.ac.il), Ory Band (oryb@post.bgu.ac.il) ##### *
  * Date: 20/12/2011                                *
  *                                                 *
  ***************************************************/
@@ -37,11 +37,12 @@ public class Ex3 {
 	/******************** Task 1 ********************/
 	public static boolean canPut(int[] tile, int x, int y, int[][][] board) {
 		// make sure the given slot isn't occupied or out of bounds
-		if (board[x][y] != null || x < 0 || y < 0 || x >= board.length || y >= board[0].length) {
+		if (x < 0 || y < 0 || x >= board.length || y >= board[0].length || board[x][y] != null) {
 			return false;
 		}
 		
 		// test indexes - the north, east, south and west squares around the square
+		// NOTE: we are testing the squares in the noted order so "tile[i]" is relevant to exact side we are testing. this simplifies the process.
 		int testX, testY;
 		int[][] testIndexes = new int[][]{{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
 		for (int i = 0; i < testIndexes.length; ++i) {
@@ -72,19 +73,25 @@ public class Ex3 {
 	public static int[][][] put(int[] tile, int x, int y, int[][][] board) {
 		// create a new board that we will fill with the old board and the new tile.
 		int[][][] newBoard = new int[board.length][board.length][];
+		
+		// go over the old board and copy its values to the new board
 		for (int iX = 0; iX < board.length; ++iX) {
 			for (int iY = 0; iY < board[iX].length; ++iY) {
-				if (iX == x && iY == y) {
-					// we reached the coordinates of the new tile. place it.
-					newBoard[iX][iY] = tile;
-				}
-				else {
-					// fill the new board with the old board data.
-					newBoard[iX][iY] = board[iX][iY];
+				if (board[iX][iY] != null) {
+					// create a new tile in the coordinates we want to fill
+					newBoard[iX][iY] = new int[4];
+					for (int i = 0; i < 4; ++i) {
+						newBoard[iX][iY][i] = board[iX][iY][i];
+					}
 				}
 			}
 		}
 		
+		// fill the desired board cell with the new tile values
+		newBoard[x][y] = new int[4];
+		for (int i = 0; i < 4; ++i) {
+			newBoard[x][y][i] = tile[i];
+		}		
 		return newBoard;
 	}
 
@@ -97,6 +104,7 @@ public class Ex3 {
 		
 		// go over the tiles array and copy every tile from it to the new array, 
 		// except from the tile we want to delete from it.
+		// k is the new array index
 		for (int j = 0, k = 0; j < tiles.length; ++j) {
 			if (j != i) {
 				restTiles[k++] = tiles[j];
