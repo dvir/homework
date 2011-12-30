@@ -30,40 +30,68 @@ public class Main {
 		Expression exp8 = new Polynomial(x, coefficients);
 		Expression exp81 = new Addition(cons1, new Multiplication(cons2, x));
 		Expression exp82 = new Polynomial(y, coefficients2);
+		
+		String[][] testCases = new String[][]{
+				{"Addition Class:", "", ""},
+				{"evaluate", "3.1", "" + exp1.evaluate(assignments)},
+				{"derivative", "(1.0+0.0)", "" + exp2},
+				{"toString", "(x+y)", "" + exp3},
+				{"toString", "(y+x)", "" + exp4},
+				{"equals", "false", "" + exp3.equals(exp4)},
 				
+				{"Subtraction Class:", "", ""},
+				{"evaluate", "-1.0", "" + exp5.evaluate(assignments)},
+				{"derivative", "(0.0-1.0)", "" + exp52},
+				{"toString", "(z-y)", "" + exp51},
+				{"equals", "true", "" + exp51.equals(exp51)},
+				
+				{"Multiplication Class:", "", ""},
+				{"evaluate", "2.2", "" + exp61.evaluate(assignments)},
+				{"derivative", "((1.0+0.0)*(0.0-0.0))", "" + exp62},
+				{"toString", "(x*y)", "" + exp61},
+				{"toString", "((x+y)*(y-z))", "" + exp6},
+				{"equals", "false", "" + exp6.equals(exp61)},
+				
+				{"Power Class:", "", ""},
+				{"evaluate", "8.0", "" + exp71.evaluate(assignments)},
+				{"derivative", "(3.0*(y^2.0))", "" + exp72},
+				{"toString", "(y^3.0)", "" + exp71},
+				{"equals", "true", "" + exp71.equals(exp71)},
+				
+				{"Polynomial Class:", "", ""},
+				{"evaluate", "24.0", "" + exp82.evaluate(assignments)},
+				{"derivative", "(3.0+8.0*y)", "" + exp82.derivative(y)},
+				{"toString", "(2.0+3.0*y+4.0*y^2)", "" + exp82},
+				{"equals", "true", "" + exp8.equals(exp8)},
+				
+				{"General:", "", ""},
+				{"toString", "(((x+y)*(y-z))^2.2)", "" + exp7},
+				{"toString", "(1.0+3.0*x)", "" + exp8},
+				{"toString", "(1.0+(3.0*x))", "" + exp81},
+				{"equals", "false", "" + exp8.equals(exp81)}
+		};
 		
-		System.out.println("Testing Addition:");
-		System.out.println("* (evaluate) Expected: 3.1 | Actual: " + exp1.evaluate(assignments));
-		System.out.println("* (derivative) Expected: (1.0+0.0) | Actual: " + exp2);
-		System.out.println("* (toString, toString, equals) Expected: (x+y),(y+x),false | Actual: " + exp3 + "," + exp4 + "," + exp3.equals(exp4));
-
-		System.out.println();
-		System.out.println("Testing Subtraction:");
-		System.out.println("* (evaluate) Expected: -1.0 | Actual: " + exp5.evaluate(assignments));
-		System.out.println("* (derivative) Expected: (0.0-1.0) | Actual: " + exp52);
-		System.out.println("* (toString, equals) Expected: (z-y),true | Actual: " + exp51 + "," + exp51.equals(exp51));
+		boolean success = true;
+		for (int i = 0; i < testCases.length; ++i) {
+			if (testCases[i][1].equals("")) {
+				System.out.println();
+				System.out.println(testCases[i][0]);
+			}
+			else {
+				System.out.print("* (" + testCases[i][0] + ") - ");
+				if (testCases[i][1].equals(testCases[i][2])) {
+					System.out.println("passed.");
+				}
+				else {
+					success = false;
+					System.out.println("failed. - Expected: " + testCases[i][1] + " | Actual: " + testCases[i][2]);
+				}
+			}
+		}
 		
 		System.out.println();
-		System.out.println("Testing Multiplication:");
-		System.out.println("* (evaluate) Expected: 2.2 | Actual: " + exp61.evaluate(assignments));
-		System.out.println("* (derivative) Expected: ((1.0+0.0)*(0.0+0.0)) | Actual: " + exp62);
-		System.out.println("* (toString, equals) Expected: (x*y),((x+y)*(y-z)),false | Actual: " + exp61 + "," + exp6 + "," + exp6.equals(exp61));
-		
-		System.out.println();
-		System.out.println("Testing Power:");
-		System.out.println("* (evaluate) Expected: 8.0 | Actual: " + exp71.evaluate(assignments));
-		System.out.println("* (derivative) Expected: (3*(y^2.0)) | Actual: " + exp72);
-		System.out.println("* (toString, equals) Expected: (y^3.0),true | Actual: " + exp71 + "," + exp71.equals(exp71));
-
-		System.out.println();
-		System.out.println("Testing Polynomial:");
-		System.out.println("* (evaluate) Expected: 10.0 | Actual: " + exp82.evaluate(assignments));
-		System.out.println("* (derivative) Expected: (3.0+8.0*y) | Actual: " + exp82.derivative(y));
-		System.out.println("* (toString, equals) Expected: (2+3.0*y+4.0*y^2),true | Actual: " + exp82 + "," + exp8.equals(exp8));
-		
-		System.out.println();
-		System.out.println("General tests:");
-		System.out.println("* (toString of Addition, Subtraction, Multiplication, Power) Expected: (((x+y)*(y-z))^2.2) | Actual: " + exp7);
-		System.out.println(" * Expected: (1+3.0*x),(1.0+(3.0*x)),false | Actual: " + exp8 + "," + exp81 + "," + exp8.equals(exp81));	
+		if (success) {
+			System.out.println("All passed! woohoo!");
+		}
 	}
 }

@@ -11,8 +11,16 @@ public class Polynomial implements Expression {
 	private double[] coefficients;
 	
 	public Polynomial(Variable var, double[] coefficients) {
+		if (coefficients == null) {
+			coefficients = new double[0];
+		}
+		
 		this.var = var;
 		this.coefficients = coefficients;
+	}
+	
+	public getCoefficients() {
+		return this.coefficients;
 	}
 	
 	/* (non-Javadoc)
@@ -51,7 +59,20 @@ public class Polynomial implements Expression {
 	}
 	
 	public boolean equals(Expression other) {
-		return (other != null && (other instanceof Polynomial) && this.equals(other));
+		if (other != null && (other instanceof Polynomial) && this.var.equals(other.var) && this.getCoefficients().length == other.getCoefficients().length) {
+			double[] otherCoefficients = other.getCoefficients();
+			for (int i = 0; i < this.coefficients.length; ++i) {
+				if (this.coefficients[i] != otherCoefficients[i]) {
+					// values mis-match; the Polynomials aren't equal.
+					return false;
+				}
+			}
+			
+			// if we got here, all the coefficients are equal.
+			return true;
+		}
+		
+		return false;
 	}
 
 	public String toString() {
