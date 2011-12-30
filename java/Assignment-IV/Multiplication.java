@@ -35,7 +35,7 @@ public class Multiplication implements Expression {
 	 */
 	@Override
 	public Expression derivative(Variable var) {
-		return new Multiplication(this.x.derivative(var), this.y.derivative(var));
+		return new Addition(new Multiplication(this.x.derivative(var), this.y), new Multiplication(this.x, this.y.derivative(var)));
 	}
 	
 	public boolean equals(Expression other) {

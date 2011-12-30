@@ -1,0 +1,23 @@
+expressions:
+(x+y) = 3.5
+(y-z) = 5.9
+((x+y)*(y-z)) = 20.650000000000002
+(((x+y)*(y-z))^4.2) = 333168.7313918867
+(-2.0+4.1*x-0.32*x^2) = 1.7799999999999996
+(4.1-0.64*x) = 3.4599999999999995
+0.0 = 0.0
+((4.2*(((x+y)*(y-z))^3.2))*(((x+y)*(1.0-0.0))+((0.0+1.0)*(y-z)))) = 636973.4390000817
+
+Basic equality check:
+
+First expression:(x+y)
+Second expression:(x+y)
+Is first equal to second? true
+
+First expression:(x+y)
+Second expression:(y+x)
+Is first equal to second? false
+
+First expression:(x+y)
+Second expression:(x-y)
+Is first equal to second? false
