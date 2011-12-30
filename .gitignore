@@ -1,6 +1,10 @@
 # Ignore any .class files
 *.class
 
+# ignore eclipse files
+*.classpath
+*.project
+
 # Ignore any .zip files (Usually the folder zipped after completion or resources)
 *.zip
 
