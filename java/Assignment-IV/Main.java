@@ -47,14 +47,14 @@ public class Main {
 				
 				{"Multiplication Class:", "", ""},
 				{"evaluate", "2.2", "" + exp61.evaluate(assignments)},
-				{"derivative", "(((1.0+0.0)*(y-z))+((x+y)*(0.0-0.0)))", "" + exp62},
+				{"derivative", "(((x+y)*(0.0-0.0))+((1.0+0.0)*(y-z)))", "" + exp62},
 				{"toString", "(x*y)", "" + exp61},
 				{"toString", "((x+y)*(y-z))", "" + exp6},
 				{"equals", "false", "" + exp6.equals(exp61)},
 				
 				{"Power Class:", "", ""},
 				{"evaluate", "8.0", "" + exp71.evaluate(assignments)},
-				{"derivative", "(3.0*((y^2.0)*1.0))", "" + exp72},
+				{"derivative", "((3.0*(y^2.0))*1.0)", "" + exp72},
 				{"toString", "(y^3.0)", "" + exp71},
 				{"equals", "true", "" + exp71.equals(exp71)},
 				

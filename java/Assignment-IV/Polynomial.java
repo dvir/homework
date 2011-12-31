@@ -44,6 +44,10 @@ public class Polynomial implements Expression {
 	 */
 	@Override
 	public Expression derivative(Variable var) {
+		if (!this.var.equals(var)) {
+			return new Constant(0);
+		}
+		
 		if (this.coefficients.length > 1) {
 			double[] newCoefficients = new double[this.coefficients.length-1];
 			for (int i = 0; i < newCoefficients.length; ++i) {

@@ -41,7 +41,13 @@ public class Power implements Expression {
 		}
 		
 		double newExponent = this.exponent - 1;
-		return new Multiplication(new Constant(this.exponent), new Multiplication(new Power(this.base, newExponent), this.base.derivative(var)));
+		return new Multiplication(
+					new Multiplication(
+								new Constant(this.exponent), 
+								new Power(this.base, newExponent)
+					), 
+					this.base.derivative(var)
+				);
 	}
 	
 	public boolean equals(Expression other) {
