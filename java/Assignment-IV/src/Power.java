@@ -50,8 +50,8 @@ public class Power implements Expression {
 				);
 	}
 	
-	public boolean equals(Expression other) {
-		return (other != null && (other instanceof Power) && this.getBase() == other.getBase() && this.getExponent() == other.getExponent());
+	public boolean equals(Object other) {
+		return (other != null && (other instanceof Power) && this.getBase().equals(((Power)other).getBase()) && this.getExponent() == ((Power)other).getExponent());
 	}
 
 	public String toString() {

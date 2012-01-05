@@ -29,8 +29,9 @@ public class VariableExpression implements Variable, Expression {
 		return new Constant(0);
 	}
 	
-	public boolean equals(VariableExpression other) {
-		return (other != null && other.getName() == this.getName());
+	
+	public boolean equals(Object other) {
+		return (other != null && (other instanceof VariableExpression) && ((VariableExpression)other).getName() == this.getName());
 	}
 	
 	public String toString() {

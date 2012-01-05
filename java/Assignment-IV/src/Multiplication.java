@@ -47,8 +47,8 @@ public class Multiplication implements Expression {
 				);
 	}
 	
-	public boolean equals(Expression other) {
-		return (other != null && (other instanceof Multiplication) && this.getX() == other.getX() && this.getY() == other.getY());		
+	public boolean equals(Object other) {
+		return (other != null && (other instanceof Multiplication) && this.getX().equals(((Multiplication)other).getX()) && this.getY().equals(((Multiplication)other).getY()));	
 	}
 
 	public String toString() {

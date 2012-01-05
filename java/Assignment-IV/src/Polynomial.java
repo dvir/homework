@@ -19,7 +19,7 @@ public class Polynomial implements Expression {
 		this.coefficients = coefficients;
 	}
 	
-	public getCoefficients() {
+	public double[] getCoefficients() {
 		return this.coefficients;
 	}
 	
@@ -62,9 +62,9 @@ public class Polynomial implements Expression {
 		return new Polynomial(this.var, new double[0]);
 	}
 	
-	public boolean equals(Expression other) {
-		if (other != null && (other instanceof Polynomial) && this.var.equals(other.var) && this.getCoefficients().length == other.getCoefficients().length) {
-			double[] otherCoefficients = other.getCoefficients();
+	public boolean equals(Object other) {
+		if (other != null && (other instanceof Polynomial) && this.var.equals(((Polynomial)other).var) && this.getCoefficients().length == ((Polynomial)other).getCoefficients().length) {
+			double[] otherCoefficients = ((Polynomial)other).getCoefficients();
 			for (int i = 0; i < this.coefficients.length; ++i) {
 				if (this.coefficients[i] != otherCoefficients[i]) {
 					// values mis-match; the Polynomials aren't equal.
@@ -86,7 +86,7 @@ public class Polynomial implements Expression {
 				result = result + coefficients[i];
 			}
 			else {
-				if (coefficients[i] > 0) {
+				if (coefficients[i] >= 0) {
 					result = result + "+";
 				}
 				result = result + coefficients[i] + "*" + var.getName();
