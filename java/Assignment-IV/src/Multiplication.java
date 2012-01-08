@@ -10,6 +10,10 @@ public class Multiplication implements Expression {
 	private Expression x, y;
 	
 	public Multiplication(Expression x, Expression y) {
+		if (x == null || y == null) {
+			throw new RuntimeException("Multiplication.Multiplication() received a null expression.");
+		}				
+		
 		this.x = x;
 		this.y = y;
 	}
@@ -35,6 +39,10 @@ public class Multiplication implements Expression {
 	 */
 	@Override
 	public Expression derivative(Variable var) {
+		if (var == null) {
+			throw new RuntimeException("Multiplication.derivative() received a null variable.");
+		}			
+		
 		return new Addition(
 					new Multiplication(
 							this.x, 
@@ -48,7 +56,7 @@ public class Multiplication implements Expression {
 	}
 	
 	public boolean equals(Object other) {
-		return (other != null && (other instanceof Multiplication) && this.getX().equals(((Multiplication)other).getX()) && this.getY().equals(((Multiplication)other).getY()));	
+		return (other instanceof Multiplication && this.getX().equals(((Multiplication)other).getX()) && this.getY().equals(((Multiplication)other).getY()));	
 	}
 
 	public String toString() {

@@ -17,6 +17,7 @@ public interface Assignment {
 	 * Returns the value of the assignment.
 	 * @return double value
 	 */
+	
 	public double getValue();
 	
 	/**

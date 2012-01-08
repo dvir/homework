@@ -11,6 +11,10 @@ public class Power implements Expression {
 	private double exponent;
 	
 	public Power(Expression base, double exponent) {
+		if (base == null) {
+			throw new RuntimeException("Power.Power() received a null base expression.");
+		}			
+		
 		this.base = base;
 		this.exponent = exponent;
 	}
@@ -36,6 +40,10 @@ public class Power implements Expression {
 	 */
 	@Override
 	public Expression derivative(Variable var) {
+		if (var == null) {
+			throw new RuntimeException("Power.derivative() received a null variable.");
+		}		
+		
 		if (this.exponent == 0) {
 			return new Constant(0);
 		}

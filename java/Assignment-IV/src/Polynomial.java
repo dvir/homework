@@ -11,12 +11,17 @@ public class Polynomial implements Expression {
 	private double[] coefficients;
 	
 	public Polynomial(Variable var, double[] coefficients) {
-		if (coefficients == null) {
-			coefficients = new double[0];
+		if (var == null || coefficients == null || coefficients.length == 0) {
+			throw new RuntimeException("Polynomial.Polynomial() received a null variable or empty coefficients array.");
 		}
 		
 		this.var = var;
-		this.coefficients = coefficients;
+		
+		// making a deep copy of the coefficients array
+		this.coefficients = new double[coefficients.length];
+		for (int i = 0; i < this.coefficients.length; ++i) {
+			this.coefficients[i] = coefficients[i];
+		}
 	}
 	
 	public double[] getCoefficients() {
@@ -28,6 +33,10 @@ public class Polynomial implements Expression {
 	 */
 	@Override
 	public double evaluate(Assignments assignments) {
+		if (assignments == null) {
+			throw new RuntimeException("Polynomial.evaluate() received a null assignments array.");
+		}			
+		
 		double sum = 0;
 		
 		// go over the coefficients array and sum the results of the polynomial equation
@@ -44,7 +53,11 @@ public class Polynomial implements Expression {
 	 */
 	@Override
 	public Expression derivative(Variable var) {
-		if (!this.var.equals(var)) {
+		if (var == null) {
+			throw new RuntimeException("Polynomial.derivative() received a null variable.");
+		}		
+		
+		if (!this.var.equals(var) || this.coefficients.length == 1) {
 			return new Constant(0);
 		}
 		

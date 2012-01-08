@@ -1,7 +1,8 @@
 import java.util.Scanner;
 
 /**
- * 
+ * @version 1.6
+ *  
  * @author Eran Samocha
  * thanks to Mark Bloch for helping
  */
@@ -38,23 +39,23 @@ public class Assignment4Tester {
 				System.out.println("6. Exit.");
 				int req = Integer.parseInt(scan.next());
 				switch (req) {
-					default:
-						return;
-					case 1:
-						performValidityChecks();
-						break;
-					case 2:
-						performOutputChecks();
-						break;
-					case 3:
-						performComparisonChecks();
-						break;
-					case 4:
-						performEvaluationChecks();
-						break;
-					case 5:
-						performDerivativeChecks();
-						break;
+				default:
+					return;
+				case 1:
+					performValidityChecks();
+					break;
+				case 2:
+					performOutputChecks();
+					break;
+				case 3:
+					performComparisonChecks();
+					break;
+				case 4:
+					performEvaluationChecks();
+					break;
+				case 5:
+					performDerivativeChecks();
+					break;
 				}
 			} catch (NumberFormatException e) {
 				System.err.println("Please enter a valid number!");
@@ -66,8 +67,6 @@ public class Assignment4Tester {
 	 * Checks if the expressions you return when calling .derivative() are what they should be
 	 */
 	private static void performDerivativeChecks() {
-		System.out.println("Testing Constant..");
-		System.out.println("Test #1 .. " + (new Constant(1).derivative(null).toString().equals("0.0") ? "passed!" : "failed!"));
 		System.out.println("Testing VariablExpression..");
 		VariableExpression x = new VariableExpression('x'), y = new VariableExpression('y');
 		System.out.println("Test #1 .. " + (x.derivative(x).toString().equals("1.0") ? "passed!" : "failed!"));
@@ -153,46 +152,47 @@ public class Assignment4Tester {
 	 * Checks if you return correct answers when comparing two objects
 	 */
 	private static void performComparisonChecks() {
-		System.out.println("Testing Constant..");
-		System.out.println("Test #1 .. " + (new Constant(1).equals(new Constant(1)) ? "passed!" : "failed!"));
-		System.out.println("Test #2 .. " + (new Constant().equals(new Constant(1)) ? "failed!" : "passed!"));
 		System.out.println("Testing VariableExpression..");
-		VariableExpression x = new VariableExpression('x'), y = new VariableExpression('y');
-		System.out.println("Test #1 .. " + (x.equals(new VariableExpression('x')) ? "passed!" : "failed!"));
-		System.out.println("Test #2 .. " + (x.equals(new VariableExpression('y')) ? "failed!" : "passed!"));
+		System.out.println("Test #1 .. " + (new VariableExpression('x').equals(new VariableExpression('x')) ? "passed!" : "failed!"));
+		System.out.println("Test #2 .. " + (new VariableExpression('x').equals(new VariableExpression('y')) ? "failed!" : "passed!"));
 		System.out.println("Testing Addition..");
-		Expression exp = new Addition(x, y);
-		System.out.println("Test #1 .. " + (exp.equals(new Addition(x, y)) ? "passed!" : "failed!"));
-		System.out.println("Test #2 .. " + (exp.equals(new Addition(y, x)) ? "failed!" : "passed!"));
+		Expression exp = new Addition(new VariableExpression('x'), new VariableExpression('y'));
+		System.out.println("Test #1 .. " + (exp.equals(new Addition(new VariableExpression('x'), new VariableExpression('y'))) ? "passed!" : "failed!"));
+		System.out.println("Test #2 .. " + (exp.equals(new Addition(new VariableExpression('y'), new VariableExpression('x'))) ? "failed!" : "passed!"));
 		System.out.println("Testing Subtraction..");
-		exp = new Subtraction(x, new Constant(1));
-		System.out.println("Test #1 .. " + (exp.equals(new Subtraction(x, new Constant(1))) ? "passed!" : "failed!"));
-		System.out.println("Test #2 .. " + (exp.equals(new Subtraction(new Constant(1), x)) ? "failed!" : "passed!"));
+		exp = new Subtraction(new VariableExpression('x'), new Constant(1));
+		System.out.println("Test #1 .. " + (exp.equals(new Subtraction(new VariableExpression('x'), new Constant(1))) ? "passed!" : "failed!"));
+		System.out.println("Test #2 .. " + (exp.equals(new Subtraction(new Constant(1), new VariableExpression('x'))) ? "failed!" : "passed!"));
 		System.out.println("Testing Multiplication..");
-		exp = new Multiplication(x, y);
-		System.out.println("Test #1 .. " + (exp.equals(new Multiplication(x, y)) ? "passed!" : "failed!"));
-		System.out.println("Test #2 .. " + (exp.equals(new Multiplication(y, x)) ? "failed!" : "passed!"));
+		exp = new Multiplication(new VariableExpression('x'), new VariableExpression('y'));
+		System.out.println("Test #1 .. " + (exp.equals(new Multiplication(new VariableExpression('x'), new VariableExpression('y'))) ? "passed!" : "failed!"));
+		System.out.println("Test #2 .. " + (exp.equals(new Multiplication(new VariableExpression('y'), new VariableExpression('x'))) ? "failed!" : "passed!"));
 		System.out.println("Testing Power..");
-		exp = new Power(x, 5);
-		System.out.println("Test #1 .. " + (exp.equals(new Power(x, 5)) ? "passed!" : "failed!"));
-		System.out.println("Test #2 .. " + (exp.equals(new Power(y, 5)) ? "failed!" : "passed!"));
-		System.out.println("Test #3 .. " + (exp.equals(new Power(x, 6)) ? "failed!" : "passed!"));
+		exp = new Power(new VariableExpression('x'), 5);
+		System.out.println("Test #1 .. " + (exp.equals(new Power(new VariableExpression('x'), 5)) ? "passed!" : "failed!"));
+		System.out.println("Test #2 .. " + (exp.equals(new Power(new VariableExpression('x'), 4)) ? "failed!" : "passed!"));
+		System.out.println("Test #3 .. " + (exp.equals(new Power(new VariableExpression('x'), 6)) ? "failed!" : "passed!"));
 		System.out.println("Testing Polynomial..");
-		exp = new Polynomial(x, new double[] { 0, 1, 0, -1, 5 });
-		System.out.println("Test #1 .. " + (exp.equals(new Polynomial(x, new double[] { 0, 1, 0, -1, 5 })) ? "passed!" : "failed!"));
-		System.out.println("Test #2 .. " + (exp.equals(new Polynomial(x, new double[] { 0, 1, 0, 0, -2, 5 })) ? "failed!" : "passed!"));
-		System.out.println("Test #3 .. " + (exp.equals(new Polynomial(y, new double[] { 0, 1, 0, -2, 5 })) ? "failed!" : "passed!"));
+		exp = new Polynomial(new VariableExpression('x'), new double[] { 0, 1, 0, -1, 5 });
+		System.out.println("Test #1 .. " + (exp.equals(new Polynomial(new VariableExpression('x'), new double[] { 0, 1, 0, -1, 5 })) ? "passed!" : "failed!"));
+		System.out.println("Test #2 .. " + (exp.equals(new Polynomial(new VariableExpression('x'), new double[] { 0, 1, 0, -2, 5 })) ? "failed!" : "passed!"));
+		System.out.println("Test #3 .. " + (exp.equals(new Polynomial(new VariableExpression('y'), new double[] { 0, 1, 0, -1, 5 })) ? "failed!" : "passed!"));
+		System.out.println("Test #4 .. " + (exp.equals(new Polynomial(new VariableExpression('x'), new double[] { 0, 1, 0, -1, 5, 0 })) ? "failed!" : "passed!"));
 		System.out.println("Testing complex expressions..");
 		exp = new Addition(new Power(new Subtraction(new Addition(new VariableExpression('t'), new VariableExpression('s')), 
-				new Multiplication(x, new VariableExpression('w'))), 5), new Polynomial(x, new double[] { 0, 0, 1, -1, 1}));
+				new Multiplication(new VariableExpression('x'), new VariableExpression('w'))), 5),
+				new Polynomial(new VariableExpression('x'), new double[] { 0, 0, 1, -1, 1}));
 		Expression exp2 = new Addition(new Power(new Subtraction(new Addition(new VariableExpression('t'), new VariableExpression('s')), 
-				new Multiplication(x, new VariableExpression('w'))), 5), new Polynomial(x, new double[] { 0, 0, 1, -1, 1}));
+				new Multiplication(new VariableExpression('x'), new VariableExpression('w'))), 5),
+				new Polynomial(new VariableExpression('x'), new double[] { 0, 0, 1, -1, 1}));
 		System.out.println("Test #1 .. " + (exp.equals(exp2) ? "passed!" : "failed!"));
 		exp2 = new Addition(new Power(new Subtraction(new Addition(new VariableExpression('a'), new VariableExpression('b')), 
-				new Multiplication(x, new VariableExpression('w'))), 5), new Polynomial(x, new double[] { 0, 0, 1, -1, 1}));
+				new Multiplication(new VariableExpression('x'), new VariableExpression('w'))), 5),
+				new Polynomial(new VariableExpression('x'), new double[] { 0, 0, 1, -1, 1}));
 		System.out.println("Test #2 .. " + (exp.equals(exp2) ? "failed!" : "passed!"));
 		exp2 = new Addition(new Power(new Subtraction(new Addition(new VariableExpression('t'), new VariableExpression('s')), 
-				new Multiplication(x, new VariableExpression('w'))), 3), new Polynomial(x, new double[] { 1, 0, 1, -1, 1}));
+				new Multiplication(new VariableExpression('x'), new VariableExpression('w'))), 3),
+				new Polynomial(new VariableExpression('x'), new double[] { 1, 0, 1, -1, 1}));
 		System.out.println("Test #3 .. " + (exp.equals(exp2) ? "failed!" : "passed!"));
 	}
 
@@ -200,11 +200,8 @@ public class Assignment4Tester {
 	 * Check if your toString functions return the output they're supposed to
 	 */
 	private static void performOutputChecks() {
-		System.out.println("Testing Constant..");
-		Expression exp = new Constant(5);
-		System.out.println("Test #1 .. " + (exp.toString().equals("5.0") ? "passed!" : "failed!"));
 		System.out.println("Testing VariableExpression..");
-		exp = new VariableExpression('x');
+		Expression exp = new VariableExpression('x');
 		System.out.println("Test #1 .. " + (exp.toString().equals("x") ? "passed!" : "failed!"));
 		System.out.println("Testing ValueAssignment..");
 		ValueAssignment valA = new ValueAssignment(new VariableExpression('x'), 5.0);
@@ -223,8 +220,7 @@ public class Assignment4Tester {
 		System.out.println("Test #1 .. " + (exp.toString().equals("(y^0.5)") ? "passed!" : "failed!"));
 		System.out.println("Testing Polynomial..");
 		exp = new Polynomial(new VariableExpression('x'), new double[] { 1, 1, 0, -7.5 });
-		System.out.println("Test #1 .. " + (exp.toString().equals("(1.0+1.0*x+0.0*x^2-7.5*x^3)") ? "passed!" : "failed!" + exp.toString()));
-		//New test
+		System.out.println("Test #1 .. " + (exp.toString().equals("(1.0+1.0*x+0.0*x^2-7.5*x^3)") ? "passed!" : "failed!"));
 		exp = new Polynomial(new VariableExpression('x'), new double[] { 4.4 });
 		System.out.println("Test #2 .. " + (exp.toString().equals("(4.4)") ? "passed!" : "failed!" ));
 	}
@@ -235,28 +231,36 @@ public class Assignment4Tester {
 	 * 3) Checks if you handled special cases correctly.
 	 */
 	private static void performValidityChecks() {
-		System.out.println("This test checks if you throw RunTimeExceptions correctly");
-		System.out.println("If the error message is different from what you wrote, you did something wrong.");
 		VariableExpression var = new VariableExpression('x');
-		System.out.println("Testing Constant..");
 		try {
-			new Constant().equals(new VariableExpression('x'));
-			System.out.println("Test #1 passed!");
+			new Constant().derivative(null);
+			System.out.println("******** PLEASE UPDATE Constant.java *********");
 		} catch (Exception e) {
-			System.out.println("Test #1 failed!");
 		}
 		System.out.println("Testing VariableExpression..");
 		try {
 			var.derivative(null);
 			System.out.println("Test #1 failed!");
 		} catch (Exception e) {
-			System.out.println("Test #1 passed!");
+			if (e instanceof NullPointerException)
+				System.out.println("Test #1 failed!");
+			else
+				System.out.println("Test #1 passed!");
 		}
 		try {
 			new VariableExpression('x').equals(new Constant());
 			System.out.println("Test #2 passed!");
 		} catch (Exception e) {
-			System.out.println("Test #2 failed!");
+			System.out.println("Test #1 failed!");
+		}
+		try {
+			new VariableExpression('x').evaluate(null);
+			System.out.println("Test #3 failed!");
+		} catch (Exception e) {
+			if (e instanceof NullPointerException)
+				System.out.println("Test #3 failed!");
+			else
+				System.out.println("Test #3 passed!");
 		}
 		System.out.println("Testing Addition..");
 		try {
@@ -281,13 +285,25 @@ public class Assignment4Tester {
 			new Addition(var, var).derivative(null);
 			System.out.println("Test #4 failed!");
 		} catch (Exception e) {
-			System.out.println("Test #4 passed!");
+			if (e instanceof NullPointerException)
+				System.out.println("Test #4 failed!");
+			else
+				System.out.println("Test #4 passed!");
 		}
 		try {
 			new Addition(var, var).equals(new Constant());
 			System.out.println("Test #5 passed!");
 		} catch (Exception e) {
 			System.out.println("Test #5 failed!");
+		}
+		try {
+			new Addition(var, var).evaluate(null);
+			System.out.println("Test #6 failed!");
+		} catch (Exception e) {
+			if (e instanceof NullPointerException)
+				System.out.println("Test #6 failed!");
+			else
+				System.out.println("Test #6 passed!");
 		}
 		System.out.println("Testing Subtraction..");
 		try {
@@ -312,13 +328,25 @@ public class Assignment4Tester {
 			new Subtraction(var, var).derivative(null);
 			System.out.println("Test #4 failed!");
 		} catch (Exception e) {
-			System.out.println("Test #4 passed!");
+			if (e instanceof NullPointerException)
+				System.out.println("Test #4 failed!");
+			else
+				System.out.println("Test #4 passed!");
 		}
 		try {
 			new Subtraction(var, var).equals(new Constant());
 			System.out.println("Test #5 passed!");
 		} catch (Exception e) {
 			System.out.println("Test #5 failed!");
+		}
+		try {
+			new Subtraction(var, var).evaluate(null);
+			System.out.println("Test #6 failed!");
+		} catch (Exception e) {
+			if (e instanceof NullPointerException)
+				System.out.println("Test #6 failed!");
+			else
+				System.out.println("Test #6 passed!");
 		}
 		System.out.println("Testing Multiplication..");
 		try {
@@ -343,13 +371,25 @@ public class Assignment4Tester {
 			new Multiplication(var, var).derivative(null);
 			System.out.println("Test #4 failed!");
 		} catch (Exception e) {
-			System.out.println("Test #4 passed!");
+			if (e instanceof NullPointerException)
+				System.out.println("Test #4 failed!");
+			else
+				System.out.println("Test #4 passed!");
 		}
 		try {
 			new Multiplication(var, var).equals(new Constant());
 			System.out.println("Test #5 passed!");
 		} catch (Exception e) {
 			System.out.println("Test #5 failed!");
+		}
+		try {
+			new Multiplication(var, var).evaluate(null);
+			System.out.println("Test #6 failed!");
+		} catch (Exception e) {
+			if (e instanceof NullPointerException)
+				System.out.println("Test #6 failed!");
+			else
+				System.out.println("Test #6 passed!");
 		}
 		System.out.println("Testing Power..");
 		try {
@@ -362,13 +402,25 @@ public class Assignment4Tester {
 			new Power(var, 0).derivative(null);
 			System.out.println("Test #2 failed!");
 		} catch (Exception e) {
-			System.out.println("Test #2 passed!");
+			if (e instanceof NullPointerException)
+				System.out.println("Test #4 failed!");
+			else
+				System.out.println("Test #4 passed!");
 		}
 		try {
 			new Power(var, 0).equals(new Constant());
 			System.out.println("Test #3 passed!");
 		} catch (Exception e) {
 			System.out.println("Test #3 failed!");
+		}
+		try {
+			new Power(var, 0).evaluate(null);
+			System.out.println("Test #4 failed!");
+		} catch (Exception e) {
+			if (e instanceof NullPointerException)
+				System.out.println("Test #4 failed!");
+			else
+				System.out.println("Test #4 passed!");
 		}
 		System.out.println("Testing Polynomial..");
 		try {
@@ -405,13 +457,32 @@ public class Assignment4Tester {
 			new Polynomial(var, new double[] { 1, 2 }).derivative(null);
 			System.out.println("Test #6 failed!");
 		} catch (Exception e) {
-			System.out.println("Test #6 passed!");
+			if (e instanceof NullPointerException)
+				System.out.println("Test #6 failed!");
+			else
+				System.out.println("Test #6 passed!");
 		}
 		try {
 			new Polynomial(var, new double[] { 1, 2 }).equals(new Constant());
 			System.out.println("Test #7 passed!");
 		} catch (Exception e) {
 			System.out.println("Test #7 failed!");
+		}
+		double[] coeff = new double[] { 1 };
+		Expression exp = new Polynomial(var, coeff);
+		coeff[0] = -1;
+		if (exp.equals(new Polynomial(var, coeff)))
+			System.out.println("Test #8 failed!");
+		else
+			System.out.println("Test #8 passed!");
+		try {
+			new Polynomial(var, new double[] { 1, 2 }).evaluate(null);
+			System.out.println("Test #9 failed!");
+		} catch (Exception e) {
+			if (e instanceof NullPointerException)
+				System.out.println("Test #9 failed!");
+			else
+				System.out.println("Test #9 passed!");
 		}
 		System.out.println("Testing ValueAssignment..");
 		try {
@@ -437,7 +508,10 @@ public class Assignment4Tester {
 			new ArrayAssignments(new Assignment[] { new ValueAssignment(new VariableExpression('x'), 1), null });
 			System.out.println("Test #2 failed!");
 		} catch (Exception e) {
-			System.out.println("Test #2 passed!");
+			if (e instanceof NullPointerException)
+				System.out.println("Test #2 failed!");
+			else
+				System.out.println("Test #2 passed!");
 		}
 		ArrayAssignments assignments = new ArrayAssignments(new Assignment[] { new ValueAssignment(new VariableExpression('x'), 1) });
 		try {
@@ -454,15 +528,46 @@ public class Assignment4Tester {
 			System.out.println("Test #4 passed!");
 		try {
 			assignments.addAssignment(null);
-			System.out.println("Test #5 failed!");
-		} catch (Exception e) {
 			System.out.println("Test #5 passed!");
+		} catch (Exception e) {
+			if (e instanceof NullPointerException)
+				System.out.println("Test #5 failed!");
+			else
+				System.out.println("Test #5 passed!");
 		}
 		try {
 			assignments.valueOf(null);
 			System.out.println("Test #6 failed!");
 		} catch (Exception e) {
-			System.out.println("Test #6 passed!");
+			if (e instanceof NullPointerException)
+				System.out.println("Test #6 failed!");
+			else
+				System.out.println("Test #6 passed!");
+		}
+		Assignment y = new ValueAssignment(new VariableExpression('y'), -1);
+		assignments.addAssignment(y);
+		y.setValue(-2);
+		if (assignments.valueOf(new VariableExpression('y')) == -2.0)
+			System.out.println("Test #7 passed! (shallow copy required!)");
+		else
+			System.out.println("Test #7 failed!");
+		assignments = new ArrayAssignments(new Assignment[] { y });
+		y.setValue(-1);
+		if (assignments.valueOf(new VariableExpression('y')) == -1.0)
+			System.out.println("Test #8 passed! (shallow copy required!)");
+		else
+			System.out.println("Test #8 failed!");
+		Assignment y2 = new ValueAssignment(y.getVar(), -2);
+		assignments = new ArrayAssignments(new Assignment[] { y, y2 });
+		if (assignments.valueOf(y.getVar()) == -2.0)
+			System.out.println("Test #9 passed!");
+		else
+			System.out.println("Test #9 failed!");
+		try {
+			new ArrayAssignments(new Assignment[0]);
+			System.out.println("Test #10 failed!");
+		} catch (Exception e) {
+			System.out.println("Test #10 passed!");
 		}
 	}
 }

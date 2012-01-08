@@ -10,6 +10,10 @@ public class Subtraction implements Expression {
 	private Expression x, y;
 	
 	public Subtraction(Expression x, Expression y) {
+		if (x == null || y == null) {
+			throw new RuntimeException("Subtraction.Subtraction() received a null expression.");
+		}			
+		
 		this.x = x;
 		this.y = y;
 	}
@@ -35,6 +39,10 @@ public class Subtraction implements Expression {
 	 */
 	@Override
 	public Expression derivative(Variable var) {
+		if (var == null) {
+			throw new RuntimeException("Subtraction.derivative() received a null variable.");
+		}				
+		
 		return new Subtraction(this.x.derivative(var), this.y.derivative(var));
 	}
 	
