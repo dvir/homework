@@ -11,8 +11,8 @@ public class Polynomial implements Expression {
 	private double[] coefficients;
 	
 	public Polynomial(Variable var, double[] coefficients) {
-		if (var == null || coefficients == null || coefficients.length == 0) {
-			throw new RuntimeException("Polynomial.Polynomial() received a null variable or empty coefficients array.");
+		if (var == null || coefficients == null) {
+			throw new RuntimeException("Polynomial.Polynomial() received a null variable or a null coefficients array.");
 		}
 		
 		this.var = var;
@@ -28,10 +28,6 @@ public class Polynomial implements Expression {
 		return this.coefficients;
 	}
 	
-	/* (non-Javadoc)
-	 * @see Expression#evaluate(Assignments)
-	 */
-	@Override
 	public double evaluate(Assignments assignments) {
 		if (assignments == null) {
 			throw new RuntimeException("Polynomial.evaluate() received a null assignments array.");
@@ -48,10 +44,6 @@ public class Polynomial implements Expression {
 		return sum;
 	}
 
-	/* (non-Javadoc)
-	 * @see Expression#derivative(Variable)
-	 */
-	@Override
 	public Expression derivative(Variable var) {
 		if (var == null) {
 			throw new RuntimeException("Polynomial.derivative() received a null variable.");

@@ -1,5 +1,5 @@
 /**
- * 
+ * Addition is a class that represents the addition action on two expressions, and defines methods on that expression.
  */
 
 /**
@@ -7,51 +7,60 @@
  *
  */
 public class Addition implements Expression {
-	private Expression x, y;
+	private Expression first, second; // the two expressions that form our addition expression.
 	
-	public Addition(Expression x, Expression y) {
-		if (x == null || y == null) {
+	/**
+	 * Constructor that initiates our internal expressions.
+	 * @param first First expression
+	 * @param second Second expression
+	 * @throws RuntimeException if any of the given expressions are null.
+	 */
+	public Addition(Expression first, Expression second) {
+		if (first == null || second == null) {
 			throw new RuntimeException("Addition.Addition() received a null expression.");
 		}		
 		
-		this.x = x;
-		this.y = y;
+		this.first = first;
+		this.second = second;
 	}
 	
-	public Expression getX() {
-		return this.x;
-	}
-	
-	public Expression getY() {
-		return this.y;
-	}
-	
-	/* (non-Javadoc)
-	 * @see Expression#evaluate(Assignments)
+	/**
+	 * @return The first expression
 	 */
-	@Override
-	public double evaluate(Assignments assignments) {
-		return this.x.evaluate(assignments) + this.y.evaluate(assignments);
+	public Expression getFirst() {
+		return this.first;
+	}
+	
+	/**
+	 * @return The second expression
+	 */
+	public Expression getSecond() {
+		return this.second;
 	}
 
-	/* (non-Javadoc)
-	 * @see Expression#derivative(Variable)
-	 */
-	@Override
+	public double evaluate(Assignments assignments) {
+		return this.first.evaluate(assignments) + this.second.evaluate(assignments);
+	}
+
 	public Expression derivative(Variable var) {
 		if (var == null) {
 			throw new RuntimeException("Addition.derivative() received a null variable.");
 		}				
 		
-		return new Addition(this.x.derivative(var), this.y.derivative(var));
+		return new Addition(this.first.derivative(var), this.second.derivative(var));
 	}
 	
-	
+	/**
+	 * Compares between the current object with another object - this and other are equals if they are both instances of Addition,
+	 * and the first and second expressions are equal.
+	 * @param other Object we are checking equality against.
+	 * @return true or false according to the conditions. 
+	 */		
 	public boolean equals(Object other) {
-		return (other != null && (other instanceof Addition) && this.getX().equals(((Addition)other).getX()) && this.getY().equals(((Addition)other).getY()));
+		return (other instanceof Addition && this.getFirst().equals(((Addition) other).getFirst()) && this.getSecond().equals(((Addition) other).getSecond()));
 	}
 
 	public String toString() {
-		return "(" + this.x + "+" + this.y + ")";
+		return "(" + this.first + "+" + this.second + ")";
 	}
 }

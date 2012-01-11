@@ -1,5 +1,5 @@
 /**
- * 
+ * VariableExpression is a class that represents a mathematical variable and defines methods on it.
  */
 
 /**
@@ -33,7 +33,7 @@ public class VariableExpression implements Variable, Expression {
 	public Expression derivative(Variable var) {
 		if (var == null) {
 			throw new RuntimeException("VariableExpression.derivative() received a null variable.");
-		}	
+		}
 		
 		// if we are deriving by our variable, the derivative is the constant 1.
 		if (this.equals(var)) {
@@ -47,6 +47,8 @@ public class VariableExpression implements Variable, Expression {
 	/**
 	 * Compares between the current object with another object - this and other are equals if they are both instances of VariableExpression
 	 * and their variables symbol are the same.
+	 * @param other Object we are checking equality against.
+	 * @return true or false according to the conditions.
 	 */
 	public boolean equals(Object other) {
 		return (other instanceof VariableExpression && ((VariableExpression)other).getName() == this.getName());

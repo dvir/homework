@@ -1,5 +1,5 @@
 /**
- * ArrayAssignments is an object that holds an array of assignments and defines methods on that array.
+ * ArrayAssignments is a class that holds an array of assignments and defines methods on that array.
  */
 
 /**
@@ -19,6 +19,7 @@ public class ArrayAssignments implements Assignments {
 	/**
 	 * Constructor that receives an array of assignments.
 	 * @param assignments Array of assignments.
+	 * @throws RuntimeException if we were given a null assignments array, if it's empty or if any of the assignments in it are null.
 	 */
 	public ArrayAssignments(Assignment[] assignments) {
 		if (assignments == null) {

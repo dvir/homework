@@ -27,18 +27,10 @@ public class Power implements Expression {
 		return this.exponent;
 	}
 		
-	/* (non-Javadoc)
-	 * @see Expression#evaluate(Assignments)
-	 */
-	@Override
 	public double evaluate(Assignments assignments) {
 		return Math.pow(this.base.evaluate(assignments), this.exponent);
 	}
 
-	/* (non-Javadoc)
-	 * @see Expression#derivative(Variable)
-	 */
-	@Override
 	public Expression derivative(Variable var) {
 		if (var == null) {
 			throw new RuntimeException("Power.derivative() received a null variable.");
@@ -59,7 +51,7 @@ public class Power implements Expression {
 	}
 	
 	public boolean equals(Object other) {
-		return (other != null && (other instanceof Power) && this.getBase().equals(((Power)other).getBase()) && this.getExponent() == ((Power)other).getExponent());
+		return (other instanceof Power && this.getBase().equals(((Power)other).getBase()) && this.getExponent() == ((Power)other).getExponent());
 	}
 
 	public String toString() {
