@@ -31,12 +31,47 @@ public class ArrayAssignments implements Assignments {
 			throw new RuntimeException("ArrayAssignments.ArrayAssignments(assignments) received an empty assignments array.");
 		}					
 		
+		// check if we received any duplicate assignment in the array
+		if (hasDuplicates(assignments)) {
+			throw new RuntimeException("ArrayAssignments.ArrayAssignments(assignments) received a duplicate assignment in the assignments array.");
+		}
+		
 		// go over the given array of assignments and add it using addAssignment.
 		// we do that to make sure every assignment we add follows the rules we defined in addAssignment.
-		this.assignments = new Assignment[0];
+		this.assignments = new Assignment[assignments.length];
 		for (int i = 0; i < assignments.length; ++i) {
-			this.addAssignment(assignments[i]);
+			this.assignments[i] = assignments[i];
 		}
+	}
+	
+	/**
+	 * Receives an array of assignments and searches for a duplicate variable.
+	 * NOTE: we treat null as void equal comparison.
+	 * @param assignments Array of assignments
+	 * @return true or false depends if we found a duplicate variable or not in the array.
+	 */
+	private boolean hasDuplicates(Assignment[] assignments) {
+		if (assignments == null) {
+			// a null array has no duplicates.
+			return false;
+		}
+		
+		for (int i = 0; i < assignments.length-1; ++i) {
+			for (int j = i+1; j < assignments.length; ++j) {
+				if (assignments[i] != null || assignments[j] != null) {
+					// if one of the assignments are null, they are equal in a void way.
+					return true;
+				}
+				
+				if (assignments[i].getVar().equals(assignments[j].getVar())) {
+					// we found a duplicate variable in the assignments! return true.
+					return true;
+				}
+			}
+		}
+		
+		// we found no duplicates.
+		return false;
 	}
 	
 	public double valueOf(Variable var) {

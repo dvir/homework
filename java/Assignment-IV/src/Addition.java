@@ -39,6 +39,7 @@ public class Addition implements Expression {
 	}
 
 	public double evaluate(Assignments assignments) {
+		// evaluate each expression and return the value of their addition.		
 		return this.first.evaluate(assignments) + this.second.evaluate(assignments);
 	}
 
@@ -46,12 +47,13 @@ public class Addition implements Expression {
 		if (var == null) {
 			throw new RuntimeException("Addition.derivative() received a null variable.");
 		}				
-		
+
+		// returns a new Addition expression according to the derivative formula - (f(x)+g(x))' = f'(x)+g'(x)
 		return new Addition(this.first.derivative(var), this.second.derivative(var));
 	}
 	
 	/**
-	 * Compares between the current object with another object - this and other are equals if they are both instances of Addition,
+	 * Compares between the current object with another object - this and other are equal if they are both instances of Addition,
 	 * and the first and second expressions are equal.
 	 * @param other Object we are checking equality against.
 	 * @return true or false according to the conditions. 

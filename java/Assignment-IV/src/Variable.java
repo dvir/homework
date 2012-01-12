@@ -4,7 +4,7 @@
 
 /**
  * @author Dvir
- *
+ * 
  */
 public interface Variable {
 	/**

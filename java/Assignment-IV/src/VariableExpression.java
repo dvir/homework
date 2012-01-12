@@ -51,7 +51,7 @@ public class VariableExpression implements Variable, Expression {
 	 * @return true or false according to the conditions.
 	 */
 	public boolean equals(Object other) {
-		return (other instanceof VariableExpression && ((VariableExpression)other).getName() == this.getName());
+		return (other instanceof VariableExpression && ((VariableExpression) other).getName() == this.getName());
 	}
 	
 	/**
