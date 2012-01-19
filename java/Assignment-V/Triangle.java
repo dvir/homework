@@ -7,40 +7,59 @@
  *
  */
 public class Triangle extends Polygon {
+	/**
+	 * Constructor that takes care of initiating our Triangle by sending the given points to be processed by the Polygon super class.
+	 * @param p1 First point of the triangle
+	 * @param p2 Second point of the triangle
+	 * @param p3 Third point of the triangle
+	 */
 	public Triangle(Point p1, Point p2, Point p3) {
-		super(new Point[]{p1, p2, p3});
+		super(new Point[]{p1, p2, p3}); // call the Polygon constructor to initialize the points array.
 	}
 	
+	/**
+	 * Constructor that takes care of creating a deep copy of another triangle.
+	 * @param t The triangle to copy into the new one.
+	 */
 	public Triangle(Triangle t) {
 		super(t.getPoints()); // call the Polygon constructor to initialize the points array.
-		/*
-		if (t == null) {
-			throw new RuntimeException("Triangle.Triangle(Triangle) received a null triangle object.");
-		}
-		
-		this.points = new Point[t.getNumOfPoints()];
-		for (int i = 0; i < this.points.length; ++i) {
-			this.points[i] = new Point(t.getPoints()[i]);
-		}
-		*/
 	}
 	
+	/**
+	 * @return Returns the first point that constructs the triangle.
+	 */
 	public Point getP1() {
+		// returns the first point in the array of points defined in the super class Polygon.
 		return new Point(this.getPoints()[0]);
 	}
-	
+
+	/**
+	 * @return Returns the second point that constructs the triangle.
+	 */
 	public Point getP2() {
+		// returns the second point in the array of points defined in the super class Polygon.		
 		return new Point(this.getPoints()[1]);
 	}
 	
+	/**
+	 * @return Returns the third point that constructs the triangle.
+	 */
 	public Point getP3() {
+		// returns the third point in the array of points defined in the super class Polygon.		
 		return new Point(this.getPoints()[2]);
 	}
 	
-	public boolean equals(Object o) {
-		if (o instanceof Triangle) {
+	/**
+	 * Compares between two objects. Two triangles are equal if and only if they both have exactly the same points.
+	 * NOTE: The order of the points doesn't matter.
+	 * 
+	 * @param other The other object to test equality against.
+	 * @return true or false according to the equality status between the objects.
+	 */
+	public boolean equals(Object other) {
+		if (other instanceof Triangle) {
 			Point[] thisPoints = this.getPoints();
-			Point[] otherPoints = ((Triangle) o).getPoints();
+			Point[] otherPoints = ((Triangle) other).getPoints();
 			
 			// we are checking out if every point in this triangle
 			// has a matching point in the other triangle.
@@ -80,7 +99,8 @@ public class Triangle extends Polygon {
 	}
 
 	public double getArea() {
-		return (this.getP1().distance(this.getP2()) + this.getP1().distance(this.getP3())) / 2;
+		double d = this.getPerimeter() / 2;
+		return Math.sqrt(d * (d - this.getP1().distance(this.getP2())) * (d - this.getP2().distance(this.getP3())) * (d - this.getP3().distance(this.getP1())));
 	}
 	
 	public boolean contains(Point p) {
@@ -88,9 +108,9 @@ public class Triangle extends Polygon {
 			throw new RuntimeException("Triangle.contains(Point p) received a null point object.");
 		}		
 		
-		return (0.01 <= (new Triangle(p, this.getP1(), this.getP2()).getArea() 
+		return (0.001 >= Math.abs((new Triangle(p, this.getP1(), this.getP2()).getArea() 
 								+ new Triangle(p, this.getP2(), this.getP3()).getArea() 
 								+ new Triangle(p, this.getP3(), this.getP1()).getArea())
-						- this.getArea());
+						- this.getArea()));
 	}
 }

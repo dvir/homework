@@ -40,8 +40,8 @@ public class Circle implements Shape {
 		return this.radius;
 	}
 	
-	public boolean equals(Object o) {
-		return (o instanceof Circle && this.getCenter().equals(((Circle) o).getCenter()) && this.getRadius() == ((Circle) o).getRadius());
+	public boolean equals(Object other) {
+		return (other instanceof Circle && this.getCenter().equals(((Circle) other).getCenter()) && this.getRadius() == ((Circle) other).getRadius());
 	}
 	
 	public double getPerimeter() {

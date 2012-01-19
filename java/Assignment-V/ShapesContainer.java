@@ -27,7 +27,7 @@ public class ShapesContainer {
 		this.shapes = new Shape[other.getShapesNum()];
 		for (int i = 0; i < other.getShapesNum(); ++i) {
 			if (other.getShape(i) == null) {
-				break;
+				throw new RuntimeException("ShapesContainer.ShapesContainer(ShapesContainer) received a null shape object.");
 			}
 			
 			this.add(other.getShape(i));
@@ -51,12 +51,12 @@ public class ShapesContainer {
 		
 		// search for newShape in the existing shapes array
 		for (int i = 0; i < this.getShapesNum(); ++i) {
-			if (higherPerimeterIndex == -1 || this.getShape(i).getPerimeter() > newShape.getPerimeter()) {
+			if (this.getShape(i).getPerimeter() > newShape.getPerimeter()) {
 				higherPerimeterIndex = i;
 			}
 			
-			if (this.getShape(i).equals(newShape)) {
-				// the new shape is already in the array, so we can't add it
+			if (this.getShape(i) == newShape) {
+				// the new shape is already in the array, so we shouldn't add it
 				return false;
 			}
 		}

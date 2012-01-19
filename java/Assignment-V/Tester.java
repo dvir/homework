@@ -16,7 +16,10 @@ public class Tester {
 		// Each function here should test a different class.
 		testPoint();
 		testTriangle();
-		/* TODO - write a function for each class */
+		testQuadrangle();
+		testCircle();
+		
+		testShapesContainer();
 		
 		// Notifying the user that the code have passed all tests. 
 		if (testPassed) {
@@ -59,8 +62,12 @@ public class Tester {
 		test(p2.getY() == 2*p1.getY(), "P2 y should be twice as P1 y.");
 		test(p2.distance(p1) == 22.360679774997898, "Distance should be 22.360679774997898");
 		test(!p2.equals(p1), "Point should not be equal.");
-		
-		/* TODO add more tests to the Point class! */
+
+		// testing deep copy constructors
+		Point pDeep = new Point(7,7);
+		Point pDeepCopy = new Point(pDeep);
+		pDeep.move(1, 1);
+		test(pDeepCopy.getX() != 1, "Point class doesn't perform deep copy!");
 	}
 
 	/**
@@ -80,13 +87,128 @@ public class Tester {
 		test(t.equals(t2), "Triangle should be equal to another triangle constructed of the same points.");
 		
 		t3.move(new Point(8, 8));
-		test(t.contains(new Point(2, 3)), "Triangle contains a point it shouldn't contain.");
+		test(!t3.contains(new Point(2, 3)), "Triangle contains a point it shouldn't contain.");
 		
 		Triangle t4 = new Triangle(new Point(1,1), new Point(2,2), new Point(3, 1));
-		test(t4.getPerimeter() == 4.82842712474619, "Perimeter should be 4.82842712474619 | Actual: " + t4.getPerimeter());
-		test(t4.getArea() == 1.7071067811865475, "Area should be 1.7071067811865475 | Actual: " + t4.getArea());
+		test(t4.getPerimeter() == 4.82842712474619, "Triangle Perimeter should be 4.82842712474619 | Actual: " + t4.getPerimeter());
+		test(t4.getArea() == 0.9999999999999996, "Triangle Area should be 1.7071067811865475 | Actual: " + t4.getArea());
 		
 		t4.move(p2);
-		test(t4.getPerimeter() == 4.82842712474619, "Perimeter should be 4.82842712474619 | Actual: " + t4.getPerimeter());
-		test(t4.getArea() == 1.7071067811865475, "Area should be 1.7071067811865475 | Actual: " + t4.getArea());	}
+		test(t4.getPerimeter() == 4.82842712474619, "Triangle Perimeter after move should be 4.82842712474619 | Actual: " + t4.getPerimeter());
+		test(t4.getArea() == 0.9999999999999996, "Triangle Area after move should be 1.7071067811865475 | Actual: " + t4.getArea());	
+
+		test(t.getP1().equals(p1), "Triangle.getP1 doesn't match the original point.");
+		test(!t4.getP1().equals(p1), "Triangle.getP1 matches a point it shouldn't.");
+		
+		// testing deep copy constructors
+		Triangle tDeep = new Triangle(new Point(0, 0), new Point(0, 10), new Point(15, 0));
+		Triangle tDeepCopy = new Triangle(tDeep);
+		tDeep.move(new Point(1, 1));
+		test(!tDeep.equals(tDeepCopy), "Triangle class doesn't perform deep copy!");
+	}
+	
+	/**
+	 * Checks the Quadrangle class.
+	 */
+	private static void testQuadrangle() {
+		Point p1 = new Point(0, 0);
+		Point p2 = new Point(0, 10);
+		Point p3 = new Point(15, 0);
+		Point p4 = new Point(15, 15);
+		
+		Quadrangle q = new Quadrangle(p1, p2, p3, p4);
+		Quadrangle q2 = new Quadrangle(p2, p3, p4, p1);
+		Quadrangle q3 = new Quadrangle(q);
+		
+		test(q.getNumOfPoints() == 4, "Quadrangle has more or less than 4 points.");
+		test(q.contains(new Point(2, 3)), "Quadrangle reports it doesn't contain a point when it should.");
+		test(q.equals(q2), "Quadrangle should be equal to another Quadrangle constructed of the same points.");
+		
+		q3.move(new Point(8, 8));
+		test(!q3.contains(new Point(2, 3)), "Quadrangle contains a point it shouldn't contain.");
+		
+		Quadrangle q4 = new Quadrangle(new Point(0,0), new Point(0,1), new Point(1, 1), new Point(1, 0));
+		test(q4.getPerimeter() == 4.0, "Quadrangle Perimeter should be 4.82842712474619 | Actual: " + q4.getPerimeter());
+		test(q4.getArea() == 0.9999999999999997, "Quadrangle Area should be 1.7071067811865475 | Actual: " + q4.getArea());
+		
+		q4.move(p2);
+		test(q4.getPerimeter() == 4.0, "Quadrangle Perimeter after move should be 4.82842712474619 | Actual: " + q4.getPerimeter());
+		test(q4.getArea() == 0.9999999999999997, "Quadrangle Area after move should be 1.7071067811865475 | Actual: " + q4.getArea());	
+
+		test(q.getP1().equals(p1), "Quadrangle.getP1 doesn't match the original point.");
+		test(!q4.getP1().equals(p1), "Quadrangle.getP1 matches a point it shouldn't.");
+		
+		// testing deep copy constructors
+		Quadrangle qDeep = new Quadrangle(new Point(0, 0), new Point(0, 10), new Point(15, 0), new Point(15, 15));
+		Quadrangle qDeepCopy = new Quadrangle(qDeep);
+		qDeep.move(new Point(1, 1));
+		test(!qDeep.equals(qDeepCopy), "Quadrangle class doesn't perform deep copy!");		
+	}	
+	
+	
+	/**
+	 * Checks the Circle class.
+	 */
+	private static void testCircle() {
+		Point p1 = new Point(0, 0);
+		Point p2 = new Point(0, 10);
+		Point p3 = new Point(15, 0);
+		Point p4 = new Point(15, 15);
+		
+		Circle c = new Circle(p1, 10);
+		Circle c2 = new Circle(p2, 2);
+		Circle c3 = new Circle(p1, 10);
+		
+		test(c.getCenter().equals(p1), "Circle center doesn't match its defining center point.");
+		test(c.contains(new Point(2, 3)), "Circle reports it doesn't contain a point when it should.");
+		test(c.equals(c3), "Circle should be equal to another Circle constructed of the same points.");
+		
+		c3.move(new Point(8, 8));
+		test(!c.contains(new Point(0, 0)), "Circle contains a point it shouldn't contain.");
+		
+		Circle c4 = new Circle(new Point(0,0), 1);
+		test(c4.getPerimeter() == Math.PI * 2, "Circle Perimeter should be 6.28~ | Actual: " + c4.getPerimeter());
+		test(c4.getArea() == Math.PI, "Circle Area should be 3.14~ | Actual: " + c4.getArea());
+		test(c4.getRadius() == 1, "Circle Radius should be 1.0 | Actual: " + c4.getRadius());
+		
+		c4.move(p2);
+		test(c4.getPerimeter() == Math.PI * 2, "Circle Perimeter after move should be 6.28~ | Actual: " + c4.getPerimeter());
+		test(c4.getArea() == Math.PI, "Circle Area after move should be 3.14~ | Actual: " + c4.getArea());	
+		test(c4.getRadius() == 1, "Circle Radius should be 1.0 | Actual: " + c4.getRadius());
+		
+		test(!c4.getCenter().equals(p3), "Circle.getCenter matches a point it shouldn't.");
+		
+		// testing deep copy constructors
+		Circle cDeep = new Circle(new Point(0, 0), 1);
+		Circle cDeepCopy = new Circle(cDeep);
+		cDeep.move(new Point(1, 1));
+		test(!cDeep.equals(cDeepCopy), "Circle class doesn't perform deep copy!");		
+	}	
+	
+	/**
+	 * Tests the ShapesContainer class.
+	 */
+	private static void testShapesContainer() {
+		ShapesContainer shapes = new ShapesContainer();
+		shapes.add(new Triangle(new Point(122.0, 145.0), new Point(133.0, 146.0), new Point(123.0, 63.0)));
+		shapes.add(new Triangle(new Point(122.0, 144.0), new Point(129.0, 143.0), new Point(166.0, 71.0)));
+		shapes.add(new Triangle(new Point(122.0, 144.0), new Point(131.0, 145.0), new Point(191.0, 91.0)));
+		shapes.add(new Triangle(new Point(132.0, 143.0), new Point(124.0, 143.0), new Point(85.0, 79.0)));
+		shapes.add(new Triangle(new Point(132.0, 143.0), new Point(123.0, 143.0), new Point(65.0, 101.0)));
+		shapes.add(new Triangle(new Point(125.0, 142.0), new Point(99.0, 172.0), new Point(145.0, 174.0)));
+		
+		test(shapes.getShapesNum() == 6, "ShapesContainer should have 6 shapes in it. (Got " + shapes.getShapesNum() + " instead)");
+		shapes.remove(0);
+		test(shapes.getShapesNum() == 5, "ShapesContainer should have 5 shapes in it after the first remove. (Got " + shapes.getShapesNum() + " instead)");
+		
+		boolean added = shapes.add(new Triangle(new Point(125.0, 142.0), new Point(99.0, 172.0), new Point(145.0, 174.0)));
+		test(shapes.getShapesNum() == 6, "ShapesContainer should have 6 shapes in it. (After remove and adding back) (Got " + shapes.getShapesNum() + " instead)");
+		
+		test(shapes.sumArea() == 2562.000000000001, "ShapesContainer.sumArea should be 2562.000000000001. Actual: " + shapes.sumArea());
+		test(shapes.sumPerimeter() == 918.9014803239568, "ShapesContainer.sumPerimeter should be 918.9014803239568. Actual: " + shapes.sumPerimeter());
+		
+		shapes.move(new Point(1, 1));
+		test(((Triangle) shapes.getShape(0)).getPoints()[0].getX() == 123.0, "First point in the first shape in shapesContainer X coordinate should be 123.0. Actual: " + ((Triangle) shapes.getShape(0)).getPoints()[0].getX());
+		test(((Triangle) shapes.getShape(0)).getPoints()[0].getY() == 146.0, "First point in the first shape in shapesContainer Y coordinate should be 146.0. Actual: " + ((Triangle) shapes.getShape(0)).getPoints()[0].getY());
+	}
 }

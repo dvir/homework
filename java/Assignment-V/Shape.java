@@ -20,6 +20,7 @@ public interface Shape {
 	/**
 	 * Moves a shape by another point, by moving every point the shape is constructed of by that point.
 	 * @param p The point we are moving the shape by
+	 * @throws RuntimeException if the given Point object is null. 
 	 */
 	public void move(Point p);
 	
@@ -28,6 +29,7 @@ public interface Shape {
 	 * NOTE: Returns false if the point is on one of the edges of the shape.
 	 * @param p The point we are searching for
 	 * @return true if the point is in the shape, false otherwise.
+	 * @throws RuntimeException if the given Point object is null. 
 	 */
 	public boolean contains(Point p);
 }

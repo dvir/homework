@@ -52,5 +52,6 @@ public class GraphicalTester {
 		
 		// Uncomment the next line if you have completed the BONUS part.
 		shapes.add(new Circle(new Point(250, 40), 30));
+		
 	}
 }

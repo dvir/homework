@@ -41,22 +41,33 @@ public class Quadrangle extends Polygon {
 		return new Point(this.getPoints()[3]);
 	}	
 	
-	public boolean equals(Object o) {
-		if (o instanceof Quadrangle) {
+	public boolean equals(Object other) {
+		if (other instanceof Quadrangle) {
 			Point[] thisPoints = this.getPoints();
-			Point[] otherPoints = ((Quadrangle) o).getPoints();
+			Point[] otherPoints = ((Quadrangle) other).getPoints();
 			
 			// we are checking out if every point in this Quadrangle
 			// matches the respective point in the other Quadrangle.
-			for (int i = 0; i < thisPoints.length; ++i) {
-				if (!thisPoints[i].equals(otherPoints[i])) {
-					// the points in the i and j slot aren't equal
-					return false;
+			// we are also checking for a match in a clock-wise rotation - 1,2,3,4 should be equal to 2,3,4,1, etc.
+			boolean noMatch; // determines whether we found a matching sequence of points
+			for (int j = 0; j < 4; ++j) {
+				noMatch = false;
+				for (int i = 0; i < thisPoints.length && !noMatch; ++i) {
+					if (!thisPoints[i].equals(otherPoints[(i+j)%4])) {
+						// the points in the i and j slot aren't equal
+						noMatch = true;
+					}
+				}
+				
+				if (!noMatch) {
+					// we found a matching sequence between the Quadrangles; that means they are equal.
+					return true;
 				}
 			}
 		}
 		
 		// if we got here, the object we are comparing to is not a Quadrangle
+		// or they don't have a matching sequence between their constructing points,
 		// and therefore they aren't equal.
 		return false;
 	}
