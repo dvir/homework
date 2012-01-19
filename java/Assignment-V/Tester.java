@@ -153,10 +153,10 @@ public class Tester {
 		Point p1 = new Point(0, 0);
 		Point p2 = new Point(0, 10);
 		Point p3 = new Point(15, 0);
-		Point p4 = new Point(15, 15);
+//		Point p4 = new Point(15, 15);
 		
 		Circle c = new Circle(p1, 10);
-		Circle c2 = new Circle(p2, 2);
+//		Circle c2 = new Circle(p2, 2);
 		Circle c3 = new Circle(p1, 10);
 		
 		test(c.getCenter().equals(p1), "Circle center doesn't match its defining center point.");
@@ -201,7 +201,7 @@ public class Tester {
 		shapes.remove(0);
 		test(shapes.getShapesNum() == 5, "ShapesContainer should have 5 shapes in it after the first remove. (Got " + shapes.getShapesNum() + " instead)");
 		
-		boolean added = shapes.add(new Triangle(new Point(125.0, 142.0), new Point(99.0, 172.0), new Point(145.0, 174.0)));
+		shapes.add(new Triangle(new Point(125.0, 142.0), new Point(99.0, 172.0), new Point(145.0, 174.0)));
 		test(shapes.getShapesNum() == 6, "ShapesContainer should have 6 shapes in it. (After remove and adding back) (Got " + shapes.getShapesNum() + " instead)");
 		
 		test(shapes.sumArea() == 2562.000000000001, "ShapesContainer.sumArea should be 2562.000000000001. Actual: " + shapes.sumArea());

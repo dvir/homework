@@ -50,7 +50,7 @@ public class Triangle extends Polygon {
 	}
 	
 	/**
-	 * Compares between two objects. Two triangles are equal if and only if they both have exactly the same points.
+	 * Compares between two objects. Two triangles are equal if and only if they are constructed from the same points.
 	 * NOTE: The order of the points doesn't matter.
 	 * 
 	 * @param other The other object to test equality against.
@@ -58,8 +58,8 @@ public class Triangle extends Polygon {
 	 */
 	public boolean equals(Object other) {
 		if (other instanceof Triangle) {
-			Point[] thisPoints = this.getPoints();
-			Point[] otherPoints = ((Triangle) other).getPoints();
+			Point[] thisPoints = this.getPoints(); // an array of all the points in this triangle
+			Point[] otherPoints = ((Triangle) other).getPoints(); // an array of all the points in the other triangle
 			
 			// we are checking out if every point in this triangle
 			// has a matching point in the other triangle.
@@ -91,16 +91,16 @@ public class Triangle extends Polygon {
 		
 		return false;
 	}
-			
-	public double getPerimeter() {
-		return this.getP1().distance(this.getP2()) 
-				+ this.getP2().distance(this.getP3()) 
-				+ this.getP3().distance(this.getP1());
-	}
 
 	public double getArea() {
-		double d = this.getPerimeter() / 2;
-		return Math.sqrt(d * (d - this.getP1().distance(this.getP2())) * (d - this.getP2().distance(this.getP3())) * (d - this.getP3().distance(this.getP1())));
+		// calculate the area of a triangle according to the formula: (d = half the perimeter)
+		// AreaOfTriangle(p1, p2, p3) = (D * (D-dist(p1,p2)) * (D-dist(p2,p3)) * (D-dist(p3,p1)))^(1/2)
+		double d = this.getPerimeter() / 2; // D - half the perimeter
+		double formula = d; // holds the inner formula
+		for (int i = 0; i < this.getSides().length; ++i) {
+			formula *= (d - this.getSides()[i]); // (d - dist(Pi, Pi+1))
+		}
+		return Math.sqrt(formula); // ^(1/2)
 	}
 	
 	public boolean contains(Point p) {
@@ -108,6 +108,10 @@ public class Triangle extends Polygon {
 			throw new RuntimeException("Triangle.contains(Point p) received a null point object.");
 		}		
 		
+		// a triangle contains a point if the sum of the area of the three triangles we can construct
+		// with the point and two of the triangle points is equal to the area of the triangle.
+		// since we can't compare with precision when using really small numbers, we will check if the
+		// absolute value of the subtraction of the sum of areas and the triangle area is <= 0.001.
 		return (0.001 >= Math.abs((new Triangle(p, this.getP1(), this.getP2()).getArea() 
 								+ new Triangle(p, this.getP2(), this.getP3()).getArea() 
 								+ new Triangle(p, this.getP3(), this.getP1()).getArea())

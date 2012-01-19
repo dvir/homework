@@ -1,5 +1,5 @@
 /**
- * 
+ * ShapesContainer contains a list of shapes and defines methods on that list, like adding, removing or several other actions.
  */
 
 /**
@@ -7,37 +7,54 @@
  *
  */
 public class ShapesContainer {
-	public static final int INIT_SIZE=10;
-	public static final int RESIZE=10;
+	public static final int INIT_SIZE=10; // the initial size of the shapes array
+	public static final int RESIZE=10; // the amount of slots to add to the shapes array when it fills up
 	
-	private Shape[] shapes;
-	private int size;
+	private Shape[] shapes; // the internal shapes array
+	private int size; // the actual shapes amount inside the shapes array
 	
+	/**
+	 * Default constructor. Initiate the internal shapes array with a size of INIT_SIZE and resets the shapes counter.
+	 */
 	public ShapesContainer() {
 		this.shapes = new Shape[INIT_SIZE];
 		this.size = 0;
 	}
 	
+	/**
+	 * Copy constructor. Creates a copy of another ShapesContainer object.
+	 * @param other The shapes container to copy from.
+	 * @throws RuntimeException if the given shapes container object is null.
+	 */
 	public ShapesContainer(ShapesContainer other) {
 		if (other == null) {
 			throw new RuntimeException("ShapesContainer.ShapesContainer(ShapesContainer) received a null shapes container.");
 		}
 		
+		// reset the actual shapes amount counter
 		this.size = 0;
+		
+		// create a new array of shapes to fill and go over the given set of shapes and copy the shapes from it.
 		this.shapes = new Shape[other.getShapesNum()];
 		for (int i = 0; i < other.getShapesNum(); ++i) {
-			if (other.getShape(i) == null) {
-				throw new RuntimeException("ShapesContainer.ShapesContainer(ShapesContainer) received a null shape object.");
-			}
-			
+			// copy the shape to our array
 			this.add(other.getShape(i));
 		}
 	}
 	
+	/**
+	 * @return The actual amount of shapes in the shapes container.
+	 */
 	public int getShapesNum() {
 		return this.size;
 	}
 	
+	/**
+	 * Adds the given shape object into the shapes container.
+	 * @param newShape The shape to add
+	 * @return true if the action succeeded, false if the shape is already in the container.
+	 * @throws RuntimeException if the given shape object is null.
+	 */
 	public boolean add(Shape newShape) {
 		if (newShape == null) {
 			throw new RuntimeException("ShapesContainer.add(Shape) received a null shape object.");
@@ -88,6 +105,12 @@ public class ShapesContainer {
 		return true;
 	}
 	
+	/**
+	 * Removes a given shape object from the container.
+	 * @param toRemove The shape to remove
+	 * @return true if the action succeeded, false if the shape wasn't found in the container.
+	 * @throws RuntimeException if the given shape object is null.
+	 */
 	public boolean remove(Shape toRemove) {
 		if (toRemove == null) {
 			throw new RuntimeException("ShapesContainer.remove(Shape) received a null shape object.");
@@ -113,6 +136,12 @@ public class ShapesContainer {
 		return this.remove(shapeIndex);
 	}
 	
+	/**
+	 * Removes the i'th shape in the shapes container.
+	 * @param i The index of the shape to be removed.
+	 * @return true if the action succeeded, false if not.
+	 * @throws RuntimeException if the given index is out of the container bounds.
+	 */
 	public boolean remove(int i) {
 		// make sure the given index is in the range of our array
 		if (i < 0 || i >= this.shapes.length) {
@@ -134,6 +163,12 @@ public class ShapesContainer {
 		return true;
 	}
 	
+	/**
+	 * Returns the i'th shape in the shapes container.
+	 * @param i The shape index
+	 * @return The shape in the i'th slot in the shapes container.
+	 * @throws RuntimeException if the given index is out of the container bounds.
+	 */
 	public Shape getShape(int i) {
 		// NOTE: this time we are making sure the index is in the actual
 		// existing shapes group, because the array might have a few null slots
@@ -145,8 +180,13 @@ public class ShapesContainer {
 		return this.shapes[i];
 	}
 	
+	/**
+	 * @return The sum of the areas of every shape in the shapes container.
+	 */
 	public double sumArea() {
-		double sum = 0;
+		double sum = 0; // the sum of all the areas of the shapes in the container
+		
+		// go over the shapes in the container and sum their areas
 		for (int i = 0; i < this.getShapesNum(); ++i) {
 			sum += this.getShape(i).getArea();
 		}
@@ -154,8 +194,13 @@ public class ShapesContainer {
 		return sum;
 	}
 	
+	/**
+	 * @return The sum of the perimeters of every shape in the shapes container.
+	 */
 	public double sumPerimeter() {
-		double sum = 0;
+		double sum = 0; // the sum of all the perimeters of the shapes in the container
+		
+		// go over the shapes in the container and sum their perimeters
 		for (int i = 0; i < this.getShapesNum(); ++i) {
 			sum += this.getShape(i).getPerimeter();
 		}
@@ -163,11 +208,17 @@ public class ShapesContainer {
 		return sum;		
 	}
 	
+	/**
+	 * Move every shape by the given point.
+	 * @param p The point to move the shapes by.
+	 * @throws RuntimeException if the given point object is null.
+	 */
 	public void move(Point p) {
 		if (p == null) {
 			throw new RuntimeException("ShapesContainer.move(Point) received a null point object.");
 		}
 		
+		// go over all the shapes in the container and move them by the given point
 		for (int i = 0; i < this.getShapesNum(); ++i) {
 			this.getShape(i).move(p);
 		}		

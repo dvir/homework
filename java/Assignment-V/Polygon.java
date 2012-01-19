@@ -44,14 +44,14 @@ public abstract class Polygon implements Shape {
 	 */
 	public double[] getSides() {
 		// calculate the length between every subsequence points
-		// and reutrn it in as an array of doubles. 
-		// (NOTE: a shape with n points has n-1 sides)
-		double[] sideLengths = new double[this.getNumOfPoints()-1];
-		for (int i = 0; i < sideLengths.length; ++i) {
+		// and return it in as an array of doubles. 
+		// (NOTE: a shape with n points has n sides)
+		double[] sideLengths = new double[this.getNumOfPoints()];
+		for (int i = 0; i < this.getNumOfPoints(); ++i) {
 			// calculate the distance between this point and the next one in the array.
 			// we use the % operator to make sure the last point will calculate it's distance
 			// according to the first point.
-			sideLengths[i] = this.getPoints()[i].distance(this.getPoints()[i%this.getNumOfPoints()]);
+			sideLengths[i] = this.getPoints()[i].distance(this.getPoints()[(i+1)%this.getNumOfPoints()]);
 		}
 		
 		return sideLengths;
@@ -64,9 +64,17 @@ public abstract class Polygon implements Shape {
 		return this.points;
 	}
 	
-	public abstract double getPerimeter();
-
-	public abstract double getArea();
+	public double getPerimeter() {
+		double sumSides = 0; // holds the sum of sides lengths
+		double[] sides = this.getSides(); // retrieve the sides lengths
+		
+		// sum the sides lengths and return it (this is the perimeter of a shape)
+		for (int i = 0; i < sides.length; ++i) {
+			sumSides += sides[i]; 
+		}
+		
+		return sumSides;
+	}
 
 	public void move(Point p) {
 		if (p == null) {
@@ -79,5 +87,6 @@ public abstract class Polygon implements Shape {
 		}
 	}
 
+	public abstract double getArea();
 	public abstract boolean contains(Point p);
 }
