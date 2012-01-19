@@ -4,7 +4,7 @@
 # ignore eclipse files
 *.classpath
 *.project
-.settings
+.settings/
 
 # Ignore any .zip files (Usually the folder zipped after completion or resources)
 *.zip
