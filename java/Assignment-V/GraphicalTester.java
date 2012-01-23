@@ -47,11 +47,14 @@ public class GraphicalTester {
 		shapes.add(new Triangle(new Point(54.0, 146.0), new Point(65.0, 148.0), new Point(58.0, 130.0)));
 		shapes.add(new Triangle(new Point(162.0, 269.0), new Point(188.0, 270.0), new Point(176.0, 215.0)));
 		shapes.add(new Triangle(new Point(67.0, 268.0), new Point(47.0, 269.0), new Point(51.0, 207.0)));
-		shapes.add(new Quadrangle(new Point(67.0, 268.0), new Point(54.0, 146.0), new Point(47.0, 269.0), new Point(51.0, 207.0)));
-		shapes.add(new Quadrangle(new Point(17.0, 168.0), new Point(24.0, 246.0), new Point(68.4, 269.4), new Point(27.0, 207.0)));
+		shapes.add(new Quadrangle(new Point(67.0, 268.0), new Point(54.0, 146.0), new Point(47.0, 269.0), new Point(51.0, 277.0)));
+		shapes.add(new Quadrangle(new Point(17.0, 168.0), new Point(24.0, 246.0), new Point(68.4, 269.4), new Point(45.0, 207.0)));
 		
 		// Uncomment the next line if you have completed the BONUS part.
 		shapes.add(new Circle(new Point(250, 40), 30));
 		
+		for (int i = 0; i < shapes.getShapesNum(); ++i) {
+			System.out.println(i+". "+shapes.getShape(i).getArea()+ " ("+shapes.getShape(i).getClass()+")");
+		}		
 	}
 }

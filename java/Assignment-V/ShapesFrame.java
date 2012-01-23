@@ -66,7 +66,7 @@ public class ShapesFrame extends Frame
             	int xPoint = (int)circle.getCenter().getX();
             	int yPoint = (int)circle.getCenter().getY();
             	int radius = (int)circle.getRadius();
-            	g.fillOval(xPoint, yPoint, radius, radius);
+            	g.fillOval(xPoint-radius, yPoint-radius, radius*2, radius*2);
         	} else {
             	throw new UnsupportedOperationException("This type of shape is not supported graphically.");
             }

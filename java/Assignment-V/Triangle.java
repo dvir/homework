@@ -98,7 +98,7 @@ public class Triangle extends Polygon {
 		double d = this.getPerimeter() / 2; // D - half the perimeter
 		double formula = d; // holds the inner formula
 		for (int i = 0; i < this.getSides().length; ++i) {
-			formula *= (d - this.getSides()[i]); // (d - dist(Pi, Pi+1))
+			formula *= (d - this.getSides()[i]); // *(d - dist(Pi, Pi+1))
 		}
 		return Math.sqrt(formula); // ^(1/2)
 	}

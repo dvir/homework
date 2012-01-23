@@ -57,21 +57,22 @@ public class ShapesContainer {
 	 */
 	public boolean add(Shape newShape) {
 		if (newShape == null) {
-			throw new RuntimeException("ShapesContainer.add(Shape) received a null shape object.");
+			// we can't add a null shape to the container
+			return false;
 		}
 		
 		// keeping track of where should we insert our shape.
-		// our shapes container is sorted by perimeter, from higher to lower,
+		// our shapes container is sorted by area, from higher to lower,
 		// so we are searching for the last index of a shape that has a larger
-		// perimeter than the new shape we want to insert.
-		int higherPerimeterIndex = -1; 
+		// area than the new shape we want to insert.
+		int higherAreaIndex = -1; 
 		
 		// search for newShape in the existing shapes array
 		for (int i = 0; i < this.getShapesNum(); ++i) {
-			if (this.getShape(i).getPerimeter() > newShape.getPerimeter()) {
-				higherPerimeterIndex = i;
+			if (this.getShape(i).getArea() > newShape.getArea()) {
+				higherAreaIndex = i;
 			}
-			
+
 			if (this.getShape(i) == newShape) {
 				// the new shape is already in the array, so we shouldn't add it
 				return false;
@@ -82,7 +83,7 @@ public class ShapesContainer {
 		if (this.getShapesNum() == this.shapes.length) {
 			// we are out of room. resize the array
 			Shape[] newShapes = new Shape[this.shapes.length + RESIZE];
-			for (int i = 0; i < this.shapes.length; ++i) {
+			for (int i = 0; i < this.getShapesNum(); ++i) {
 				newShapes[i] = this.shapes[i];
 			}
 			
@@ -92,16 +93,16 @@ public class ShapesContainer {
 		
 		// we are going to put the new shape in the slot we pre-calculated for it
 		// when searching for it in the container.
-		// we should place it right after the least higher perimeter shape than the new one
+		// we should place it right after the least higher area shape than the new one
 		// which means we should move every shape from that index one slot down
 		// NOTE: we are safe to assume we can move everything down since we made up some room in the container
-		for (int i = this.getShapesNum()-1; i > higherPerimeterIndex; --i) {
+		for (int i = this.getShapesNum()-1; i > higherAreaIndex; --i) {
 			this.shapes[i+1] = this.shapes[i];
 		}
 		
-		this.shapes[higherPerimeterIndex+1] = newShape; // put the new shape in its place
+		this.shapes[higherAreaIndex+1] = newShape; // put the new shape in its place
 		this.size++; // increase the internal shapes array size indicator
-		
+
 		return true;
 	}
 	
@@ -113,16 +114,18 @@ public class ShapesContainer {
 	 */
 	public boolean remove(Shape toRemove) {
 		if (toRemove == null) {
-			throw new RuntimeException("ShapesContainer.remove(Shape) received a null shape object.");
+			// nothing to be removed
+			return false;
 		}	
 		
 		int shapeIndex = 0; // holds the shape index, so we could work on it if we found the shape
 		boolean found = false; // holds whether we found the shape in the array
 		// search for toRemove in the existing shapes array
-		for (;shapeIndex < this.getShapesNum() && !found; ++shapeIndex) {
-			if (this.getShape(shapeIndex).equals(toRemove)) {
+		for (; shapeIndex < this.getShapesNum() && !found; ++shapeIndex) {
+			if (this.getShape(shapeIndex) == toRemove) {System.out.println("HSAD!5");
 				// we found the shape we want to remove
 				found = true;
+				break;
 			}
 		}		
 		
@@ -144,18 +147,19 @@ public class ShapesContainer {
 	 */
 	public boolean remove(int i) {
 		// make sure the given index is in the range of our array
-		if (i < 0 || i >= this.shapes.length) {
-			throw new RuntimeException("ShapesContainer.remove(int) received an out of bounds index. (" + i + ")");
+		if (i < 0 || i >= this.getShapesNum()) {
+			// an out of bounds index received. nothing to be removed
+			return false;
 		}
 		
 		// we are going to move every shape after the shape we want to remove 
 		// one slot higher in the array
-		for (; i < this.shapes.length-2; ++i) {
+		for (; i < this.getShapesNum()-2; ++i) {
 			this.shapes[i] = this.shapes[i+1];
 		}
 		
 		// set the last element to null
-		this.shapes[this.shapes.length-1] = null;
+		this.shapes[this.getShapesNum()-1] = null;
 		
 		// decrease the internal shapes array size indicator
 		this.size--;
