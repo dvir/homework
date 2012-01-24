@@ -232,11 +232,11 @@
 			shapes.add(new Triangle(new Point(125.0, 142.0), new Point(99.0, 172.0), new Point(145.0, 174.0)));
 			test(shapes.getShapesNum() == 6, "ShapesContainer should have 6 shapes in it. (After remove and adding back) (Got " + shapes.getShapesNum() + " instead)");
 			
-			test(shapes.sumArea() == 2163.5000000000023, "ShapesContainer.sumArea should be 2163.5000000000023. Actual: " + shapes.sumArea());
-			test(shapes.sumPerimeter() == 985.776779266402, "ShapesContainer.sumPerimeter should be 985.776779266402. Actual: " + shapes.sumPerimeter());
+			test(shapes.sumArea() == 2119.000000000001, "ShapesContainer.sumArea should be 2119.000000000001. Actual: " + shapes.sumArea());
+			test(shapes.sumPerimeter() == 972.2061079374912, "ShapesContainer.sumPerimeter should be 972.2061079374912. Actual: " + shapes.sumPerimeter());
 			
 			shapes.move(new Point(1, 1));
 			test(((Triangle) shapes.getShape(0)).getPoints()[0].getX() == 126.0, "First point in the first shape in shapesContainer X coordinate should be 126.0. Actual: " + ((Triangle) shapes.getShape(0)).getPoints()[0].getX());
-			test(((Triangle) shapes.getShape(0)).getPoints()[0].getY() == 143.0, "First point in the first shape in shapesContainer Y coordinate should be 143.0. Actual: " + ((Triangle) shapes.getShape(0)).getPoints()[0].getY());
+			test(((Triangle) shapes.getShape(0)).getPoints()[0].getY() == 143.0, "First point in the first shape in shapesContainer Y coordinate should be 143.0. Actual: " + ((Triangle) shapes.getShape(0)).getPoints()[0].getY());			
 		}
 	}

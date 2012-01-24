@@ -92,7 +92,7 @@ public class Circle implements Shape {
 
 	public boolean contains(Point p) {
 		if (p == null) {
-			throw new RuntimeException("Circle.contains(Point p) received a null point object.");
+			return false;
 		}
 		
 		// to find out if a point is inside a circle, we should check if the distance

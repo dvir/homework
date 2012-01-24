@@ -27,7 +27,7 @@ public class Quadrangle extends Polygon {
 	}
 	
 	/**
-	 * @return Returns the first point that constructs the triangle.
+	 * @return Returns the first point that constructs the quadrangle.
 	 */	
 	public Point getP1() {
 		// returns the first point in the array of points defined in the super class Polygon.
@@ -35,7 +35,7 @@ public class Quadrangle extends Polygon {
 	}
 	
 	/**
-	 * @return Returns the second point that constructs the triangle.
+	 * @return Returns the second point that constructs the quadrangle.
 	 */	
 	public Point getP2() {
 		// returns the second point in the array of points defined in the super class Polygon.
@@ -43,7 +43,7 @@ public class Quadrangle extends Polygon {
 	}
 	
 	/**
-	 * @return Returns the third point that constructs the triangle.
+	 * @return Returns the third point that constructs the quadrangle.
 	 */	
 	public Point getP3() {
 		// returns the third point in the array of points defined in the super class Polygon.
@@ -51,7 +51,7 @@ public class Quadrangle extends Polygon {
 	}
 
 	/**
-	 * @return Returns the fourth point that constructs the triangle.
+	 * @return Returns the fourth point that constructs the quadrangle.
 	 */	
 	public Point getP4() {
 		// returns the fourth point in the array of points defined in the super class Polygon.
@@ -110,7 +110,7 @@ public class Quadrangle extends Polygon {
 	
 	public boolean contains(Point p) {
 		if (p == null) {
-			throw new RuntimeException("Quadrangle.contains(Point p) received a null point object.");
+			return false;
 		}		
 		
 		// divide the quadrangle into two triangles and search for the point in either of them		

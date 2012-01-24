@@ -147,14 +147,13 @@ public class ShapesContainer {
 	 */
 	public boolean remove(int i) {
 		// make sure the given index is in the range of our array
-		if (i < 0 || i >= this.getShapesNum()) {
-			// an out of bounds index received. nothing to be removed
-			return false;
+		if (i < 0 || i >= this.shapes.length) {
+			throw new RuntimeException("ShapesContainer.remove(int) received an out of bounds index. (" + i + ")");
 		}
 		
 		// we are going to move every shape after the shape we want to remove 
 		// one slot higher in the array
-		for (; i < this.getShapesNum()-2; ++i) {
+		for (; i < this.getShapesNum()-1; ++i) {
 			this.shapes[i] = this.shapes[i+1];
 		}
 		

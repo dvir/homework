@@ -105,7 +105,7 @@ public class Triangle extends Polygon {
 	
 	public boolean contains(Point p) {
 		if (p == null) {
-			throw new RuntimeException("Triangle.contains(Point p) received a null point object.");
+			return false;
 		}		
 		
 		// a triangle contains a point if the sum of the area of the three triangles we can construct
