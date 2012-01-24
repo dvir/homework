@@ -26,7 +26,7 @@ public class Circle implements Shape {
 			throw new RuntimeException("Circle.Circle(Point, double) received a negative radius value");
 		}
 		
-		this.center = center;
+		this.center = new Point(center);
 		this.radius = radius;
 	}
 	

@@ -122,7 +122,7 @@ public class ShapesContainer {
 		boolean found = false; // holds whether we found the shape in the array
 		// search for toRemove in the existing shapes array
 		for (; shapeIndex < this.getShapesNum() && !found; ++shapeIndex) {
-			if (this.getShape(shapeIndex) == toRemove) {System.out.println("HSAD!5");
+			if (this.getShape(shapeIndex) == toRemove) {
 				// we found the shape we want to remove
 				found = true;
 				break;

@@ -60,42 +60,48 @@ public class Quadrangle extends Polygon {
 	
 	/**
 	 * Compares between two objects. Two quadrangles are equal if and only if they are constructed from the same points.
-	 * NOTE: A quadrangle constructed from points 1-2-3-4 is equal to a 2-3-4-1, 3-4-1-2 and 4-1-2-3 quadrangle.
+	 * NOTE: we can skip the order of points check since we can assume both are valid quadrangles.
 	 * 
 	 * @param other The other object to test equality against.
 	 * @return true or false according to the equality status between the objects.
 	 */	
+
 	public boolean equals(Object other) {
 		if (other instanceof Quadrangle) {
-			Point[] thisPoints = this.getPoints();
-			Point[] otherPoints = ((Quadrangle) other).getPoints();
+			Point[] thisPoints = this.getPoints(); // an array of all the points in this quadrangle
+			Point[] otherPoints = ((Quadrangle) other).getPoints(); // an array of all the points in the other quadrangle
 			
-			// we are checking out if every point in this Quadrangle
-			// matches the respective point in the other Quadrangle.
-			// we are also checking for a match in a clock-wise rotation - 1,2,3,4 should be equal to 2,3,4,1, etc.
-			boolean noMatch; // determines whether we found a matching sequence of points
-			for (int j = 0; j < 4; ++j) {
-				noMatch = false;
-				for (int i = 0; i < thisPoints.length && !noMatch; ++i) {
-					if (!thisPoints[i].equals(otherPoints[(i+j)%4])) {
-						// the points in the i and j slot aren't equal
-						noMatch = true;
+			// we are checking out if every point in this quadrangle
+			// has a matching point in the other quadrangle.
+			// since we can assume a valid quadrangle has 4 points that exist,
+			// different than each other and not on the same line,
+			// this test is enough.
+			boolean found = false; // determines whether we found a matching point
+			for (int i = 0; i < thisPoints.length; ++i) {
+				found = false;
+				// find a matching point in this quadrangle within the other quadrangle
+				for (int j = 0; j < otherPoints.length && !found; ++j) {
+					if (thisPoints[i].equals(otherPoints[j])) {
+						// we found a matching point; we can stop searching
+						found = true;
 					}
 				}
 				
-				if (!noMatch) {
-					// we found a matching sequence between the Quadrangles; that means they are equal.
-					return true;
+				if (!found) {
+					// found no matching point for point i in this quadrangle.
+					// that means the quadrangles aren't equal.
+					return false;
 				}
 			}
+			
+			// if we got here, every point forming our quadrangle has a match in the other quadrangle,
+			// and therefore they are logically equal quadrangles.
+			return true;
 		}
 		
-		// if we got here, the object we are comparing to is not a Quadrangle
-		// or they don't have a matching sequence between their constructing points,
-		// and therefore they aren't equal.
 		return false;
-	}
-
+	}	
+	
 	public double getArea() {
 		// divide the quadrangle into two triangles and sum their areas
 		return (new Triangle(this.getP1(), this.getP2(), this.getP3()).getArea() 

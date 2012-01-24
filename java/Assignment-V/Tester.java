@@ -15,6 +15,7 @@
 			
 			// Each function here should test a different class.
 			testPoint();
+			testPolygon();
 			testTriangle();
 			testQuadrangle();
 			testCircle();
@@ -70,6 +71,28 @@
 			test(pDeepCopy.getX() != 1, "Point class doesn't perform deep copy!");
 		}
 	
+		/**
+		 * Checks the Polygon class.
+		 */
+		private static void testPolygon() {
+			Point p1=new Point(1,2);
+			Point p2=new Point(1,-2);
+			Point p3=new Point(-1,-2);
+			Point p4=new Point(-1,2);
+			Point p5=new Point(1,2);
+			Polygon t1=new Triangle(p1,p2,p3);
+			Polygon t2=new Triangle(p5,p2,p3);
+			
+			Polygon t3=new Triangle(t1.getPoints()[0],t1.getPoints()[1],t1.getPoints()[2]);
+			test(t1.equals(t3),"Polygons should be equal.");	//testing getPoints
+			p5.move(-4,-4);
+			test(t1.equals(t2),"Polygons should be equal.");	//testing deep copy in Polygon's constructor
+			
+			Polygon q1=new Quadrangle(p1,p2,p3,p4);
+			test(!(t1.equals(q1)),"Polygons should not be equal.");
+			test(!(q1.equals(t1)),"Polygons should not be equal.");
+		}		
+		
 		/**
 		 * Checks the Triangle class.
 		 */
@@ -169,7 +192,7 @@
 			test(c.equals(c3), "Circle should be equal to another Circle constructed of the same points.");
 			
 			c3.move(new Point(8, 8));
-			test(!c.contains(new Point(0, 0)), "Circle contains a point it shouldn't contain.");
+			test(!c3.contains(new Point(0, 0)), "Circle contains a point it shouldn't contain.");
 			
 			Circle c4 = new Circle(new Point(0,0), 1);
 			test(c4.getPerimeter() == Math.PI * 2, "Circle Perimeter should be 6.28~ | Actual: " + c4.getPerimeter());

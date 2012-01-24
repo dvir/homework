@@ -51,10 +51,6 @@ public class GraphicalTester {
 		shapes.add(new Quadrangle(new Point(17.0, 168.0), new Point(24.0, 246.0), new Point(68.4, 269.4), new Point(45.0, 207.0)));
 		
 		// Uncomment the next line if you have completed the BONUS part.
-		shapes.add(new Circle(new Point(250, 40), 30));
-		
-		for (int i = 0; i < shapes.getShapesNum(); ++i) {
-			System.out.println(i+". "+shapes.getShape(i).getArea()+ " ("+shapes.getShape(i).getClass()+")");
-		}		
+		shapes.add(new Circle(new Point(250, 40), 30));	
 	}
 }
