@@ -252,10 +252,26 @@ public class Ex3 {
 		
 		int[][] tiles3 = new int[][]{{2,0,2,3},{3,3,3,4},{0,0,1,2},{1,4,1,0}};
 
-		EternityPrint.showBoard(solve(tiles3)); // showing a game board
-		EternityPrint.showBoard(solve(tiles2)); // showing a game board
-		EternityPrint.showBoard(solve(tiles1)); // showing a game board
+//		EternityPrint.showBoard(solve(tiles3)); // showing a game board
+//		EternityPrint.showBoard(solve(tiles2)); // showing a game board
+//		EternityPrint.showBoard(solve(tiles1)); // showing a game board
 		
+		
+		  int[] tile = { 1, 1, 2, 0 };
+		  int[][][] boardTest = new int[1000][1000][];
+		  int x = 1;
+		  int y = 1;
+		  System.out.println("Annoying canPut test: " + canPut(tile, x, y, boardTest));
+		  
+		  int[][] tilesTest4 = { { 7, 4, 9, 0 }, { 4, 9, 5, 5 }, { 9, 8, 5, 0 },
+				    { 2, 0, 4, 1 }, { 0, 5, 1, 5 }, { 3, 7, 0, 4 }, { 1, 5, 4, 5 },
+				    { 1, 2, 0, 2 }, { 4, 0, 0, 2 }, { 4, 8, 1, 2 }, { 8, 0, 2, 9 },
+				    { 5, 4, 0, 0 }, { 1, 3, 1, 5 }, { 1, 5, 1, 1 }, { 5, 1, 1, 8 },
+				    { 3, 1, 3, 8 }, { 0, 5, 4, 5 }, { 4, 0, 4, 3 }, { 2, 8, 7, 0 },
+				    { 1, 2, 0, 7 }, { 0, 0, 8, 2 }, { 0, 2, 4, 5 }, { 4, 5, 1, 8 },
+				    { 0, 5, 2, 0 }, { 1, 2, 3, 4 } };
+		  int[][][] tilesTest4expected = {     { { 0, 3, 4, 0 }, { 4, 1, 1, 0 }, { 1, 8, 8, 0 }, { 8, 3, 5, 0 },       { 5, 2, 0, 0 } },     { { 0, 7, 5, 3 }, { 5, 3, 8, 1 }, { 8, 5, 3, 8 }, { 3, 2, 9, 3 },       { 9, 9, 0, 2 } },     { { 0, 5, 1, 7 }, { 1, 4, 8, 3 }, { 8, 1, 7, 5 }, { 7, 1, 6, 2 },       { 6, 3, 0, 9 } },     { { 0, 9, 6, 5 }, { 6, 3, 2, 4 }, { 2, 7, 3, 1 }, { 3, 6, 4, 1 },       { 4, 2, 0, 3 } },     { { 0, 0, 9, 9 }, { 9, 0, 4, 3 }, { 4, 0, 2, 7 }, { 2, 0, 7, 6 },       { 7, 0, 0, 2 } } };
+		  System.out.println(solve(tilesTest4) != null);
 		
 	}
 }
