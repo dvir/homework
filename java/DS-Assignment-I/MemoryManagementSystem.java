@@ -33,7 +33,6 @@ public class MemoryManagementSystem {
 			primaryMemory.enqueue(new Page(index, secondaryMemory[index]));
 		}
 		return primaryMemory.read(index);
-		}
 	}
 
 	public void write(int index, char c) {
