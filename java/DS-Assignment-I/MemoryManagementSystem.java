@@ -4,14 +4,17 @@ import java.util.Arrays;
 public class MemoryManagementSystem {
 	private String[] secondaryMemory;	//This array will hold the secondary memory
 	private boolean useLRU; 				// true if LRU is used, false if FIFO is used
-	private RAM primaryMemory;
+	private RAM primaryMemory; // the RAM
 
 	public MemoryManagementSystem(boolean useLRU) {
-		secondaryMemory = new String[1000];
-		this.useLRU = useLRU;
-		primaryMemory = new RAM(50,1000,useLRU);
-		for (int i=0;i<1000;i++) {
-			secondaryMemory[i]="";
+		this.primaryMemory = new RAM(50, 1000, useLRU); // initialize the RAM
+		this.useLRU = useLRU; // should we sort the RAM with LRU?
+		
+		this.secondaryMemory = new String[1000]; // the physical memory
+		
+		// initialize the physical memory with empty strings.
+		for (int i = 0; i < 1000; i++) {
+			secondaryMemory[i] = "";
 		}
 	}
 
@@ -23,31 +26,46 @@ public class MemoryManagementSystem {
 		return "secondaryMemory=" + Arrays.toString(secondaryMemory);
 	}
 	
-	//This method returns the data you read. Notice that this data is not used by our main, but you can use it for testing your code.
+	/**
+	 * Reads the data from a memory slot. Retrieves data from the RAM.
+	 * @param index The memory slot to read from
+	 * @return The data from the memory slot
+	 */
 	public String read(int index) {
-		if (!primaryMemory.exists(index)) {
-			if (primaryMemory.isFull()) {
-				Page last = primaryMemory.dequeue();
-				secondaryMemory[last.getIndex()] = last.getData();
-			}
-			primaryMemory.enqueue(new Page(index, secondaryMemory[index]));
-		}
+		this.setupInRam(index);
 		return primaryMemory.read(index);
-		}
 	}
 
+	/**
+	 * Writes more data to a memory slot. Writes to the RAM.
+	 * @param index The memory slot to write to
+	 * @param c The character to write
+	 */
 	public void write(int index, char c) {
-		if (!primaryMemory.exists(index)) {
-			if (primaryMemory.isFull()) {
-				Page last = primaryMemory.dequeue();
-				secondaryMemory[last.getIndex()] = last.getData();
-			}
-			primaryMemory.enqueue(new Page(index, secondaryMemory[index]));
-		}
+		this.setupInRam(index);
 		primaryMemory.write(index,c);
 	}
 	
-	/*
-	 * You can add more methods here
+	/**
+	 * Sets up the memory slot in the RAM
+	 * @param index The index of the memory slot
 	 */
+	private void setupInRam(int index) {
+		if (!primaryMemory.exists(index)) {
+			if (primaryMemory.isFull()) {
+				Page last = primaryMemory.dequeue();
+				secondaryMemory[last.getIndex()] = last.getData();
+System.out.println("Saving to ROM: ["+last.getIndex()+"] " + last.getData() + " | Because ["+index+"] goes in with data '"+secondaryMemory[index]+"'");
+			}
+					
+			primaryMemory.enqueue(new Page(index, secondaryMemory[index]));
+		}		
+	}
+	
+	/**
+	 * DEBUGGING PURPOSES ONLY! REMOVE WHEN DONE
+	 */
+	public void printRAM() {
+		this.primaryMemory.printRAM();
+	}
 }

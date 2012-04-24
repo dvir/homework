@@ -1,0 +1,206 @@
+write 0 a
+write 1 a
+write 2 a
+write 3 a
+write 4 a
+write 5 a
+write 6 a
+write 7 a
+write 8 a
+write 9 a
+write 10 a
+write 11 a
+write 12 a
+write 13 a
+write 14 a
+write 15 a
+write 16 a
+write 17 a
+write 18 a
+write 19 a
+write 20 a
+write 21 a
+write 22 a
+write 23 a
+write 24 a
+write 25 a
+write 26 a
+write 27 a
+write 28 a
+write 29 a
+write 30 a
+write 31 a
+write 32 a
+write 33 a
+write 34 a
+write 35 a
+write 36 a
+write 37 a
+write 38 a
+write 39 a
+write 5 b
+write 6 b
+write 7 b
+write 8 b
+write 9 b
+write 10 b
+write 11 b
+write 12 b
+write 13 b
+write 14 b
+write 50 c
+write 51 c
+write 52 c
+write 53 c
+write 54 c
+write 55 c
+write 56 c
+write 57 c
+write 58 c
+write 59 c
+write 60 c
+print
+write 61 c
+write 62 c
+write 63 c
+write 64 c
+write 65 c
+print
+write 66 c
+write 67 c
+write 68 c
+write 69 c
+write 70 c
+write 71 c
+write 72 c
+write 73 c
+write 74 c
+write 75 c
+write 76 c
+write 77 c
+write 78 c
+write 79 c
+write 80 c
+write 81 c
+write 82 c
+write 83 c
+write 84 c
+write 85 c
+write 86 c
+write 87 c
+write 88 c
+write 89 c
+write 90 c
+print
+write 91 c
+write 92 c
+write 93 c
+write 94 c
+write 95 c
+write 96 c
+write 97 c
+write 98 c
+write 99 c
+print
+read 899
+read 900
+read 901
+read 902
+read 903
+read 904
+read 905
+read 906
+read 907
+read 908
+read 909
+read 910
+read 911
+read 912
+read 913
+read 914
+read 915
+read 916
+read 917
+read 918
+read 919
+read 920
+read 921
+read 922
+read 923
+read 924
+read 925
+read 926
+read 927
+read 928
+read 929
+read 930
+read 931
+read 932
+read 933
+read 934
+read 935
+read 936
+read 937
+read 938
+read 939
+read 940
+read 941
+read 942
+read 943
+read 944
+read 945
+read 946
+read 947
+read 948
+read 949
+read 950
+read 951
+read 952
+read 953
+read 954
+read 955
+read 956
+read 957
+read 958
+read 959
+read 960
+read 961
+read 962
+read 963
+read 964
+read 965
+read 966
+read 967
+read 968
+read 969
+read 970
+read 971
+read 972
+read 973
+read 974
+read 975
+read 976
+read 977
+read 978
+read 979
+read 980
+read 981
+read 982
+read 983
+read 984
+read 985
+read 986
+read 987
+read 988
+read 989
+read 990
+read 991
+read 992
+read 993
+read 994
+read 995
+read 996
+read 997
+read 998
+read 999
+print

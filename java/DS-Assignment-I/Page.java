@@ -23,6 +23,10 @@ public class Page {
 		this.data = data;
 	}
 	
+	public void appendChar(char c) {
+		this.data = data + c;
+	}
+	
 	public int getIndex() {
 		return this.index;
 	}

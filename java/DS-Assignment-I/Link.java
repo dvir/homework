@@ -13,6 +13,8 @@ public class Link {
 	
 	public Link(Page page) {
 		this.page = page;
+		this.next = this;
+		this.prev = this;
 	}
 	
 	public Page getPage() {

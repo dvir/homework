@@ -13,7 +13,6 @@ import java.io.FileWriter;
 import java.util.StringTokenizer;
 
 public class Main {
-
 	public static void main(String[] args) {
 		
 		boolean useLru = args[0].matches("1");
@@ -50,13 +49,14 @@ public class Main {
 							write_To_File(outputFileName, memory.toString());
 						}
 					}
-				}
+				}				
 			}
 
 			ibr.close();
 			ifr.close();
 		}
-
+		
+		
 		catch (Exception e) {
 			System.out.println("Error \"" + e.toString() + "\" on file "
 					+ inputFilename);
@@ -67,7 +67,8 @@ public class Main {
 	}
 
 	private static void write_To_File(String outputFilename, String toWrite) {
-
+		System.out.println(toWrite);
+		/*
 		try {
 			File outFile = new File(outputFilename);
 			FileWriter ofw = new FileWriter(outFile,true);
@@ -82,6 +83,7 @@ public class Main {
 			e.printStackTrace();
 			System.exit(-1); // brutally exit the program
 		}
+		*/
 
 	}
 
