@@ -168,18 +168,4 @@ public class RAM implements Queue {
 		
 		return page;
 	}
-	
-	/**
-	 * DEBUGGING PURPOSES ONLY! REMOVE WHEN DONE
-	 */
-	public void printRAM() {
-		Link link = this.last.getNext();
-		int i = 0;
-		System.out.println("printing RAM:");
-		while (link.getPage().getIndex() != this.last.getPage().getIndex()) {
-			System.out.println("Link ["+i+"]: " + link.getPage());
-			i++;
-			link = link.getNext();
-		}
-	}
 }

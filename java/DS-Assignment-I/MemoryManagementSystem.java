@@ -16,6 +16,11 @@ public class MemoryManagementSystem {
 		for (int i = 0; i < 1000; i++) {
 			secondaryMemory[i] = "";
 		}
+		
+		// initialize the RAM with the first ramSize pages from the physical memory.
+		for (int i = 0; i < 50; i++) {
+			this.setupInRam(i);
+		}
 	}
 
 	/*
@@ -55,17 +60,9 @@ public class MemoryManagementSystem {
 			if (primaryMemory.isFull()) {
 				Page last = primaryMemory.dequeue();
 				secondaryMemory[last.getIndex()] = last.getData();
-System.out.println("Saving to ROM: ["+last.getIndex()+"] " + last.getData() + " | Because ["+index+"] goes in with data '"+secondaryMemory[index]+"'");
 			}
 					
 			primaryMemory.enqueue(new Page(index, secondaryMemory[index]));
 		}		
-	}
-	
-	/**
-	 * DEBUGGING PURPOSES ONLY! REMOVE WHEN DONE
-	 */
-	public void printRAM() {
-		this.primaryMemory.printRAM();
 	}
 }
