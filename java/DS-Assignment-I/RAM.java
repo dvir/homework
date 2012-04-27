@@ -60,6 +60,9 @@ public class RAM implements Queue {
 	public void pushToTop(int key) {
 		// the page is already in the list, and we are using LRU (Least Recently Used), 
 		// which means we should "push" the page up
+//System.out.print("Current top: ["+this.last.getNext().getPage().getIndex()+"] "+this.last.getNext().getPage().getData()+"...");
+		int startingTop = this.last.getNext().getPage().getIndex();
+		
 		Link currLink = this.ram[key];
 		Link prevLink = currLink.getPrev();
 		Link nextLink = currLink.getNext();
@@ -75,7 +78,14 @@ public class RAM implements Queue {
 		
 		// push the link back in the top of the queue
 		first.setPrev(currLink);
-		this.last.setNext(currLink);		
+		this.last.setNext(currLink);
+		
+		if (startingTop == this.last.getNext().getPage().getIndex()) {
+			// this is the point everything fucks up 
+			// (well not exactly, as two calls in a row to the same key are possible, but it's quite obvious looking at the debugging data)
+			//System.out.print("==" + this.size + "==");
+		}
+//System.out.println("New top: ["+this.last.getNext().getPage().getIndex()+"] "+this.last.getNext().getPage().getData()+"...");
 	}	
 	
 	/**
@@ -132,14 +142,14 @@ public class RAM implements Queue {
 		
 		this.ram[newLink.getPage().getIndex()] = newLink;
 		
-		this.size++;
+		this.size++;		
 	}
 	
 	/**
 	 * Dequeue's the last element of the RAM queue
 	 * @return page The page we dequeued from the RAM
 	 */
-	public Page dequeue() {
+	public Page dequeue() {		
 		if (this.isEmpty()) {
 			// the queue is empty! nothing to dequeue.
 			// throw an exception.
@@ -164,8 +174,7 @@ public class RAM implements Queue {
 		this.ram[page.getIndex()] = null;
 		
 		// decrease the size of the queue
-		this.size--;
-		
+		this.size--;		
 		return page;
 	}
 }
