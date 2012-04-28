@@ -5,20 +5,23 @@ public class MemoryManagementSystem {
 	private String[] secondaryMemory;	//This array will hold the secondary memory
 	private boolean useLRU; 				// true if LRU is used, false if FIFO is used
 	private RAM primaryMemory; // the RAM
+	
+	public static final int PHYSICAL_MEMORY_SIZE=1000;
+	public static final int RAM_SIZE=50;
 
 	public MemoryManagementSystem(boolean useLRU) {
-		this.primaryMemory = new RAM(50, 1000, useLRU); // initialize the RAM
+		this.primaryMemory = new RAM(RAM_SIZE, PHYSICAL_MEMORY_SIZE, useLRU); // initialize the RAM
 		this.useLRU = useLRU; // should we sort the RAM with LRU?
 		
-		this.secondaryMemory = new String[1000]; // the physical memory
+		this.secondaryMemory = new String[PHYSICAL_MEMORY_SIZE]; // the physical memory
 		
 		// initialize the physical memory with empty strings.
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < PHYSICAL_MEMORY_SIZE; i++) {
 			secondaryMemory[i] = "";
 		}
 		
-		// initialize the RAM with the first ramSize pages from the physical memory.
-		for (int i = 0; i < 50; i++) {
+		// initialize the RAM with the first RAM_SIZE pages from the physical memory.
+		for (int i = 0; i < RAM_SIZE; i++) {
 			this.setupInRam(i);
 		}
 	}
