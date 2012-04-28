@@ -1,10 +1,10 @@
 /**
  * @author Dvir Azulay, Or Elmaliach
  * this class represents the primary memory component of the memory menagement system
- * 
+ * used for writing data to the memory and reading from it
  */
 
-public class RAM implements Queue {
+public class RAM implements Queue implements Memory{
 	//state
 	private int size; // counter for the number of elements, which are currently in the list
 	private Link[] ram; // a circular double linked list
