@@ -47,7 +47,7 @@ public class MemoryManagementSystem implements Memory{
 	 * @return The data from the memory slot
 	 */
 	public String read(int index) {
-		this.LoadToRAM(index);
+		this.loadToRAM(index);
 		return primaryMemory.read(index);
 	}
 
