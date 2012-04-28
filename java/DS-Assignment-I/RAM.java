@@ -9,17 +9,14 @@
 
 public class RAM implements Queue {
 	private int size;
-	private int ramSize;
 	private Link last; // a circular linked list
 	private Link[] ram; // a list indexing the circular linked list
-	
 	private boolean useLRU;
 	
-	public RAM(int ramSize, int romSize, boolean useLRU) {
+	public RAM(boolean useLRU) {
 		this.size = 0;
-		this.ramSize = ramSize;
-		this.ram = new Link[romSize]; // initialize the RAM array, in the size of the ROM, so the indexes will correspond to the Page in the rom.
-		for (int i = 0; i < romSize; i++) {
+		this.ram = new Link[PHYSICAL_MEMORY_SIZE]; // initialize the RAM array, in the size of the ROM, so the indexes will correspond to the Page in the rom.
+		for (int i = 0; i < PHYSICAL_MEMORY_SIZE; i++) {
 			this.ram[i] = null; // null = page is NOT in the RAM, otherwise - the page in the RAM
 		}
 		
@@ -57,11 +54,11 @@ public class RAM implements Queue {
 	 * Push a page in the RAM to the top of the queue
 	 * @param key The page index in the RAM
 	 */
-	public void pushToTop(int key) {
+	private void pushToTop(int key) {
 		// the page is already in the list, and we are using LRU (Least Recently Used), 
 		// which means we should "push" the page up
 //System.out.print("Current top: ["+this.last.getNext().getPage().getIndex()+"] "+this.last.getNext().getPage().getData()+"...");
-		int startingTop = this.last.getNext().getPage().getIndex();
+		/*int startingTop = this.last.getNext().getPage().getIndex();
 		
 		Link currLink = this.ram[key];
 		Link prevLink = currLink.getPrev();
@@ -85,7 +82,27 @@ public class RAM implements Queue {
 			// (well not exactly, as two calls in a row to the same key are possible, but it's quite obvious looking at the debugging data)
 			//System.out.print("==" + this.size + "==");
 		}
-//System.out.println("New top: ["+this.last.getNext().getPage().getIndex()+"] "+this.last.getNext().getPage().getData()+"...");
+		//System.out.println("New top: ["+this.last.getNext().getPage().getIndex()+"] "+this.last.getNext().getPage().getData()+"...");
+		*/
+		
+		//OR's VERSION:
+		Link first = this.last.getNext();
+		
+		if (!this.ram[key] == first) {
+			Link temp = this.ram[key];
+		
+			temp.getPrev().setNext(temp.getNext());
+			temp.getNext().setPrev(temp.getPrev());
+		
+			if (this.ram[key] == this.last) {
+				this.last = this.last.getPrev();
+			}
+			
+			temp.setNext(first);
+			this.last.setNext(temp);
+			temp.setPrev(this.last);
+			first.setPrev(temp);
+		}
 	}	
 	
 	/**
@@ -110,7 +127,7 @@ public class RAM implements Queue {
 	 * @return True if it's full, false otherwise
 	 */
 	public boolean isFull() {
-		return (this.size == this.ramSize);
+		return (this.size == RAM_SIZE);
 	}
 	
 	/**
@@ -123,7 +140,7 @@ public class RAM implements Queue {
 			// throw an exception.
 			// NOTE: we could've just dequeued and then enqueued, but in the RAM we need to save the dequeued pages,
 			// so we can't just pop it.			
-			throw new RuntimeException("QueueOverFlow in RAM.enqueue()");
+			throw new RuntimeException("QueueOverflow in RAM.enqueue()");
 		}
 		
 		// push the page to the start of the queue		
