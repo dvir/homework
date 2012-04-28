@@ -1,35 +1,33 @@
 /**
+ * @author Dvir Azulay, Or Elmaliach
+ * this class represents the primary memory component of the memory menagement system
  * 
  */
 
-/**
- * @author Dvir
- *
- */
-
 public class RAM implements Queue {
-	private int size;
-	private Link last; // a circular linked list
-	private Link[] ram; // a list indexing the circular linked list
-	private boolean useLRU;
-	private int ramSize;
+	//state
+	private int size; // counter for the number of elements, which are currently in the list
+	private Link[] ram; // a circular double linked list
+	private Link last; // pointer to the last link in the list
+	private boolean useLRU; // true if we use LRU method, false if we use FIFO method
 	
-	public RAM(int ramSize, int physicalMemorySize, boolean useLRU) {
+	//constructors
+	public RAM(boolean useLRU) {
 		this.size = 0;
-		this.ramSize = ramSize;
-		this.ram = new Link[physicalMemorySize]; // initialize the RAM array, in the size of the ROM, so the indexes will correspond to the Page in the rom.
-		for (int i = 0; i < physicalMemorySize; i++) {
+		this.ram = new Link[MemoryManagementSystem.PHYSICAL_MEMORY_SIZE]; // initialize the RAM array, in the size of the physical memory, so the indexes will correspond to the physical memory's indexes
+		for (int i = 0; i < MemoryManagementSystem.PHYSICAL_MEMORY_SIZE; i++) {
 			this.ram[i] = null; // null = page is NOT in the RAM, otherwise - the page in the RAM
 		}
 		
-		this.last = null; // initialize the RAM queue
-		this.useLRU = useLRU; // determines whether we handle the RAM's queue by FIFO or LRU
+		this.last = null;
+		this.useLRU = useLRU; // determines whether we handle the RAM's queue by FIFO or by LRU
 	}
 	
+	//behavior
 	/**
 	 * Reads data from the RAM
-	 * @param key The memory slot to read from
-	 * @return The data
+	 * @param key The physical memory's index to read from
+	 * @return A string representing the data in this index
 	 */
 	public String read(int key) {
 		if (this.useLRU) {
@@ -40,7 +38,7 @@ public class RAM implements Queue {
 	}
 	
 	/**
-	 * Write data into the RAM 
+	 * Write data into the a RAM slot
 	 * @param key The memory slot to write to
 	 * @param c The data to append to the memory slot
 	 */
@@ -57,49 +55,23 @@ public class RAM implements Queue {
 	 * @param key The page index in the RAM
 	 */
 	private void pushToTop(int key) {
-		// the page is already in the list, and we are using LRU (Least Recently Used), 
-		// which means we should "push" the page up
-//System.out.print("Current top: ["+this.last.getNext().getPage().getIndex()+"] "+this.last.getNext().getPage().getData()+"...");
-		/*int startingTop = this.last.getNext().getPage().getIndex();
-		
-		Link currLink = this.ram[key];
-		Link prevLink = currLink.getPrev();
-		Link nextLink = currLink.getNext();
-		Link first = this.last.getNext();
-
-		// pop the link outside of the queue
-		prevLink.setNext(nextLink);
-		nextLink.setPrev(prevLink);
-		
-		// prepare the link with prev and next as last and first respectively
-		currLink.setPrev(this.last);
-		currLink.setNext(first);
-		
-		// push the link back in the top of the queue
-		first.setPrev(currLink);
-		this.last.setNext(currLink);
-		
-		if (startingTop == this.last.getNext().getPage().getIndex()) {
-			// this is the point everything fucks up 
-			// (well not exactly, as two calls in a row to the same key are possible, but it's quite obvious looking at the debugging data)
-			//System.out.print("==" + this.size + "==");
-		}
-		//System.out.println("New top: ["+this.last.getNext().getPage().getIndex()+"] "+this.last.getNext().getPage().getData()+"...");
-		*/
-		
-		//OR's VERSION:
+		// the page is already in the queue, and we are using LRU (Least Recently Used), 
+		// which means we should move this page to the head of the queue
 		Link first = this.last.getNext();
 		
 		if (this.ram[key] != first) {
 			Link temp = this.ram[key];
-		
+			
+			//we're gapping over this page, effectively removing it from it's current place in the queue
 			temp.getPrev().setNext(temp.getNext());
 			temp.getNext().setPrev(temp.getPrev());
-		
+			
+			//updating the current last link pointer if nessecery, crutial for following code
 			if (this.ram[key] == this.last) {
 				this.last = this.last.getPrev();
 			}
 			
+			//inserting the current link to  the head of the line, and updating the 'next' and 'prev' pointers as needed
 			temp.setNext(first);
 			this.last.setNext(temp);
 			temp.setPrev(this.last);
@@ -108,7 +80,7 @@ public class RAM implements Queue {
 	}	
 	
 	/**
-	 * Checks if a page is in the RAM
+	 * Checks if a page is currently in the RAM
 	 * @param key The memory slot index
 	 * @return True if the page is in the RAM, false otherwise
 	 */
@@ -129,19 +101,17 @@ public class RAM implements Queue {
 	 * @return True if it's full, false otherwise
 	 */
 	public boolean isFull() {
-		return (this.size == this.ramSize);
+		return (this.size == MemoryManagementSystem.RAM_SIZE);
 	}
 	
 	/**
 	 * Enqueues a new page to the RAM queue
 	 * @param page The page to enqueue
+	 * @throws A runtime exception if the RAM is full
 	 */
 	public void enqueue(Page page) {
 		if (this.isFull()) {
-			// the queue is full! can't add any more pages to the RAM.
-			// throw an exception.
-			// NOTE: we could've just dequeued and then enqueued, but in the RAM we need to save the dequeued pages,
-			// so we can't just pop it.			
+			// the queue is full! can't add any more pages to the RAM		
 			throw new RuntimeException("QueueOverflow in RAM.enqueue()");
 		}
 		
@@ -151,6 +121,8 @@ public class RAM implements Queue {
 		// if the queue is empty, initialize it with the new link
 		if (this.last == null) {
 			this.last = newLink;
+			newLink.setNext(newLink);
+			newLink.setPrev(newLink);
 		}
 		else {
 			newLink.setPrev(this.last);
@@ -170,30 +142,22 @@ public class RAM implements Queue {
 	 */
 	public Page dequeue() {		
 		if (this.isEmpty()) {
-			// the queue is empty! nothing to dequeue.
-			// throw an exception.
-			throw new RuntimeException("QueueUnderFlow in RAM.dequeue()");
+			// the queue is empty! nothing to dequeue
+			throw new RuntimeException("QueueUnderflow in RAM.dequeue()");
 		}
 		
-		Link toRemove = this.last; // the last Link in the RAM queue
-		Link newLast = toRemove.getPrev(); // the link before the last in the queue
-		Link first = toRemove.getNext(); // the first link in the queue
+		Link toRemove = this.last; // the last Link in the RAM queue		
+		Link first = this.last.getNext(); // the first link in the queue
 		
-		// remove the current last link from the end of the queue
-		first.setPrev(newLast);
-		newLast.setNext(first);
+		//gapping over the last link
+		first.setPrev(this.last.getPrev());
+		this.last.getPrev().setNext(this.last.getNext());
 		
-		// update the last link in the queue to the link before it
-		this.last = newLast;
+		this.last=this.last.getPrev(); //updating the last link pointer
 		
-		// get the page of the link we are about to dequeue
-		Page page = toRemove.getPage();
-
-		// remove the link from our RAM index
-		this.ram[page.getIndex()] = null;
+		this.ram[toRemove.getPage().getIndex()] = null; //remove the link from the RAM index
+		this.size--; //decrease the number of elements in the queue
 		
-		// decrease the size of the queue
-		this.size--;		
-		return page;
+		return toRemove.getPage();
 	}
 }
