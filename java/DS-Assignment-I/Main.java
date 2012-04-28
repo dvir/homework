@@ -67,8 +67,6 @@ public class Main {
 	}
 
 	private static void write_To_File(String outputFilename, String toWrite) {
-		System.out.println(toWrite);
-		/*
 		try {
 			File outFile = new File(outputFilename);
 			FileWriter ofw = new FileWriter(outFile,true);
@@ -83,8 +81,6 @@ public class Main {
 			e.printStackTrace();
 			System.exit(-1); // brutally exit the program
 		}
-		*/
-
 	}
 
 }

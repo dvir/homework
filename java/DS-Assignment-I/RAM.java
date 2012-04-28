@@ -12,11 +12,13 @@ public class RAM implements Queue {
 	private Link last; // a circular linked list
 	private Link[] ram; // a list indexing the circular linked list
 	private boolean useLRU;
+	private int ramSize;
 	
-	public RAM(boolean useLRU) {
+	public RAM(int ramSize, int physicalMemorySize, boolean useLRU) {
 		this.size = 0;
-		this.ram = new Link[PHYSICAL_MEMORY_SIZE]; // initialize the RAM array, in the size of the ROM, so the indexes will correspond to the Page in the rom.
-		for (int i = 0; i < PHYSICAL_MEMORY_SIZE; i++) {
+		this.ramSize = ramSize;
+		this.ram = new Link[physicalMemorySize]; // initialize the RAM array, in the size of the ROM, so the indexes will correspond to the Page in the rom.
+		for (int i = 0; i < physicalMemorySize; i++) {
 			this.ram[i] = null; // null = page is NOT in the RAM, otherwise - the page in the RAM
 		}
 		
@@ -88,7 +90,7 @@ public class RAM implements Queue {
 		//OR's VERSION:
 		Link first = this.last.getNext();
 		
-		if (!this.ram[key] == first) {
+		if (this.ram[key] != first) {
 			Link temp = this.ram[key];
 		
 			temp.getPrev().setNext(temp.getNext());
@@ -127,7 +129,7 @@ public class RAM implements Queue {
 	 * @return True if it's full, false otherwise
 	 */
 	public boolean isFull() {
-		return (this.size == RAM_SIZE);
+		return (this.size == this.ramSize);
 	}
 	
 	/**
