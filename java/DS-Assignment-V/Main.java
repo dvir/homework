@@ -78,11 +78,11 @@ public class Main {
  	   int tmp;
  	   for (int i = 0; i < (N-firstNotRegisteredIndex)/2; i++) {
  		   tmp = boardedPassengers[firstNotRegisteredIndex+i];
- 		   boardedPassengers[firstNotRegisteredIndex+i] = boardedPassengers[N-i];
- 		   boardedPassengers[N-i] = tmp;
+ 		   boardedPassengers[firstNotRegisteredIndex+i] = boardedPassengers[N-i-1];
+ 		   boardedPassengers[N-i-1] = tmp;
  	   }
  	   
- 	   write_To_File_Example(outputFileName, "" + Math.floor(stepsAmount / passengersArrivedCount)); // write N to the output file 	   
+ 	   write_To_File_Example(outputFileName, "" + (stepsAmount / passengersArrivedCount)); // write N to the output file 	   
  	    
  	   int[] sortedBoardedPassengers = new int[N]; // holds the sorted boarded passengers list, by id, from smallest to largest
  	   // copy the boarded passengers list to the new array
@@ -94,7 +94,7 @@ public class Main {
  	   boolean swapped = true;
  	   for (int i = 0; i < N && swapped; i++) {
  		   swapped = false;
- 		   for (int j = 1; j < N-1; j++) {
+ 		   for (int j = 1; j < N; j++) {
  			   if (sortedBoardedPassengers[j-1] > sortedBoardedPassengers[j]) {
  		 		   tmp = sortedBoardedPassengers[j];
  		 		   sortedBoardedPassengers[j] = sortedBoardedPassengers[j-1];

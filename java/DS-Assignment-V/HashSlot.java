@@ -14,7 +14,8 @@ public class HashSlot {
 			this.tree = new AVLNode(id);
 		} else {
 			// insert the id into the AVL tree
-			this.tree.insert(id);
+			// and update the tree root if given a new one from insert
+			this.tree = this.tree.insert(id);
 		}
 		
 		this.count++;
@@ -27,7 +28,12 @@ public class HashSlot {
 		}
 		
 		// search the tree for the id and return
-		return 1+this.tree.search(id);
+		int searchResult = this.tree.search(id);
+		if (searchResult > 0) {
+			return searchResult+1;
+		}
+		
+		return searchResult-1;
 	}	
 	
 	public int getHeight () {

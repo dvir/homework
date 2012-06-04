@@ -42,25 +42,58 @@ public class AVLNode {
 		}
 	}
 
-	public void insert(int id) {
+	public AVLNode insert(int id) {
 		if (key > id) {
 			if (leftChild != null) {
-				leftChild.insert(id);
+				return leftChild.insert(id);
 			} else {
 				leftChild = new AVLNode(id, this);
-				balanceAfterInsert();
+				return balanceAfterInsert();
 			}
 		} else {
 			if (rightChild != null) {
-				rightChild.insert(id);
+				return rightChild.insert(id);
 			} else {
 				rightChild = new AVLNode(id, this);
-				balanceAfterInsert();
+				return balanceAfterInsert();
 			}
 		}
 	}
 
-	private void balanceAfterInsert() {
+	private AVLNode balanceAfterInsert() {
+		fixBalanceFactor();
+		
+		int rightChildHeight = 0;
+		int leftChildHeight = 0;
+
+		if (leftChild != null) {
+			leftChildHeight = leftChild.height();
+		}
+		if (rightChild != null) {
+			rightChildHeight = rightChild.height();
+		}
+
+		if (leftChildHeight + 1 < rightChildHeight) {
+			if (rightChild.balanceFactor == -1) {
+				rightChild.rotateRight();
+			}
+			
+			rotateLeft();
+		} else if (leftChildHeight > 1 + rightChildHeight) {
+			if (leftChild.balanceFactor == 1) {
+				leftChild.rotateLeft();
+			}
+			
+			rotateRight();
+		}
+
+		if (father == null) {
+			return this;
+		}
+		
+		return father.balanceAfterInsert();
+		
+		/*
 		AVLNode currentNode = this;
 		while (currentNode != null) {
 			currentNode.fixBalanceFactor();
@@ -88,6 +121,7 @@ public class AVLNode {
 
 			currentNode = currentNode.father;
 		}
+		*/
 	}
 
 	private void rotateLeft() {
@@ -101,12 +135,14 @@ public class AVLNode {
 		}
 		rightChild.father = father;
 
+		AVLNode oldRightChild = rightChild;
+		
 		rightChild = rightChild.leftChild;
 		if (rightChild != null) {
 			rightChild.father = this;
 		}
 
-		father = rightChild;
+		father = oldRightChild;
 		father.leftChild = this;
 
 		if (father.father != null) {
@@ -128,12 +164,14 @@ public class AVLNode {
 		
 		leftChild.father = father;
 
+		AVLNode oldLeftChild = leftChild;
+		
 		leftChild = leftChild.rightChild;
 		if (leftChild != null) {
 			leftChild.father = this;
 		}
 
-		father = leftChild;
+		father = oldLeftChild;
 		father.rightChild = this;
 
 		if (father.father != null) {
