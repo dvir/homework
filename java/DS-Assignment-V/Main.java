@@ -61,7 +61,7 @@ public class Main {
  			   lastRegisteredIndex++;
  			   boardedPassengers[lastRegisteredIndex] = id;
  		   }
- 		   else if (firstNotRegisteredIndex > lastRegisteredIndex) {  		   
+ 		   else if (firstNotRegisteredIndex-1 > lastRegisteredIndex) {  		   
  			   firstNotRegisteredIndex--;
  			   boardedPassengers[firstNotRegisteredIndex] = id; 			   
  		   } 			   
@@ -82,7 +82,8 @@ public class Main {
  		   boardedPassengers[N-i-1] = tmp;
  	   }
  	   
- 	   write_To_File_Example(outputFileName, "" + (stepsAmount / passengersArrivedCount)); // write N to the output file 	   
+ 	   write_To_File_Example(outputFileName, "" + (stepsAmount / passengersArrivedCount)); // write average of steps per search to the output file
+ 	   System.out.println("steps: " + stepsAmount + " | passengersArrivedCount: " + passengersArrivedCount);
  	    
  	   int[] sortedBoardedPassengers = new int[N]; // holds the sorted boarded passengers list, by id, from smallest to largest
  	   // copy the boarded passengers list to the new array
@@ -113,6 +114,37 @@ public class Main {
  	   }
  	   
  	   write_To_File_Example(outputFileName, idsList); // write the ids of the sorted boarded passengers list.
+ 	  boolean useFirstHash = true;
+ 	  
+ 	  for (int j = 0; j < 2; j++) {
+ 		  int steps;
+	 	  int count = 0;
+	 	  int countFirstHalfSteps = -1;
+	 	  int countFirstThreeQuartersSteps = -1;
+	 	  int countFirstNMinusSqrtNSteps = -1;
+	 	  int countLastSqrtNSteps = -1;
+	 	  CheckInTable airplane = new CheckInTable(N);
+	 	  for (int i = 0; i < N; i++) {
+	 		 steps = airplane.checkIn(boardedPassengers[i], useFirstHash);
+	 		 count += steps;
+	 		 //write_To_File_Example(outputFileName, (useFirstHash ? "[1] " : "[2] ") + i + " did " + steps + ". Total: " + count);
+	 		 
+	 		 if (countFirstHalfSteps == -1 && i+1 >= N / 2) {
+	 			countFirstHalfSteps = count;
+	 		 }
+	 		 if (countFirstThreeQuartersSteps == -1 && i+1 >= 3*N/4) {
+	 			countFirstThreeQuartersSteps = count;
+	 		 }
+	 		 if (countFirstNMinusSqrtNSteps == -1 && i+1 >= N-Math.sqrt(N)) {
+	 			countFirstNMinusSqrtNSteps = count;
+	 		 } 
+	 	  }
+	 	  
+	 	 countLastSqrtNSteps = count - countFirstNMinusSqrtNSteps; // N - (N - sqrt(N)) = sqrt(N)
+	 	  
+	 	  write_To_File_Example(outputFileName, countFirstHalfSteps + "," + countFirstThreeQuartersSteps + "," + countFirstNMinusSqrtNSteps + "," + countLastSqrtNSteps);
+	 	  useFirstHash = !useFirstHash;
+ 	  }
    }
    
    

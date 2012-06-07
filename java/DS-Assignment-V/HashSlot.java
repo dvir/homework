@@ -24,7 +24,7 @@ public class HashSlot {
 	public int search (int id) {
 		if (this.tree == null) {
 			// tree is empty, we don't need to search it
-			return 1;
+			return -1;
 		}
 		
 		// search the tree for the id and return
@@ -35,6 +35,10 @@ public class HashSlot {
 		
 		return searchResult-1;
 	}	
+	
+	public int getCount () {
+		return this.count;
+	}
 	
 	public int getHeight () {
 		if (this.tree == null) {

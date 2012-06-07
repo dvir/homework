@@ -1,11 +1,9 @@
 
 public class HashTable {
-	int size; // the size of the hash table. (N / 3)
-	HashSlot[] table; // the hash table; an array of hash slots
-	int count;
+	private int size; // the size of the hash table. (N / 3)
+	private HashSlot[] table; // the hash table; an array of hash slots
 	
 	public HashTable (int N) {
-		this.count = N;
 		this.size = N / 3;
 		this.table = new HashSlot[this.size];
 		
@@ -14,11 +12,7 @@ public class HashTable {
 			this.table[i] = new HashSlot();
 		}
 	}
-	
-	public int getCount () {
-		return this.count;
-	}
-	
+		
 	public void insert (int id) {
 		// activate the hash function on the id and insert it into the respective hash slot		
 		this.table[hash(id)].insert(id);
@@ -40,7 +34,7 @@ public class HashTable {
 		// if we got here, the table isn't empty. Set the result string to be the representation
 		// of the first hash slot.
 		result = this.table[0].toString(); // returns a string with the height and count of elements in the first hash slot
-		for (int i = 1; i < this.table.length; i++) {
+		for (int i = 1; i < this.size; i++) {
 			// append the height and count of elements of the hash slot to the result string
 			result += " " + this.table[i].toString(); 
 		}
