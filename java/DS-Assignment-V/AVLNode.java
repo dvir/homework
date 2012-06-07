@@ -27,6 +27,26 @@ public class AVLNode {
 	}
 
 	private int search(int id, int accumulator) {
+		if (key == id) {
+			return accumulator + 1;
+		}
+		
+		if (key > id) {
+			if (leftChild != null) {
+				return leftChild.search(id, accumulator + 1);
+			}
+		}
+		else {
+			if (rightChild != null) {
+				return rightChild.search(id, accumulator + 1);
+			}
+		}		
+		
+		// didn't find the id in the tree
+		// NOTE: we add 2 instead of 1 because if we got here we checked two childs and got null.
+		return (-1) * (accumulator + 2);
+		
+		/*
 		if ((key > id) && (leftChild != null)) {
 			return leftChild.search(id, accumulator + 1);
 		} else {
@@ -40,6 +60,7 @@ public class AVLNode {
 				}
 			}
 		}
+		*/
 	}
 
 	public AVLNode insert(int id) {

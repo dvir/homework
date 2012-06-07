@@ -83,7 +83,6 @@ public class Main {
  	   }
  	   
  	   write_To_File_Example(outputFileName, "" + (stepsAmount / passengersArrivedCount)); // write average of steps per search to the output file
- 	   System.out.println("steps: " + stepsAmount + " | passengersArrivedCount: " + passengersArrivedCount);
  	    
  	   int[] sortedBoardedPassengers = new int[N]; // holds the sorted boarded passengers list, by id, from smallest to largest
  	   // copy the boarded passengers list to the new array
