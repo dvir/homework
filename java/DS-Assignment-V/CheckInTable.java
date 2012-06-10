@@ -1,4 +1,6 @@
-
+/**
+ * @author Or Elmaliach 301482220 ; Dvir Azulay 200534014
+ */
 public class CheckInTable {
 	private int size; // the size of the hash table. (N)
 	private int count; // the amount of people in the hash table
