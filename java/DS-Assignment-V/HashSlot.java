@@ -1,4 +1,6 @@
-
+/**
+ * @author Or Elmaliach 301482220 ; Dvir Azulay 200534014
+ */
 public class HashSlot {
 	private AVLNode tree; // the tree containing the ids in the hash slot
 	private int count; // the amount of ids in the tree
