@@ -34,17 +34,20 @@ public class CheckInTable {
 		} else {
 			hashKey = this.hash2(id);
 		}
-		
-		//System.out.println("id: " + id + " - hash1: " + this.hash1(id) + " - hash2: " + this.hash2(id));
 
 		// jump +1, -1, +2, -2, +3, -3, ...
-		// NOTE: this relies on the fact that we won't try to insert a new id into a full hash table.
+		// NOTE: this relies on the fact that we won't try to insert a new id into a full hash table. 
+		// (we avoid this by using a count for the elements in the hash table)
+		
 		int result = 1;
 		boolean found = false;
+		
+		// check if the initial position given by the hash function is free
 		if (this.table[hashKey] == -1) {
 			found = true;
 		}
 		
+		// if the initial position was full, perform the linear probing as described above.
 		for (int i = 1; i < this.size && !found; i++) {
 			if (hashKey+i < this.size) {
 				result++;
@@ -70,6 +73,7 @@ public class CheckInTable {
 		return result;
 	}
 
+	// reverse an integer digits. used by the second hash function.
 	private int reverse (int id) {
 		int result = 0;
 		while (id > 0) {

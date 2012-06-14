@@ -115,20 +115,27 @@ public class Main {
  	   write_To_File_Example(outputFileName, idsList); // write the ids of the sorted boarded passengers list.
  	  boolean useFirstHash = true;
  	  
+ 	  // check in passengers to the flight and record statistics of the steps it took us to find a seat for them.
+ 	  // we do this twice - once with each hash function
  	  for (int j = 0; j < 2; j++) {
  		  int steps;
 	 	  int count = 0;
-	 	  int countFirstHalfSteps = -1;
-	 	  int countFirstThreeQuartersSteps = -1;
-	 	  int countFirstNMinusSqrtNSteps = -1;
-	 	  int countLastSqrtNSteps = -1;
+	 	  int countFirstHalfSteps = -1; // first 1/2 steps
+	 	  int countFirstThreeQuartersSteps = -1; // first 3/4 steps
+	 	  int countFirstNMinusSqrtNSteps = -1; // first N-sqrt(N) steps
+	 	  int countLastSqrtNSteps = -1; // last sqrt(N) steps
+	 	  
+	 	  // create the airplane check-in table, with the size of the registered passengers list
 	 	  CheckInTable airplane = new CheckInTable(N);
 	 	  for (int i = 0; i < N; i++) {
+	 		 // check in the passengers. the return value is the steps it took us to find a seat for him while linear probing on the hash table.
 	 		 steps = airplane.checkIn(boardedPassengers[i], useFirstHash);
 	 		 count += steps;
-	 		 //write_To_File_Example(outputFileName, (useFirstHash ? "[1] " : "[2] ") + i + " did " + steps + ". Total: " + count);
 	 		 
-	 		 if (countFirstHalfSteps == -1 && i+1 >= N / 2) {
+	 		 // if this is the first time we pass the threshold for the count of steps we want to record, 
+	 		 // set the stats parameter to the value of current steps.
+	 		 
+	 		 if (countFirstHalfSteps == -1 && i+1 >= N/2) {
 	 			countFirstHalfSteps = count;
 	 		 }
 	 		 if (countFirstThreeQuartersSteps == -1 && i+1 >= 3*N/4) {
@@ -141,7 +148,8 @@ public class Main {
 	 	  
 	 	 countLastSqrtNSteps = count - countFirstNMinusSqrtNSteps; // N - (N - sqrt(N)) = sqrt(N)
 	 	  
-	 	  write_To_File_Example(outputFileName, countFirstHalfSteps + "," + countFirstThreeQuartersSteps + "," + countFirstNMinusSqrtNSteps + "," + countLastSqrtNSteps);
+	 	  // write the statistics to the output file
+	 	  write_To_File_Example(outputFileName, countFirstHalfSteps + ", " + countFirstThreeQuartersSteps + ", " + countFirstNMinusSqrtNSteps + ", " + countLastSqrtNSteps);
 	 	  useFirstHash = !useFirstHash;
  	  }
    }
