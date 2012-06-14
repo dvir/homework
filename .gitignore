@@ -12,3 +12,4 @@
 # Ignore test files
 test.java
 *.dat
+*.txt
