@@ -1,5 +1,7 @@
 /**
  * @author Or Elmaliach 301482220 ; Dvir Azulay 200534014
+ * Implementation of a hash table holding air plane passengers ids.
+ * Each slot in the hash table is of type HashSlot.
  */
 public class HashTable {
 	private int size; // the size of the hash table. (N / 3)

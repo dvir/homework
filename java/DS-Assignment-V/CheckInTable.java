@@ -1,5 +1,7 @@
 /**
  * @author Or Elmaliach 301482220 ; Dvir Azulay 200534014
+ * CheckInTable is an implementation of a hash table as a plane seating table.
+ * We have two different hash functions that can be used by it.
  */
 public class CheckInTable {
 	private int size; // the size of the hash table. (N)

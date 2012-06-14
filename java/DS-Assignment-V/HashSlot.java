@@ -1,5 +1,7 @@
 /**
  * @author Or Elmaliach 301482220 ; Dvir Azulay 200534014
+ * HashSlot is a slot in a hash table that holds air plane passengers ids.
+ * The data of each slot is stored in an AVL tree structure.
  */
 public class HashSlot {
 	private AVLNode tree; // the tree containing the ids in the hash slot

@@ -3,7 +3,7 @@
  * This class is a single node in an AVL Tree, modified for the needs of this assignment
  * Each node represents the AVL tree which is rooted in it
  * So we can invoke the search or height methods on any node (sub-tree)
- * but it is illadvised to use the insert method on anything but the whole tree's root
+ * but it is ill-advised to use the insert method on anything but the whole tree's root
  * as this will corrupt the BST feature of this AVL tree
  */
 public class AVLNode {
