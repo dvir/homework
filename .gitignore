@@ -13,3 +13,6 @@
 test.java
 *.dat
 *.txt
+
+# Ignore bin files
+bin/
