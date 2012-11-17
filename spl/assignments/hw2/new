@@ -1,0 +1,5 @@
+if (argc > 1) {
+        if (string(argv[1]) == "MALAG=no") {
+            malag = false;
+        }
+    }
