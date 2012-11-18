@@ -3,8 +3,7 @@
 
 
 #include "opencv2/opencv.hpp"
-#include <highgui.h>
-#include <cv.h>
+#include "opencv2/highgui/highgui.hpp" 
  
 class ImageOperations
 {

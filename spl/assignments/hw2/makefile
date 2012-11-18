@@ -36,10 +36,10 @@ bin/electivecourse.o: bin/course.o bin/student.o src/electivecourse.cpp include/
 	$(CC) $(CFLAGS) -c -Linclude -o bin/electivecourse.o src/electivecourse.cpp
 
 bin/imageloader.o: src/imageloader.cpp include/imageloader.h
-	$(CC) $(CFLAGS) -c -I/usr/include/opencv -I/usr/include/ -o bin/imageloader.o src/imageloader.cpp `pkg-config opencv --cflags --libs`
+	$(CC) $(CFLAGS) -c -I/usr/include/opencv -I/usr/include/ -o bin/imageloader.o src/imageloader.cpp
 		 
 bin/imageoperations.o: src/imageoperations.cpp include/imageoperations.h
-	$(CC) $(CFLAGS) -c -I/usr/include/opencv -I/usr/include/ -o bin/imageoperations.o src/imageoperations.cpp `pkg-config opencv --cflags --libs`
+	$(CC) $(CFLAGS) -c -I/usr/include/opencv -I/usr/include/ -o bin/imageoperations.o src/imageoperations.cpp
 
  #Clean the build directory
 clean: 
