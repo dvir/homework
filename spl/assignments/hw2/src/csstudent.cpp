@@ -1,8 +1,10 @@
 #include "../include/typedef.h"
+#include "../include/utils.h"
 #include "../include/course.h"
 #include "../include/csstudent.h"
 #include <cstdlib>
-#include <iostream>
+#include <fstream>
+using namespace std;
 
 CSStudent::CSStudent(std::vector<std::string> data, 
                      int elective_courses_count) 
@@ -13,7 +15,7 @@ CSStudent::CSStudent(std::vector<std::string> data,
 void CSStudent::study(Course& c) {
     if (rand()%101 < 25) {
         // student didn't handle the workload and quit the course.
-        std::cout << _id << " quits course " << c.getName() << std::endl;
+        Utils::log(_id, " quits course ", c.getName());
         return;  
     } 
     

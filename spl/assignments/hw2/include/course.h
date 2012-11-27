@@ -11,15 +11,15 @@ class Course {
         virtual void reg(Student& s) = 0;
         virtual std::string getDept() { return _dept; };
         virtual std::string getName() { return _name; };
-        virtual int getSemester() { return _semester; };
-        virtual int getMinGrade() { return _min_grade; };
+        virtual size_t getSemester() { return _semester; };
+        virtual size_t getMinGrade() { return _min_grade; };
 
     protected:
         Students _students;
         std::string _dept;
         std::string _name;
-        int _semester;
-        int _min_grade;
+        size_t _semester;
+        size_t _min_grade;
 
         virtual void reset();
 };

@@ -1,8 +1,10 @@
 #include "../include/typedef.h"
+#include "../include/utils.h"
 #include "../include/course.h"
 #include "../include/pgstudent.h"
 #include <cstdlib>
-#include <iostream>
+#include <fstream>
+using namespace std;
 
 PGStudent::PGStudent(std::vector<std::string> data, 
                      int elective_courses_count) 
@@ -13,7 +15,7 @@ PGStudent::PGStudent(std::vector<std::string> data,
 void PGStudent::study(Course& c) {
     if (rand()%101 < 20) {
         // student is slacking off the course.
-        std::cout << _id << " is slacking off " << c.getName() << std::endl;
+        Utils::log(_id, " is slacking off ", c.getName());
         return;  
     } 
     

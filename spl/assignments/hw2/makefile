@@ -7,15 +7,15 @@ CFLAGS  = -g -Wall -Weffc++
 all: main
 
  # Tool invocations
-main: bin/randomUniversity.o bin/student.o bin/course.o bin/csstudent.o bin/pgstudent.o bin/cscourse.o bin/pgcourse.o bin/electivecourse.o bin/imageloader.o bin/imageoperations.o
+main: bin/randomUniversity.o bin/utils.o bin/student.o bin/course.o bin/csstudent.o bin/pgstudent.o bin/cscourse.o bin/pgcourse.o bin/electivecourse.o bin/imageloader.o bin/imageoperations.o
 	@echo 'Building target: randomUniversity'
 	@echo 'Invoking: C++ Linker'
-	$(CC) -o bin/main bin/randomUniversity.o bin/student.o bin/csstudent.o bin/pgstudent.o bin/course.o bin/cscourse.o bin/pgcourse.o bin/electivecourse.o bin/imageloader.o bin/imageoperations.o /usr/local/lib/libopencv_highgui.so /usr/local/lib/libopencv_core.so /usr/local/lib/libopencv_imgproc.so -L/usr/local/lib/ -L/usr/lib -lopencv_core -lopencv_highgui -lopencv_imgproc
+	$(CC) -o bin/main bin/randomUniversity.o bin/utils.o bin/student.o bin/csstudent.o bin/pgstudent.o bin/course.o bin/cscourse.o bin/pgcourse.o bin/electivecourse.o bin/imageloader.o bin/imageoperations.o -L/usr/lib -lopencv_core -lopencv_highgui -lopencv_imgproc
 	@echo 'Finished building target: main'
 	@echo ' '
 
-bin/randomUniversity.o: bin/student.o bin/course.o bin/csstudent.o bin/pgstudent.o bin/cscourse.o bin/pgcourse.o bin/electivecourse.o src/randomUniversity.cpp
-	$(CC) $(FLAGS) -c -Linclude -o bin/randomUniversity.o src/randomUniversity.cpp
+bin/randomUniversity.o: bin/utils.o bin/student.o bin/course.o bin/csstudent.o bin/pgstudent.o bin/cscourse.o bin/pgcourse.o bin/electivecourse.o src/randomUniversity.cpp
+	$(CC) $(CFLAGS) -c -Linclude -o bin/randomUniversity.o src/randomUniversity.cpp
 
  # Depends on the source and header files
 bin/student.o: src/student.cpp include/student.h
@@ -40,6 +40,9 @@ bin/imageloader.o: src/imageloader.cpp include/imageloader.h
 		 
 bin/imageoperations.o: src/imageoperations.cpp include/imageoperations.h
 	$(CC) $(CFLAGS) -c -I/usr/include/opencv -I/usr/include/ -o bin/imageoperations.o src/imageoperations.cpp
+
+bin/utils.o: src/utils.cpp include/utils.h
+	$(CC) $(CFLAGS) -c -Linclude -o bin/utils.o src/utils.cpp
 
  #Clean the build directory
 clean: 

@@ -15,4 +15,5 @@ class CSCourse;
 class PGCourse;
 class ElectiveCourse;
 
+class Utils;
 #endif

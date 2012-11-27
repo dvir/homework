@@ -18,29 +18,22 @@
 
 #include "../include/imageloader.h"
 #include "../include/imageoperations.h"
+
+#include "../include/utils.h"
  
 using namespace std;
 
-vector<string> str_split(string str, char separator) {
-	vector<string> words;
-	string word = ""; 
-    string::iterator it;
-	for (it = str.begin(); it < str.end(); ++it) {
-		if (*it == separator) {
-			words.push_back(word);
-			word = "";
-		} else {
-			word = word + *it;
-		}
-	}
-
-	if (word != "") words.push_back(word);
-	
-	return words;
-}
-
 int main(int argc, char* argv[]) {
     srand(time(NULL));
+
+    // clean log file
+    ofstream log;
+    log.open("random.log");
+    if (!log.is_open()) {
+        cout << "Unable to open log file." << endl;
+        return 1;
+    }
+    log.close();
 
     ifstream conf;
     string line;
@@ -59,9 +52,9 @@ int main(int argc, char* argv[]) {
 
     Students students;
 
-    int semesters = 0;
-    int CS_elective_courses = 0;
-    int PG_elective_courses = 0;
+    size_t semesters = 0;
+    size_t CS_elective_courses = 0;
+    size_t PG_elective_courses = 0;
 
     conf.open("curriculum.conf");
     if (!conf.is_open()) {
@@ -76,7 +69,7 @@ int main(int argc, char* argv[]) {
     
     // read dept,required_elective_courses data
     while (getline(conf, line)) {
-        data = str_split(line, '=');    
+        data = Utils::str_split(line, ',');    
         if (data[0] == "CS") {
             CS_elective_courses = atoi(data[1].c_str());
         } else if (data[0] == "PG") {
@@ -85,7 +78,7 @@ int main(int argc, char* argv[]) {
     }
     
     conf.close();
-
+    
     conf.open("courses.conf");
     if (!conf.is_open()) {
         cout << "Unable to read courses configuration." << endl;
@@ -93,7 +86,7 @@ int main(int argc, char* argv[]) {
     }
 
     while (getline(conf, line)) {
-        data = str_split(line, ',');    
+        data = Utils::str_split(line, ',');    
         if (data[0] == "CS") {
             CS_courses.push_back(new CSCourse(data));
         } else if (data[0] == "PG") {
@@ -111,34 +104,40 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     
+    log.open("random.log", ios::app);
+    if (!log.is_open()) {
+        cout << "Unable to open log file." << endl;
+        return 1;
+    }
     while (getline(conf, line)) {
-        data = str_split(line, ',');    
+        data = Utils::str_split(line, ',');    
         Student* student;
         if (data[1] == "CS") {
             student = new CSStudent(data, CS_elective_courses);
         } else if (data[1] == "PG") {
             student = new PGStudent(data, PG_elective_courses);
             if (!malag) {
-                std::cout << student->getId() << " is being denied his education." << std::endl;
+                Utils::log(student->getId(), " is being denied his education.");
             }
         }
         
-        students.push_back(student);
+        Students::iterator it = students.begin();
+        for ( ; it < students.end() && (*it)->getId() < student->getId();
+             ++it)
+        {
+            //iterator stops in the place
+            //where we want to insert the new student
+            //(we are sorting the students' vector)
+        }
+        students.insert(it, student);
     }
-    
+    log.close(); 
     conf.close();
 
-    // open output log file
-    ofstream log;
-    log.open("random.log");
-    if (!log.is_open()) {
-        cout << "Unable to open log file." << endl;
-        return 1;
-    }
-    
     // start simulation
     for (size_t semester = 1; semester <= semesters; ++semester) {
-        cout << "Semester " << semester << " of Random University." << endl;
+        Utils::log("Semester ", semester, " of Random University.");
+        
         // for each student, find out what is the latest semester
         // he has finished all the courses for.
         // if the next semester he should participate on is odd or even
@@ -174,15 +173,12 @@ int main(int argc, char* argv[]) {
                      ++it2)
                 {
                     Course* course = *it2;
-
                     if (course->getSemester() == student->getCurrentSemester())
                     {
                         student->addSemesterCourse(*course);
                     }
                 }
             }
-
-            student->startSemester(semester);
 
             int elective_courses_count = student->getElectiveCoursesCount();
             if (elective_courses_count > 0) {
@@ -195,10 +191,13 @@ int main(int argc, char* argv[]) {
                     if (semester%2 == course->getSemester()%2
                         && !student->hasCompleted(*course)) 
                     {
-                        course->reg(*student);
+                        student->addElectiveCourse(*course);
+                        elective_courses_count--;
                     }
                 }
             }
+            
+            student->startSemester(semester);
         }
 
         for (Courses::iterator it = CS_courses.begin();
@@ -225,6 +224,13 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    // open output log file    
+    log.open("random.log", ios::app);
+    if (!log.is_open()) {
+        cout << "Unable to open log file." << endl;
+        return 1;
+    }
+
     // announce graduation status
     size_t dept_courses_count = 0;
     for (Students::iterator it = students.begin();
@@ -233,9 +239,9 @@ int main(int argc, char* argv[]) {
     {
         Student* student = *it;
         if (student->getDept() == "CS") {
-            dept_courses_count = CS_courses.size();
+            dept_courses_count = CS_courses.size() + CS_elective_courses;
         } else if (student->getDept() == "PG") {
-            dept_courses_count = PG_courses.size();
+            dept_courses_count = PG_courses.size() + PG_elective_courses;
 
             // if the MALAG didn't allow the student to study,
             // we shouldn't produce any output for such students.
@@ -245,27 +251,70 @@ int main(int argc, char* argv[]) {
         }
 
         if (student->hasGraduated(dept_courses_count)) {
-            std::cout << student->getId() << " has graduated" << std::endl;
+            Utils::log(student->getId(), " has graduated");
         } else {
-            std::cout << student->getId() << " has not graduated" << std::endl;
+            Utils::log(student->getId(), " has not graduated");
+        }
+    }
+    log.close();
+
+    size_t CS_students_count=0;
+    size_t PG_students_count=0;
+
+    for (Students::iterator it = students.begin();
+         it < students.end();
+         ++it)
+    {
+        if ((*it)->getDept() == "CS") {
+            ++CS_students_count;
+        }
+        else{
+            ++PG_students_count;
         }
     }
 
-    ImageLoader img1("Lenna.png");
-    img1.displayImage();
-                         
-    ImageOperations opr;
-                              
-    ImageLoader img2(100,100);
-    opr.resize(img1.getImage(),img2.getImage());
-    img2.displayImage();
+    if (argc < 3) {
+        ImageOperations opr;
+        ImageLoader CS_image(100, 100*CS_students_count);
+        ImageLoader PG_image(100, 100*PG_students_count);
+        ImageLoader frame(100, 100);
+        size_t i = 0, j = 0;
+        for (Students::iterator it = students.begin();
+             it < students.end();
+             ++it)
+        {
+            Student* student = *it;
+            ImageLoader current_student(100, 100); // frame
+            ImageLoader source_image(student->getImage());
+            opr.resize(source_image.getImage(), current_student.getImage());
+            
+            if (student->getDept() == "CS"){
+                //turn to greyscale if needed
+                if (!student->hasGraduated(CS_courses.size())) {
+                    opr.rgb_to_greyscale(current_student.getImage(), current_student.getImage());
+                }
+                opr.copy_paste_image(current_student.getImage(), CS_image.getImage(), 100*i);
+                ++i;
+            } else {
+                //turn to greyscale if needed
+                if (!student->hasGraduated(PG_courses.size())) {
+                    opr.rgb_to_greyscale(current_student.getImage(), current_student.getImage());
+                }
+                opr.copy_paste_image(current_student.getImage(), PG_image.getImage(), 100*j);
+                ++j;
+            }
+        }
 
-    ImageLoader img3(img1.getImage().size().height, img1.getImage().size().width * 2);
-    opr.copy_paste_image(img1.getImage(),img3.getImage(),0);
-    opr.copy_paste_image(img1.getImage(),img3.getImage(),img1.getImage().size().width);                                                                                   img3.displayImage();
+        //save to files
+        CS_image.saveImage("CS.jpg");
+        PG_image.saveImage("PG.jpg");
 
+        // display images
+        CS_image.displayImage();
+        PG_image.displayImage();
+    }
+    
     // clean everything!
-
     for (Courses::iterator it = CS_courses.begin();
          it < CS_courses.end();
          ++it)

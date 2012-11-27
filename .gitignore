@@ -16,3 +16,8 @@ test.java
 
 # Ignore bin files
 bin/
+*.o
+*.out
+
+# ignore vim files
+.vim

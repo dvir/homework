@@ -1,7 +1,8 @@
 #include "../include/typedef.h"
+#include "../include/utils.h"
 #include "../include/student.h"
 #include "../include/pgcourse.h"
-#include <iostream>
+#include <fstream>
 using namespace std;
 
 PGCourse::PGCourse(std::vector<std::string> data) : Course(data) {
@@ -10,5 +11,6 @@ PGCourse::PGCourse(std::vector<std::string> data) : Course(data) {
 
 void PGCourse::reg(Student& s) {
     _students.push_back(&s);
-    std::cout << s.getId() << " is taking " << _name << " from PG" << std::endl;
+
+    Utils::log(s.getId(), " is taking ", _name, " from PG");
 }
