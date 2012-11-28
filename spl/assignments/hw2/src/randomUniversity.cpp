@@ -290,14 +290,14 @@ int main(int argc, char* argv[]) {
             
             if (student->getDept() == "CS"){
                 //turn to greyscale if needed
-                if (!student->hasGraduated(CS_courses.size())) {
+                if (!student->hasGraduated(CS_courses.size() + CS_elective_courses)) {
                     opr.rgb_to_greyscale(current_student.getImage(), current_student.getImage());
                 }
                 opr.copy_paste_image(current_student.getImage(), CS_image.getImage(), 100*i);
                 ++i;
             } else {
                 //turn to greyscale if needed
-                if (!student->hasGraduated(PG_courses.size())) {
+                if (!student->hasGraduated(PG_courses.size() + PG_elective_courses)) {
                     opr.rgb_to_greyscale(current_student.getImage(), current_student.getImage());
                 }
                 opr.copy_paste_image(current_student.getImage(), PG_image.getImage(), 100*j);
