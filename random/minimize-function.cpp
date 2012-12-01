@@ -5,7 +5,7 @@
  *
  * @Example:
  * g++ -g -Wall -Weffc++ -o minimize-function minimize-function.cpp && clear && ./minimize-function 4 0 1 2 5 6 7 8 9 10 14
- *
+ * Output: f = cd' + b'c' + a'bd
  *
 */
 
@@ -133,16 +133,12 @@ class Term : public Binary {
 
         string getExpression() const {
             string expression = getBinary();
-            for (size_t i = 0; 
-                 i < _literals_count - expression.length(); ++i)
-            {
-                expression.insert(0, "0");
-            }
+            expression.insert(0, _literals_count - expression.length(), '0');
 
             for (vector<size_t>::const_iterator it = _dashes.begin();
                  it < _dashes.end(); ++it)
             {
-                expression.replace(max((size_t)0, expression.length() - (*it)), 1, "-");
+                expression.replace(expression.length() - (*it), 1, "-");
             }
 
             return expression;
