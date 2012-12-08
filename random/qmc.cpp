@@ -19,6 +19,8 @@
 #include <cstdlib>
 #include <iomanip>
 #include <sstream>
+#include <boost/program_options.hpp>
+#include <boost/foreach.hpp>
 using namespace std;
 
 class Binary {
@@ -88,6 +90,7 @@ class Term : public Binary {
             _remaining_minterms(),
             _selected(false),
             _prime_implicant(false),
+            _dont_care(false),
             _literals_count(literals_count)
         {
             _minterms.push_back(num);
@@ -100,16 +103,17 @@ class Term : public Binary {
             _remaining_minterms(),
             _selected(false),
             _prime_implicant(false),
+            _dont_care(first.isDontCare() && second.isDontCare()),
             _literals_count(max(first.getLiteralCount(), second.getLiteralCount()))
         {
-            for (vector<size_t>::iterator it = first.getMinTerms().begin();
-                 it < first.getMinTerms().end(); ++it)
+            for (vector<size_t>::iterator it = first.getMinterms().begin();
+                 it < first.getMinterms().end(); ++it)
             {
                 _minterms.push_back(*it);
             }
             
-            for (vector<size_t>::iterator it = second.getMinTerms().begin();
-                 it < second.getMinTerms().end(); ++it)
+            for (vector<size_t>::iterator it = second.getMinterms().begin();
+                 it < second.getMinterms().end(); ++it)
             {
                 _minterms.push_back(*it);
             }
@@ -177,6 +181,14 @@ class Term : public Binary {
             _prime_implicant = true;
         };
         
+        bool isDontCare() const {
+            return _dont_care;
+        };
+
+        void dontCare() {
+            _dont_care = true;
+        };
+        
         virtual char charAt(size_t i) const {
             if (i >= getExpression().size()) {
                 return '0';
@@ -206,7 +218,7 @@ class Term : public Binary {
             return separating_bit;
         };
 
-        vector<size_t>& getMinTerms() {
+        vector<size_t>& getMinterms() {
             return _minterms;
         };
         
@@ -270,7 +282,10 @@ class Term : public Binary {
         };
 
         void coverMinterm(size_t i) {
-            _remaining_minterms.erase(find(_remaining_minterms.begin(), _remaining_minterms.end(), i));
+            vector<size_t>::iterator position = find(_remaining_minterms.begin(), _remaining_minterms.end(), i);
+            if (position != _remaining_minterms.end()) {
+                _remaining_minterms.erase(position);
+            }
         };
 
         void primeImplicantCandidate() {
@@ -280,12 +295,14 @@ class Term : public Binary {
         vector<size_t> getRemainingMinterms() const {
             return _remaining_minterms;
         };
+
     private:
         vector<size_t> _dashes;
         vector<size_t> _minterms;
         vector<size_t> _remaining_minterms;
         bool _selected;
         bool _prime_implicant;
+        bool _dont_care;
         size_t _literals_count;
 };
 
@@ -308,10 +325,16 @@ struct PrimeImplicantCandidatesCompare {
 typedef vector<Term*> Terms;
 typedef tr1::unordered_map<size_t, Terms> ImplicantsMap;
 
-string terms_function(const vector<Term*>& terms) {
+string terms_function(const vector<Term*>& terms, bool debug=false) {
     string minimized_function;
     if (terms.size() > 0) {
         minimized_function.append(terms.at(0)->getLiterals());
+
+        if (debug) {
+            minimized_function.append(" (");
+            minimized_function.append(terms.at(0)->getDecimals());
+            minimized_function.append(")");
+        }
     }
     
     for (Terms::const_iterator it = terms.begin()+1; 
@@ -319,19 +342,107 @@ string terms_function(const vector<Term*>& terms) {
     {
         minimized_function.append(" + ");
         minimized_function.append((*it)->getLiterals());
+
+        if (debug) {
+            minimized_function.append(" (");
+            minimized_function.append((*it)->getDecimals());
+            minimized_function.append(")");
+        }
     }
 
     return minimized_function;
 }
 
+ostream& operator<<(ostream& output, const vector<string>& list) {
+    if (list.size() > 0) {
+        output << list.at(0);
+    }
+
+    for (vector<string>::const_iterator it = list.begin()+1;
+         it != list.end(); ++it)
+    {
+        output << " " << *it;
+    }
+
+    return output;
+}
+
+ostream& operator<<(ostream& output, const Terms& terms) {
+    if (terms.size() > 0) {
+        output << terms.at(0)->getLiterals() << " (" << terms.at(0)->getDecimals() << ")";
+    }
+
+    for (Terms::const_iterator it = terms.begin()+1;
+         it != terms.end(); ++it)
+    {
+        output << (*it)->getLiterals() << " (" << (*it)->getDecimals() << ")";
+    }
+
+    return output;
+}
+
 int main(int argc, char** argv) {
+    namespace po = boost::program_options;
+
+    int literals_count;
+    bool debug;
+
+    po::options_description desc("Allowed options");
+    desc.add_options()
+        ("help", "produce help message")
+        ("sop", po::value< vector<int> >()->multitoken(), "SOP terms")
+        ("pos", po::value< vector<int> >()->multitoken(), "POS terms")
+        ("dont-care", po::value< vector<int> >()->multitoken(), "Dont-Care terms")
+        ("literals-count,l", po::value<int>(&literals_count)->required(), "Literals count")
+        ("debug", po::value<bool>(&debug)->default_value(false), "Show debug information")
+    ;
+
+//    po::positional_options_description p;
+//    p.add("input-file", -1);
+
+    po::variables_map vm;
+    po::store(po::command_line_parser(argc, argv).
+              options(desc)
+//              .positional(p)
+              .run()
+              , vm);
+
+    if (vm.count("help")) {
+        cout << desc << "\n";
+        return 1;
+    }
+    
+    po::notify(vm);
+
     Terms terms;
+    Terms dontCareTerms;
     Terms primeTerms;
 
-    int literals_count = atoi(argv[1]);
-    for (size_t i = 2; i < (size_t)argc; ++i) {
-        Term* term = new Term(atoi(argv[i]), literals_count);
-        terms.push_back(term);
+    if (vm.count("sop")) {
+        BOOST_FOREACH (int term_val, vm["sop"].as< vector<int>  >())
+        {
+            Term* term = new Term(term_val, literals_count);
+            terms.push_back(term);
+        }
+    }
+    
+    if (vm.count("pos")) {
+        BOOST_FOREACH (int term_val, vm["pos"].as< vector<int>  >())
+        {
+            // calculate the SOP term for the POS term - 2^(literals) - 1 - minterm
+            Term* term = new Term(pow(2, literals_count) - 1 - term_val, literals_count);
+            terms.push_back(term);
+        }
+    }
+    
+    if (vm.count("dont-care")) {
+        BOOST_FOREACH (int term_val, vm["dont-care"].as< vector<int>  >())
+        {
+            Term* term = new Term(term_val, literals_count);
+            term->dontCare();
+            terms.push_back(term);
+            dontCareTerms.push_back(term);
+        }
     }
 
     sort(terms.begin(), terms.end(), PointerCompare());
@@ -458,9 +569,16 @@ int main(int argc, char** argv) {
              it < currentTerms.end(); ++it)
         {
             if (!(*it)->isSelected()) {
+                // make sure that we don't add terms that are made of
+                // only dont care terms.
+                if ((*it)->isDontCare()) {
+                    continue;
+                }
+
                 // make sure we don't have that term in the list already
                 // (that can happen because 0,8-1,9 are equal to 0,1-8,9, for example)
                 bool is_duplicate = false;
+
                 for (Terms::iterator pt_it = primeTerms.begin(); 
                     pt_it < primeTerms.end(); ++pt_it) 
                 {
@@ -488,12 +606,27 @@ int main(int argc, char** argv) {
     {
         Term* term = *it;
         term->primeImplicantCandidate();
-        vector<size_t> minterms = term->getMinTerms();
+        vector<size_t> minterms = term->getMinterms();
         for (vector<size_t>::iterator mt_it = minterms.begin();
              mt_it < minterms.end(); ++mt_it)
         {
             implicantsMap[*mt_it].push_back(term);
         }
+    }
+
+    // remove dontcare minterms from implicantsMap, as we don't need to
+    // actually cover them.
+    for (Terms::iterator it = dontCareTerms.begin();
+         it < dontCareTerms.end(); ++it)
+    {
+        size_t minterm = (*it)->getDecimal();
+        for (Terms::iterator t_it = implicantsMap[minterm].begin();
+             t_it < implicantsMap[minterm].end(); ++t_it)
+        {
+            (*t_it)->coverMinterm(minterm);
+        }
+
+        implicantsMap[minterm].clear();
     }
 
 
@@ -509,11 +642,16 @@ int main(int argc, char** argv) {
             if ((*it).second.size() == 1) {
                 Term* term = (*it).second.at(0);
                 
+                // we found a new prime implicant!
+//                cout << "New (natural) prime implicant for term " << (*it).first << "! " << term->getExpression() <<
+//                        " (" << term->getDecimals() << ")" << endl;
+//                cout << (*it).second << endl;
+
                 term->primeImplicant();
                 found_prime_implicant = true;
 
                 primeImplicants.push_back(term);
-                vector<size_t> minterms = term->getMinTerms();
+                vector<size_t> minterms = term->getMinterms();
                 for (vector<size_t>::iterator mt_it = minterms.begin();
                      mt_it < minterms.end(); ++mt_it)
                 {
@@ -551,10 +689,13 @@ int main(int argc, char** argv) {
                 break;
             }
 
+            // we found a new prime implicant!
+//            cout << "New prime implicant! " << term->getExpression() <<
+//                    " (" << term->getDecimals() << ")" << endl;
             term->primeImplicant();
             primeImplicants.push_back(term);
 
-            vector<size_t> minterms = term->getMinTerms();
+            vector<size_t> minterms = term->getMinterms();
             for (vector<size_t>::iterator mt_it = minterms.begin();
                  mt_it < minterms.end(); ++mt_it)
             {
@@ -569,7 +710,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    cout << "f = " << terms_function(primeImplicants) << endl;
+    cout << "f = " << terms_function(primeImplicants, debug) << endl;
     
     // clean everything!
  
