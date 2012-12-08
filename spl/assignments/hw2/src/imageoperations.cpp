@@ -2,8 +2,8 @@
 
 void ImageOperations::rgb_to_greyscale(const cv::Mat& src, cv::Mat& dst)
 {    
-    cv::cvtColor(src,dst,CV_RGB2GRAY);
-    cv::cvtColor(dst,dst,CV_GRAY2RGB);
+//    cv::cvtColor(src,dst,CV_RGB2GRAY);
+//    cv::cvtColor(dst,dst,CV_GRAY2RGB);
 }
  
  

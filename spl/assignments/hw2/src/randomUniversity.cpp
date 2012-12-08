@@ -277,7 +277,6 @@ int main(int argc, char* argv[]) {
         ImageOperations opr;
         ImageLoader CS_image(100, 100*CS_students_count);
         ImageLoader PG_image(100, 100*PG_students_count);
-        ImageLoader frame(100, 100);
         size_t i = 0, j = 0;
         for (Students::iterator it = students.begin();
              it < students.end();
@@ -286,35 +285,51 @@ int main(int argc, char* argv[]) {
             Student* student = *it;
             ImageLoader current_student(100, 100); // frame
             ImageLoader source_image(student->getImage());
+            cv::Mat student_image;
+
             opr.resize(source_image.getImage(), current_student.getImage());
-            
+
             if (student->getDept() == "CS"){
                 //turn to greyscale if needed
-                if (!student->hasGraduated(CS_courses.size() + CS_elective_courses)) {
-                    opr.rgb_to_greyscale(current_student.getImage(), current_student.getImage());
+                if (student->hasGraduated(CS_courses.size() + CS_elective_courses)) {
+                    student_image = cv::imread(student->getImage());
+                } else {
+//                    opr.rgb_to_greyscale(current_student.getImage(), current_student.getImage());
+                    student_image = cv::imread(student->getImage(), CV_LOAD_IMAGE_GRAYSCALE);                    
+                    cv::cvtColor(student_image, student_image, CV_GRAY2BGR);
                 }
+               
+                opr.resize(student_image, current_student.getImage());
                 opr.copy_paste_image(current_student.getImage(), CS_image.getImage(), 100*i);
                 ++i;
             } else {
                 //turn to greyscale if needed
-                if (!student->hasGraduated(PG_courses.size() + PG_elective_courses)) {
-                    opr.rgb_to_greyscale(current_student.getImage(), current_student.getImage());
+                if (student->hasGraduated(PG_courses.size() + PG_elective_courses)) {
+                    student_image = cv::imread(student->getImage());
+                } else {
+//                    opr.rgb_to_greyscale(current_student.getImage(), current_student.getImage());
+                    student_image = cv::imread(student->getImage(), CV_LOAD_IMAGE_GRAYSCALE);                    
+                    cv::cvtColor(student_image, student_image, CV_GRAY2BGR);
                 }
+                
+                opr.resize(student_image, current_student.getImage());
                 opr.copy_paste_image(current_student.getImage(), PG_image.getImage(), 100*j);
                 ++j;
             }
         }
 
         //save to files
-        CS_image.saveImage("CS.jpg");
-        PG_image.saveImage("PG.jpg");
+//        CS_image.saveImage("CS.jpg");
+//        PG_image.saveImage("PG.jpg");
 
         // display images
-        CS_image.displayImage();
-        PG_image.displayImage();
+//        CS_image.displayImage();
+//        PG_image.displayImage();
     }
     
     // clean everything!
+//    cv::destroyAllWindows();
+
     for (Courses::iterator it = CS_courses.begin();
          it < CS_courses.end();
          ++it)
