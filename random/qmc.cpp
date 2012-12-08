@@ -4,9 +4,9 @@
  * @author: Dvir Azulay (dvir.azulay@gmail.com)
  *
  * @Example:
- * g++ -g -Wall -Weffc++ -o minimize-function minimize-function.cpp && clear && ./minimize-function 4 0 1 2 5 6 7 8 9 10 14
- * Output: f = cd' + b'c' + a'bd
- *
+ *   - Compiling: g++ -g -Wall -Weffc++ -o qmc qmc.cpp -lboost_program_options
+ *   - ./qmc -l 4 --sop 0 1 2 5 6 7 8 9 10 14
+ *   - Output: f = cd' + b'c' + a'bd
 */
 
 #include <vector>
