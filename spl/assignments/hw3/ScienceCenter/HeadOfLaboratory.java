@@ -1,5 +1,6 @@
 package ScienceCenter;
 
+import java.util.*;
 import java.util.concurrent.*;
 
 public class HeadOfLaboratory {
@@ -26,8 +27,13 @@ public class HeadOfLaboratory {
 		_executor = Executors.newFixedThreadPool(_numOfScientists);
 	}
 	
-	public void runExperiment(Experiment e) {
-		RunnableExperiment task = new RunnableExperiment(e);
+	public void runExperiment(Experiment exp, Observer obs) {
+		RunnableExperiment task = new RunnableExperiment(exp);
+		task.addObserver(obs);
 		_executor.execute(task);
+	}
+	
+	public String getSpec() {
+		return _spec;
 	}
 }

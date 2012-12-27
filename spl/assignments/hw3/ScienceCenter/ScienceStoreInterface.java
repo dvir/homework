@@ -42,7 +42,7 @@ public interface ScienceStoreInterface {
 	 * @post: if @ret == true getEquipmentPackages().size() == @pre(getEquipmentPackages().size() + 1) && false == getEquipmentPackages().contains(@param ep)
 	 * 		  if @ret == false getEquipmentPackages().size() == @pre(getEquipmentPackages().size()) && false == getEquipmentPackages().contains(@param ep)
 	 */
-	public boolean buyEquipmentPackage(EquipmentPackage ep);
+	public void buyEquipmentPackage(EquipmentPackage ep);
 	
 	/**
 	 * Searches the Scientist list in the store, and if we find the one
@@ -53,7 +53,7 @@ public interface ScienceStoreInterface {
 	 * @post: if @ret == true getScientists().size() == @pre(getScientists().size() + 1) && false == getScientists().contains(@param s)
 	 * 		  if @ret == false getScientists().size() == @pre(getScientists().size()) && false == getScientists().contains(@param s)
 	 */	
-	public boolean buyScientist(Scientist s);
+	public void buyScientist(Scientist s);
 	
 	/**
 	 * Searches the HeadOfLaboratory list in the store, and if we find the one
@@ -64,5 +64,5 @@ public interface ScienceStoreInterface {
 	 * @post: if @ret == true getLaboratories().size() == @pre(getLaboratories().size() + 1) && false == getLaboratories().contains(@param lab)
 	 * 		  if @ret == false getLaboratories().size() == @pre(getLaboratories().size()) && false == getLaboratories().contains(@param lab)
 	 */	
-	public boolean buyLaboratory(HeadOfLaboratory lab);
+	public void buyLaboratory(HeadOfLaboratory lab);
 }

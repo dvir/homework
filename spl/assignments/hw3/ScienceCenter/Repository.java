@@ -30,7 +30,7 @@ public class Repository {
 			i++;
 		}
 		
-		if (_equipmentPackages.size() > 0 && _equipmentPackages.get(i).getName() == ep.getName()) {
+		if (_equipmentPackages.size() > 0 && i < _equipmentPackages.size() && _equipmentPackages.get(i).getName() == ep.getName()) {
 			synchronized (ep) {
 				_equipmentPackages.get(i).returnAmount(ep.getAmount());
 			}
@@ -39,26 +39,36 @@ public class Repository {
 		}
 	}
 	
+//	public synchronized EquipmentPackage takeEquipmentPackage(String name, int amount) {
+//		ListIterator<EquipmentPackage> it = _equipmentPackages.listIterator();
+//		while (it.hasNext()) {
+//			EquipmentPackage curr = it.next();
+//			if (curr.getName() == name) {
+//				if (curr.takeAmount(amount)) {
+//					return new EquipmentPackage(name, amount, -1);
+//				}
+//				
+//				break;
+//			}
+//		}
+//		
+//		return null;
+//	}
+
 	/**
 	 * Takes equipment package from the repository, by a given name.
 	 * 
 	 * @param name The name of the equipment package.
-	 * @param amount The amount we want to take from it.
 	 * @return 	If we find the package (with the same @param name) in the repository, 
-	 * 			and we have enough @param amount, we return a new equipmentPackage 
-	 * 			with the requested amount and update the package in the repository with the new amount.
+	 * 			we return the EquipmentPackage it represents.
 	 *		    If we didn't find it, we return null.
-	 */
-	public synchronized EquipmentPackage takeEquipmentPackage(String name, int amount) {
+	 */ 
+	public synchronized EquipmentPackage searchRepository(String name) {
 		ListIterator<EquipmentPackage> it = _equipmentPackages.listIterator();
 		while (it.hasNext()) {
 			EquipmentPackage curr = it.next();
 			if (curr.getName() == name) {
-				if (curr.takeAmount(amount)) {
-					return new EquipmentPackage(name, amount, -1);
-				}
-				
-				break;
+				return curr;
 			}
 		}
 		

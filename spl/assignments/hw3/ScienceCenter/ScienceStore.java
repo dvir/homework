@@ -10,73 +10,43 @@ import java.util.List;
  *
  */
 public class ScienceStore implements ScienceStoreInterface {
-	
-	//state
-	
+	List<EquipmentPackage> _equipments;
+	List<Scientist> _scientists;
+	List<HeadOfLaboratory> _labs;
 
 	//constructors
 	public ScienceStore (){
 		
 	}
 	
-	public ScienceStore (List<EquipmentPackage> epList, List<Scientist> scientistList, List<HeadOfLaboratory> labList){
-		
+	public ScienceStore (List<EquipmentPackage> equipments, List<Scientist> scientists, List<HeadOfLaboratory> labs){
+		_equipments = equipments;
+		_scientists = scientists;
+		_labs = labs;
 	}
 	
-	
-	//behavior
-	/* (non-Javadoc)
-	 * @see ScienceCenter.ScienceStoreInterface#getEquipmentPackages()
-	 */
-	@Override
 	public List<EquipmentPackage> getEquipmentPackages() {
-		// TODO Auto-generated method stub
-		return null;
+		return _equipments;
 	}
 
-	/* (non-Javadoc)
-	 * @see ScienceCenter.ScienceStoreInterface#getScientists()
-	 */
-	@Override
 	public List<Scientist> getScientists() {
-		// TODO Auto-generated method stub
-		return null;
+		return _scientists;
 	}
 
-	/* (non-Javadoc)
-	 * @see ScienceCenter.ScienceStoreInterface#getLaboratories()
-	 */
-	@Override
 	public List<HeadOfLaboratory> getLaboratories() {
-		// TODO Auto-generated method stub
-		return null;
+		return _labs;
 	}
 
-	/* (non-Javadoc)
-	 * @see ScienceCenter.ScienceStoreInterface#buyEquipmentPackage(ScienceCenter.EquipmentPackage)
-	 */
-	@Override
-	public boolean buyEquipmentPackage(EquipmentPackage ep) {
-		// TODO Auto-generated method stub
-		return false;
+	public void buyEquipmentPackage(EquipmentPackage ep) {
+		System.out.println("HERE!!!!!");
+		System.exit(-1);
 	}
 
-	/* (non-Javadoc)
-	 * @see ScienceCenter.ScienceStoreInterface#buyScientist(ScienceCenter.Scientist)
-	 */
-	@Override
-	public boolean buyScientist(Scientist s) {
-		// TODO Auto-generated method stub
-		return false;
+	public void buyScientist(Scientist s) {
+
 	}
 
-	/* (non-Javadoc)
-	 * @see ScienceCenter.ScienceStoreInterface#buyLaboratory(ScienceCenter.HeadOfLaboratory)
-	 */
-	@Override
-	public boolean buyLaboratory(HeadOfLaboratory l) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	public void buyLaboratory(HeadOfLaboratory l) {
 
+	}	
 }
