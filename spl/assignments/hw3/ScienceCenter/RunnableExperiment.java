@@ -16,10 +16,10 @@ public class RunnableExperiment extends Observable implements Runnable {
 		this._experiment = exp;
 	}
 	
-	public void run() {
+	public void run() {		
 		_experiment.start();
 		
-		long runtime = _experiment.getAllowedRuntime();
+		double runtime = _experiment.getAllowedRuntime();
 		
 		// simulate the experiment
 		// Each loop body is a day in real life.
@@ -30,11 +30,12 @@ public class RunnableExperiment extends Observable implements Runnable {
 		// 4. Check if we passed the experiment runtime. If so, we are done.
 		// 5. Sleep for 16 hours.
 		
-		while(runtime > 0) {
+		while (runtime > 0) {
 			// Start a new day
 			_experiment.nextDay();
 			
-			// 1. Acquire equipment.			
+			// 1. Acquire equipment.
+			long timeStartTakingEquipment = new Date().getTime();
 			try {
 				ChiefScientistAssistant.takeEquipment(_experiment.getRequiredEquipment());
 			} catch (InterruptedException e) {
@@ -45,6 +46,8 @@ public class RunnableExperiment extends Observable implements Runnable {
 				// re-interrupt the thread
 				Thread.currentThread().interrupt();				
 			}
+			long timeTookToTakeEquipment = new Date().getTime() - timeStartTakingEquipment;
+			_experiment.increaseTimeTookToTakeEquipment(timeTookToTakeEquipment);
 			
 			// 2. Sleep for 8 hours.
 			try {
@@ -82,10 +85,8 @@ public class RunnableExperiment extends Observable implements Runnable {
 			}
 		}
 		
-		
 		_experiment.complete();
 		
-System.out.println("Experiment " + _experiment.getId() + " notifying observers.");
 		this.setChanged();
 		this.notifyObservers();
 	}

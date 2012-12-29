@@ -71,22 +71,29 @@ public class ChiefScientist implements Observer {
 		ListIterator<HeadOfLaboratory> it = _labs.listIterator();
 		while (it.hasNext()) {
 			HeadOfLaboratory lab = it.next();
-			if (lab.getSpec() == spec) {
+			if (lab.getSpec().compareTo(spec) == 0) {
 				// we found it!
 				return lab;
 			}
 		}
 		
 		// if we got here, we couldn't find a lab with the given spec.
-		// try to purchase it from the store.
-		
-		// @todo: implement purchasing from the store.
-		return new HeadOfLaboratory("Something", spec, 3, 0);
-		
-		//return null;
+		return null;
+	}
+	
+	public void addLaboratory(HeadOfLaboratory lab) {
+		_labs.add(lab);
 	}
 	
 	public ScienceStore getScienceStore() {
 		return _store;
+	}
+	
+	public Repository getRepository() {
+		return _repository;
+	}
+	
+	public Statistics getStats() {
+		return _stats;
 	}
 }

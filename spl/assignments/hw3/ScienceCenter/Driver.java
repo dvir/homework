@@ -75,11 +75,54 @@ public class Driver {
 			String[] reqEquipmentData = data[3].split(" ");
 			for (int j = 0; j < reqEquipmentData.length; ++j) {
 				String[] equipmentData = reqEquipmentData[j].split(",");
-				reqEquipment.add(new EquipmentPackage(equipmentData[0], Integer.parseInt(equipmentData[1]), 0));
+				EquipmentPackage reqEp = new EquipmentPackage(equipmentData[0], Integer.parseInt(equipmentData[1]), 0);
+				
+				int reqEpIndex = 0;
+				boolean inserted = false;
+				while (reqEpIndex < reqEquipment.size()) {
+					EquipmentPackage curr = reqEquipment.get(reqEpIndex);
+					if (curr.getName().compareTo(reqEp.getName()) > 0) {
+						break;
+					} else if (curr.getName().compareTo(reqEp.getName()) == 0) {
+						// equal name packages! merge them and quit
+						reqEquipment.get(reqEpIndex).increaseAmount(reqEp.getAmount());
+						inserted = true;
+						break;
+					}
+					
+					reqEpIndex++;
+				}
+				
+				if (!inserted) {
+					reqEquipment.add(reqEp);
+				}
 			}
-						
+			
 			Experiment exp = new Experiment(Integer.parseInt(data[0]), data[2], Integer.parseInt(data[4]), preExperiments, reqEquipment, Integer.parseInt(data[5]));
-			experiments.add(exp);
+			
+			// add experiments ordered by highest reward per hour first (so they have better chances grabbing equipment)
+//			int expIndex = 0;
+//			while (expIndex < experiments.size()) {
+//				Experiment curr = experiments.get(expIndex);
+//				if ((curr.getAllowedRuntime() / curr.getReward()) > (exp.getAllowedRuntime() / exp.getReward())) {
+//					break;
+//				}
+//				
+//				expIndex++;
+//			}
+			
+			// topologically sort experiments (an experiment which relies on another experiment will always appear after it in the list)
+			int expIndex = 0;
+			while (expIndex < experiments.size()) {
+				Experiment curr = experiments.get(expIndex);
+				if (curr.isPreExperiment(exp)) {
+					break;
+				}
+				
+				expIndex++;
+			}			
+			
+			experiments.add(expIndex, exp);
 		}
 		
 		List<EquipmentPackage> equipmentsForSale = new ArrayList<EquipmentPackage>();
@@ -110,8 +153,8 @@ public class Driver {
 
 		ChiefScientist chiefScientist = new ChiefScientist(labs, experiments, store, stats, repository);
 		ChiefScientistAssistant.setChiefScientist(chiefScientist);
-		
-		ChiefScientistAssistant.scanExperiments(null);
+		Thread t = new Thread(ChiefScientistAssistant.getInstance());
+		t.start();
 	}
 
    public static List<String> readfile(String inputFilename){

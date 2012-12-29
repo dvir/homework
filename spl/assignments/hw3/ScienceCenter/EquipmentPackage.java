@@ -3,13 +3,11 @@ package ScienceCenter;
 import java.util.concurrent.*;
 
 public class EquipmentPackage {
-	//state
 	private String _name;
 	private int _amount;
 	private double _cost;
 	private Semaphore _sm;
 	
-	//constructors
 	public EquipmentPackage(String name, int amount, double cost){
 		_name = name;
 		_amount = amount;
@@ -17,7 +15,16 @@ public class EquipmentPackage {
 		_sm = new Semaphore(amount, true);
 	}
 	
-	//behavior
+	/**
+	 * Copy constructor
+	 * @param ep The equipment package to copy
+	 */
+	public EquipmentPackage(EquipmentPackage ep) {
+		_name = ep.getName();
+		_amount = ep.getAmount();
+		_cost = ep.getCost();
+		_sm = new Semaphore(_amount, true);
+	}
 	
 	public String getName() {
 		return _name;
@@ -31,6 +38,10 @@ public class EquipmentPackage {
 		return _cost;
 	}
 	
+	public double getCostPerItem() {
+		return _cost / _amount;
+	}
+	
 	public void takeAmount(int amount) throws InterruptedException {
 		_sm.acquire(amount);
 	}
@@ -42,4 +53,13 @@ public class EquipmentPackage {
 	public void returnAmount(int amount) {
 		_sm.release(amount);
 	}	
+	
+	public synchronized void increaseAmount(int amount) {
+		_amount += amount;
+		_sm.release(amount);
+	}
+	
+	public String toString() {
+		return _name + " - " + _amount + " ($" + _cost + ")";
+	}
 }

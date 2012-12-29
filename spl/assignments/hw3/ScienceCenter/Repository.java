@@ -12,7 +12,7 @@ public class Repository {
 	private List<EquipmentPackage> _equipmentPackages;
 	
 	public Repository() {
-		_equipmentPackages = new ArrayList();
+		_equipmentPackages = new ArrayList<EquipmentPackage>();
 	}
 	
 	/**
@@ -23,37 +23,18 @@ public class Repository {
 		int i = 0;
 		while (i < _equipmentPackages.size()) {
 			EquipmentPackage curr = _equipmentPackages.get(i);
-			if (curr.getName().compareTo(ep.getName()) < 0) {
+			if (curr.getName().compareTo(ep.getName()) > 0) {
 				break;
+			} else if (curr.getName().compareTo(ep.getName()) == 0) {
+				// equal name packages! merge them and quit
+				_equipmentPackages.get(i).increaseAmount(ep.getAmount());
 			}
 			
 			i++;
 		}
 		
-		if (_equipmentPackages.size() > 0 && i < _equipmentPackages.size() && _equipmentPackages.get(i).getName() == ep.getName()) {
-			synchronized (ep) {
-				_equipmentPackages.get(i).returnAmount(ep.getAmount());
-			}
-		} else {
-			_equipmentPackages.add(i, ep);
-		}
+		_equipmentPackages.add(i, ep);
 	}
-	
-//	public synchronized EquipmentPackage takeEquipmentPackage(String name, int amount) {
-//		ListIterator<EquipmentPackage> it = _equipmentPackages.listIterator();
-//		while (it.hasNext()) {
-//			EquipmentPackage curr = it.next();
-//			if (curr.getName() == name) {
-//				if (curr.takeAmount(amount)) {
-//					return new EquipmentPackage(name, amount, -1);
-//				}
-//				
-//				break;
-//			}
-//		}
-//		
-//		return null;
-//	}
 
 	/**
 	 * Takes equipment package from the repository, by a given name.
@@ -63,11 +44,10 @@ public class Repository {
 	 * 			we return the EquipmentPackage it represents.
 	 *		    If we didn't find it, we return null.
 	 */ 
-	public synchronized EquipmentPackage searchRepository(String name) {
-		ListIterator<EquipmentPackage> it = _equipmentPackages.listIterator();
-		while (it.hasNext()) {
-			EquipmentPackage curr = it.next();
-			if (curr.getName() == name) {
+	public EquipmentPackage searchRepository(String name) {
+		for (int i = 0; i < _equipmentPackages.size(); ++i) {
+			EquipmentPackage curr = _equipmentPackages.get(i);
+			if (curr.getName().compareTo(name) == 0) {
 				return curr;
 			}
 		}
