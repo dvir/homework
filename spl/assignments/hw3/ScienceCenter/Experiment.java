@@ -26,7 +26,7 @@ public class Experiment {
 	
 	private int _days = 0; // Days that the experiment took to finish
 	private long _startTime = 0;
-	private int _runtime = -1;
+	private double _runtime = -1;
 	private long _timeTookToTakeEquipment = 0;
 	private long _startWaitingForScientistTime = 0;
 	private long _timeWaitedForScientist = -1;
@@ -90,7 +90,7 @@ public class Experiment {
 	
 	public synchronized void complete() {
 		long endTime = new Date().getTime();
-		_runtime = (int)((endTime - _startTime - _days*1600) / 100);
+		_runtime = ((double)(endTime - _startTime - _days*1600) / 100);
 		
 		_state = State.COMPLETE;
 	}
@@ -114,7 +114,7 @@ public class Experiment {
 		return _allowedRuntime;
 	}
 	
-	public int getRuntime() throws RuntimeException {
+	public double getRuntime() throws RuntimeException {
 		if (_state != State.COMPLETE) {
 			// the experiment isn't finished yet!
 			throw new RuntimeException("Cannot retrieve total runtime of an experiment that isn't finished yet. (Experiment: " + _id + " | Runtime: " + _runtime);
