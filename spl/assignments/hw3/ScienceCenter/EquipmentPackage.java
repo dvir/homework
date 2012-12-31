@@ -3,10 +3,10 @@ package ScienceCenter;
 import java.util.concurrent.*;
 
 public class EquipmentPackage {
-	private String _name;
-	private int _amount;
-	private double _cost;
-	private Semaphore _sm;
+	private String _name; // the equipment package type.
+	private int _amount; // the amount of this equipment in the package.
+	private double _cost; // the cost to purchase this equipment package.
+	private Semaphore _sm; // the Semaphore that handles the equipment package usage queue.
 	
 	public EquipmentPackage(String name, int amount, double cost){
 		_name = name;
@@ -26,6 +26,41 @@ public class EquipmentPackage {
 		_sm = new Semaphore(_amount, true);
 	}
 	
+	/**
+	 * Takes some of the equipment from the package.
+	 * @param amount The amount to take.
+	 * @throws RuntimeException If the amount requested is more than available.
+	 */
+	public void takeAmount(int amount) throws InterruptedException {
+		if (amount > _amount) {
+			throw new RuntimeException("Requested too many "+_name+". ("+amount+" while only "+_amount+" are available)");
+		}
+		
+		_sm.acquire(amount);
+	}
+	
+	/**
+	 * Returns equipment back to the equipment package.
+	 * @param amount The amount to return.
+	 * @throws RuntimeException If the amount returned is more than we actually have.
+	 */
+	public void returnAmount(int amount) {
+		if (amount > _amount) {
+			throw new RuntimeException("Returned too many "+_name+". ("+amount+" while only "+_amount+" are available)");
+		}
+		
+		_sm.release(amount);
+	}	
+	
+	/**
+	 * Increase the amount of units available in the equipment package.
+	 * @param amount The amount to increase by.
+	 */
+	public synchronized void increaseAmount(int amount) {
+		_amount += amount;
+		_sm.release(amount);
+	}
+	
 	public String getName() {
 		return _name;
 	}
@@ -40,24 +75,7 @@ public class EquipmentPackage {
 	
 	public double getCostPerItem() {
 		return _cost / _amount;
-	}
-	
-	public void takeAmount(int amount) throws InterruptedException {
-		_sm.acquire(amount);
-	}
-	
-	public boolean tryTakeAmount(int amount) {
-		return _sm.tryAcquire(amount);
-	}
-	
-	public void returnAmount(int amount) {
-		_sm.release(amount);
 	}	
-	
-	public synchronized void increaseAmount(int amount) {
-		_amount += amount;
-		_sm.release(amount);
-	}
 	
 	public String toString() {
 		return _name + " - " + _amount + " ($" + _cost + ")";

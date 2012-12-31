@@ -9,27 +9,28 @@ import java.util.*;
  *
  */
 public class Experiment {
+	// experiment state object.
 	private enum State {
-		INCOMPLETE,
-		INPROGRESS,
-		COMPLETE
+		INCOMPLETE, // hasn't started yet
+		INPROGRESS, // in progress
+		COMPLETE // finished
 	};	
 	
-	private int _id;
-	private String _spec;
-	private int _allowedRuntime;
-	private List<Experiment> _remainingPreExperiments;
-	private List<Experiment> _preExperiments;
-	private List<EquipmentPackage> _reqEquipment;
-	private int _reward;
-	private State _state;
+	private int _id; // the experiment id
+	private String _spec; // the experiment specialization
+	private int _allowedRuntime; // the allowed runtime for the experiment, in real life hours.
+	private int _reward; // reward for finishing the experiment in time.
+	private State _state; // the experiment current state.
+	private List<EquipmentPackage> _reqEquipment; // a list of required equipment package for this experiment.
+	private List<Experiment> _preExperiments; // a list of pre-required experiments before this one.
+	private List<Experiment> _remainingPreExperiments; // a list of remaining pre-required experiments that has to be completed before executing this one.
 	
-	private int _days = 0; // Days that the experiment took to finish
-	private long _startTime = 0;
-	private double _runtime = -1;
-	private long _timeTookToTakeEquipment = 0;
-	private long _startWaitingForScientistTime = 0;
-	private long _timeWaitedForScientist = -1;
+	private int _days = 0; // days that the experiment took to finish
+	private long _startTime = 0; // experiment start time 
+	private double _runtime = -1; // experiment total runtime
+	private long _timeTookToTakeEquipment = 0; // the total time it took to take equipment from the repository
+	private long _startWaitingForScientistTime = 0; // the time the experiment was sent to a laboratory
+	private long _timeWaitedForScientist = -1; // the time it took until an available scientist was found for the experiment
 	
 	public Experiment(int id, String spec, int allowedRuntime, List<Experiment> preExperiments, List<EquipmentPackage> reqEquipment, int reward) {
 		this._id = id;
@@ -75,19 +76,27 @@ public class Experiment {
 	/**
 	 * Sets the experiment in progress.
 	 */
-	public void init() {
+	public synchronized void init() {
 		_state = State.INPROGRESS;
+		
+		// record the time in which the experiment was sent to the laboratory.
 		_startWaitingForScientistTime = new Date().getTime();
 	}
 	
 	/**
-	 * Start the experiment by starting the runtime counter and setting the state to State.INPROGRESS.
+	 * Start the experiment by starting the runtime counter.
 	 */
 	public synchronized void start() {
+		// save the time we waited for a scientist to process the experiment.
 		_timeWaitedForScientist = (new Date().getTime() - _startWaitingForScientistTime);
+		
+		// start the experiment time counter.
 		_startTime = new Date().getTime();
 	}
 	
+	/**
+	 * Complete experiment
+	 */
 	public synchronized void complete() {
 		long endTime = new Date().getTime();
 		_runtime = ((double)(endTime - _startTime - _days*1600) / 100);
@@ -98,45 +107,8 @@ public class Experiment {
 	/**
 	 * Advance days counter by one.
 	 */
-	public void nextDay() {
+	public synchronized void nextDay() {
 		_days++;
-	}
-	
-	public int getId() {
-		return _id;
-	}
-	
-	public int getReward() {
-		return _reward;
-	}
-	
-	public double getAllowedRuntime() {	
-		return _allowedRuntime;
-	}
-	
-	public double getRuntime() throws RuntimeException {
-		if (_state != State.COMPLETE) {
-			// the experiment isn't finished yet!
-			throw new RuntimeException("Cannot retrieve total runtime of an experiment that isn't finished yet. (Experiment: " + _id + " | Runtime: " + _runtime);
-		}
-		
-		return _runtime;
-	}
-	
-	public List<Experiment> getPreExperiments() {
-		return _preExperiments;
-	}
-	
-	public List<Experiment> getRemainingPreExperiments() {
-		return _remainingPreExperiments;
-	}	
-	
-	public List<EquipmentPackage> getRequiredEquipment() {
-		return _reqEquipment;
-	}
-	
-	public String getSpec() {
-		return _spec;
 	}
 	
 	/**
@@ -154,6 +126,11 @@ public class Experiment {
 		}
 	}
 	
+	/**
+	 * Checks if the given experiment is a pre-required experiment for this experiment.
+	 * @param exp The experiment to check.
+	 * @return true if it is, false otherwise.
+	 */
 	public boolean isPreExperiment(Experiment exp) {
 		ListIterator<Experiment> it = _remainingPreExperiments.listIterator();
 		while (it.hasNext()) {
@@ -166,6 +143,10 @@ public class Experiment {
 		return false;
 	}	
 	
+	/**
+	 * Checks if the experiment finished on the allowed time frame.
+	 * @return true if it did, false otherwise.
+	 */
 	public synchronized boolean isFinishedOnTime() {
 		if (_state != State.COMPLETE) {
 			// the experiment isn't finished yet!
@@ -175,9 +156,62 @@ public class Experiment {
 		return ((getAllowedRuntime() * 1.15) >= getRuntime());
 	}
 	
+	public double getRuntime() throws RuntimeException {
+		if (_state != State.COMPLETE) {
+			// the experiment isn't finished yet!
+			throw new RuntimeException("Cannot retrieve total runtime of an experiment that isn't finished yet. (Experiment: " + _id + " | Runtime: " + _runtime);
+		}
+		
+		return _runtime;
+	}	
+	
+	public void increaseTimeTookToTakeEquipment(long time) {
+		_timeTookToTakeEquipment += time;
+	}
+	
+	public long getTimeTookToTakeEquipment() {
+		return _timeTookToTakeEquipment;
+	}
+	
+	public long getTimeWaitedForScientist() {
+		return _timeWaitedForScientist;
+	}
+
+	public boolean isComplete() {
+		return (_state == State.COMPLETE);
+	}	
+	
 	public boolean isInProgress() {
 		return (_state == State.INPROGRESS);
 	}
+	
+	public int getId() {
+		return _id;
+	}
+	
+	public int getReward() {
+		return _reward;
+	}
+	
+	public double getAllowedRuntime() {	
+		return _allowedRuntime;
+	}
+	
+	public List<Experiment> getPreExperiments() {
+		return _preExperiments;
+	}
+	
+	public List<Experiment> getRemainingPreExperiments() {
+		return _remainingPreExperiments;
+	}	
+	
+	public List<EquipmentPackage> getRequiredEquipment() {
+		return _reqEquipment;
+	}
+	
+	public String getSpec() {
+		return _spec;
+	}	
 	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -207,21 +241,5 @@ public class Experiment {
 		}
 		
 		return sb.toString();
-	}
-	
-	public void increaseTimeTookToTakeEquipment(long time) {
-		_timeTookToTakeEquipment += time;
-	}
-	
-	public long getTimeTookToTakeEquipment() {
-		return _timeTookToTakeEquipment;
-	}
-	
-	public long getTimeWaitedForScientist() {
-		return _timeWaitedForScientist;
-	}
-
-	public boolean isComplete() {
-		return (_state == State.COMPLETE);
 	}
 }

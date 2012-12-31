@@ -4,11 +4,11 @@ import java.util.*;
 import java.util.concurrent.*;
 
 public class HeadOfLaboratory {
-	private String _name;
-	private String _spec;
-	private int _numOfScientists;
-	private double _cost;
-	private ExecutorService _executor;
+	private String _name; // head of laboratory professor name
+	private String _spec; // laboratory specialization
+	private int _numOfScientists; // numbers of scientists in the laboratory
+	private double _cost; // lab cost
+	private ExecutorService _executor; // Thread pool in the size of the amount of scientists in the lab.
 
 	public HeadOfLaboratory(String name, String spec, int numOfScientists, double cost){
 		_name = name;
@@ -30,23 +30,65 @@ public class HeadOfLaboratory {
 		_executor = Executors.newFixedThreadPool(_numOfScientists);
 	}
 	
-	private int getNumOfScientists() {
-		return _numOfScientists;
-	}
-
-	public synchronized void addScientists(int amount) {
-		_executor.shutdown();
-		
-		_numOfScientists += amount;
+	/**
+	 * Initiate the executor service with a thread pool in the size of the amount of scientists.
+	 */
+	public synchronized void startLab() {
 		_executor = Executors.newFixedThreadPool(_numOfScientists);
 	}
 	
+	/**
+	 * Shutdown laboratory by shutting down the ExecuterService.
+	 */
+	public void shutdownLab() {
+	   _executor.shutdown(); // Disable new tasks from being submitted
+	   try {
+	     // Wait a while for existing tasks to terminate
+	     if (!_executor.awaitTermination(60, TimeUnit.SECONDS)) {
+	    	 _executor.shutdownNow(); // Cancel currently executing tasks
+	       // Wait a while for tasks to respond to being cancelled
+	       if (!_executor.awaitTermination(60, TimeUnit.SECONDS))
+	           System.err.println("Pool did not terminate");
+	     }
+	   } catch (InterruptedException e) {
+	     // shutdown immediately if current thread also interrupted
+		   _executor.shutdownNow();
+	     // Preserve interrupt status
+		   Thread.currentThread().interrupt();
+	   }
+	}	
+
+	/**
+	 * Add scientists to the laboratory.
+	 * Will shutdown the executor service and only then re-create it with the new amount of scientists.
+	 * @param amount The amount of scientists to increase by.
+	 */
+	public synchronized void addScientists(int amount) {
+		shutdownLab();
+		
+		_numOfScientists += amount;
+		
+		startLab();
+	}
+	
+	/**
+	 * Send an experiment to the laboratory for execution with an optional Observer object to notify when the experiment has finished.
+	 * @param exp The experiment.
+	 * @param obs The observer to notify when the experiment has finished.
+	 */
 	public void runExperiment(Experiment exp, Observer obs) {
 		exp.init();
 		
 		RunnableExperiment task = new RunnableExperiment(exp);
-		task.addObserver(obs);
+		
+		if (obs != null) {
+			task.addObserver(obs);
+		}
 		_executor.execute(task);
+	}
+	
+	private int getNumOfScientists() {
+		return _numOfScientists;
 	}
 	
 	public String getName() {
@@ -66,6 +108,8 @@ public class HeadOfLaboratory {
 	}
 	
 	public String toString() {
-		return _name + " is a " + _spec + " lab, with " + _numOfScientists + " scientists. ($" + _cost + ")";
+		StringBuilder sb = new StringBuilder();
+		sb.append(_name).append(" is a ").append(_spec).append(" lab, with ").append(_numOfScientists).append(" scientists. ($").append(_cost).append(")");
+		return sb.toString();
 	}
 }

@@ -10,14 +10,14 @@ import java.util.*;
  *
  */
 public class Statistics {
-	private double _budget;
-	private List<EquipmentPackage> _purchasedEquipments;
-	private List<Scientist> _purchasedScientists;
-	private List<HeadOfLaboratory> _purchasedLaboratories;
-	private List<Experiment> _completedExperiments;
-	private double _moneyGainedExperiments;
-	private double _moneySpent;
-	private long _startTime;
+	private double _budget; // our ScienceStore budget.
+	private List<EquipmentPackage> _purchasedEquipments; // a list of purchased equipment packages.
+	private List<Scientist> _purchasedScientists; // a list of purchased scientists.
+	private List<HeadOfLaboratory> _purchasedLaboratories; // a list of purchased laboratories.
+	private List<Experiment> _completedExperiments; // a list of completed experiments.
+	private double _moneyGainedExperiments; // sum of moeny gained from completing experiments.
+	private double _moneySpent; // sum of money spent.
+	private long _startTime; // our program start time.
 	
 	public Statistics() {
 		_budget = 0;
@@ -30,24 +30,46 @@ public class Statistics {
 		_startTime = new Date().getTime();
 	}
 	
+	/**
+	 * Compute statistics for a purchased equipment package.
+	 * @param ep The equipment package that was purchased.
+	 */
 	public synchronized void purchasedEquipmentPackage(EquipmentPackage ep) {
 		_purchasedEquipments.add(ep);
+		
 		reduceBudget(ep.getCost());
+		
 		_moneySpent += ep.getCost();
 	}
-	
+
+	/**
+	 * Compute statistics for a purchased scientist.
+	 * @param sc The scientist that was purchased.
+	 */	
 	public synchronized void purchasedScientist(Scientist sc) {
 		_purchasedScientists.add(sc);
+		
 		reduceBudget(sc.getCost());
+		
 		_moneySpent += sc.getCost();
 	}
 	
+	/**
+	 * Compute statistics for a purchased laboratory.
+	 * @param lab The laboratory that was purchased.
+	 */	
 	public synchronized void purchasedLaboratory(HeadOfLaboratory lab) {
 		_purchasedLaboratories.add(lab);
+		
 		reduceBudget(lab.getCost());
+		
 		_moneySpent += lab.getCost();
 	}		
 	
+	/**
+	 * Complete experiment by granting the right reward and saving statistics for it.
+	 * @param exp The completed experiment. 
+	 */
 	public synchronized void compeletedExperiment(Experiment exp) {
 		double reward = exp.getReward(); // the reward we get for finishing an experiment
 		
@@ -56,17 +78,24 @@ public class Statistics {
 			reward = reward * 0.1; // we get 10% of the reward if we didn't finish in 1.15*time.
 		}	
 		
-System.out.println(exp);
 		increaseBudget(reward);
 		_moneyGainedExperiments += reward;
 		_completedExperiments.add(exp);		
 	}
 	
-	public void reduceBudget(double amount) {
+	/**
+	 * Decrease our ScienceCenter budget.
+	 * @param amount The amount to decrease by.
+	 */
+	public synchronized void reduceBudget(double amount) {
 		_budget -= amount;
 	}
 	
-	public void increaseBudget(double amount) {
+	/**
+	 * Increase our ScienceCenter budget.
+	 * @param amount The amount to increase by.
+	 */
+	public synchronized void increaseBudget(double amount) {
 		_budget += amount;
 	}
 	

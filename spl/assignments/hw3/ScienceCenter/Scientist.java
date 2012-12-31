@@ -1,9 +1,9 @@
 package ScienceCenter;
 
 public class Scientist {
-	private String _name;
-	private String _spec;
-	private double _cost;
+	private String _name; // the scientist's name
+	private String _spec; // the scientist's specialization
+	private double _cost; // the cost to purchase the scientist.
 	
 	public Scientist(String name, String spec, double cost){
 		_name = name;
@@ -24,6 +24,8 @@ public class Scientist {
 	}
 	
 	public String toString() {
-		return _name + " is a " + _spec + " scientist. ($" + _cost + ")";
+		StringBuilder sb = new StringBuilder();
+		sb.append(_name).append(" is a ").append(_spec).append(" scientist. ($").append(_cost).append(")");
+		return sb.toString();
 	}	
 }

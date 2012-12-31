@@ -6,13 +6,15 @@ package ScienceCenter;
 import java.util.*;
 
 /**
+ * A singleton.
+ * 
  * @author Dvir, Or
  *
  */
 public class ChiefScientistAssistant implements Runnable {
-	private ChiefScientist _chiefScientist;
-	private List<Experiment> _pendingExperiments = new ArrayList<Experiment>();
-	private static ChiefScientistAssistant _instance = null;
+	private static ChiefScientistAssistant _instance = null; // the ChiefScientistAssistant instance.
+	private ChiefScientist _chiefScientist; // the chief scientist object instance.
+	private List<Experiment> _pendingExperiments = new ArrayList<Experiment>(); // a list of experiments that have no pre-requirements and are waiting execution.
 	
 	public static ChiefScientistAssistant getInstance() {
 		if (_instance == null) {
@@ -22,6 +24,10 @@ public class ChiefScientistAssistant implements Runnable {
 		return _instance;
 	}
 	
+	/**
+	 * Set the ChiefScientist object instance in the ChiefScientistAssistant object.
+	 * @param chiefScientist The chief scientist instance.
+	 */
 	public static void setChiefScientist(ChiefScientist chiefScientist) {
 		getInstance().setChiefScientistInstance(chiefScientist);
 	}
@@ -36,6 +42,7 @@ public class ChiefScientistAssistant implements Runnable {
 			throw new RuntimeException("ChiefScientistAssistant can't start until the ChiefScientist has arrived.");
 		}
 	
+		// run optimizations
 		optimize();
 		
 		// scan experiments list for new experiments to execute.
@@ -53,6 +60,10 @@ public class ChiefScientistAssistant implements Runnable {
 		}
 	}
 
+	/**
+	 * Run optimizations.
+	 * * Calculate the minimum amount of equipment needed for all the experiments to run and purchase them before-hand. 
+	 */
 	private void optimize() {
 		// this list will hold the equipment amounts we need so no experiment will -have- to purchase any. 
 		// (though we might purchase some to optimize results)
@@ -101,6 +112,10 @@ public class ChiefScientistAssistant implements Runnable {
 		}
 	}
 	
+	/**
+	 * We finished running an experiment. Complete it and notify the ChiefScientistAssistant that it's done.
+	 * @param exp The experiment we finished executing.
+	 */
 	public static void finishedExperiment(Experiment exp) {
 		synchronized (getInstance()) {
 			getInstance().completedExperiment(exp);
@@ -123,7 +138,10 @@ public class ChiefScientistAssistant implements Runnable {
 		if (_chiefScientist.getIncompleteExperiments().size() == 0 && _pendingExperiments.size() == 0) {
 			// no more experiments to be held. output statistics and quit!
 			printStats();
+			_chiefScientist.shutdownScienceCenter();
+			Thread.currentThread().interrupt();
 			System.exit(0);
+			return;
 		}
 		
 		// check if we can queue new experiments that relied upon this experiment
@@ -372,27 +390,11 @@ public class ChiefScientistAssistant implements Runnable {
 			break;
 		}
 	}	
-	
-	public static void purchasedEquipmentPackage(EquipmentPackage ep) {
-		getInstance().getStats().purchasedEquipmentPackage(ep);
-	}
-	
-	public static void purchasedScientist(Scientist sc) {
-		getInstance().getStats().purchasedScientist(sc);
-	}
-	
-	public static void purchasedLaboratory(HeadOfLaboratory lab) {
-		getInstance().getStats().purchasedLaboratory(lab);
-	}	
-	
-	public void increaseBudget(int amount) {
-		_chiefScientist.increaseBudget(amount);
-	}
-	
-	public void reduceBudget(int amount) {
-		_chiefScientist.reduceBudget(amount);
-	}
-	
+
+	/**
+	 * Get statistics object instance from ChiefScientist.
+	 * @return The Statistics object instance. 
+	 */
 	public Statistics getStats() {
 		return _chiefScientist.getStats();
 	}

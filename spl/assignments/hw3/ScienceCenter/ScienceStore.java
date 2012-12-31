@@ -44,7 +44,7 @@ public class ScienceStore implements ScienceStoreInterface {
 			EquipmentPackage curr = it.next();
 			if (curr.equals(ep)) { // object comparison
 				it.remove();
-				ChiefScientistAssistant.purchasedEquipmentPackage(new EquipmentPackage(ep));
+				ChiefScientistAssistant.getInstance().getStats().purchasedEquipmentPackage(new EquipmentPackage(ep));
 				return true;
 			}
 		}
@@ -60,7 +60,7 @@ public class ScienceStore implements ScienceStoreInterface {
 			Scientist curr = it.next();
 			if (curr.equals(sc)) { // object comparison
 				it.remove();
-				ChiefScientistAssistant.purchasedScientist(sc);
+				ChiefScientistAssistant.getInstance().getStats().purchasedScientist(sc);
 				return true;
 			}
 		}
@@ -76,7 +76,7 @@ public class ScienceStore implements ScienceStoreInterface {
 			HeadOfLaboratory curr = it.next();
 			if (curr.equals(lab)) { // object comparison
 				it.remove();
-				ChiefScientistAssistant.purchasedLaboratory(new HeadOfLaboratory(lab));
+				ChiefScientistAssistant.getInstance().getStats().purchasedLaboratory(new HeadOfLaboratory(lab));
 				return true;
 			}
 		}

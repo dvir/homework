@@ -45,16 +45,9 @@ public class ChiefScientist implements Observer {
 		return _incompleteExperiments;
 	}
 	
+	
 	public void removeIncompleteExperiment(Experiment e) {
 		_incompleteExperiments.remove(e);
-	}
-	
-	public void reduceBudget(double amount) {
-		_stats.reduceBudget(amount);
-	}
-	
-	public void increaseBudget(double amount) {
-		_stats.increaseBudget(amount);
 	}	
 	
 	public EquipmentPackage searchRepository(String name) {
@@ -95,5 +88,15 @@ public class ChiefScientist implements Observer {
 	
 	public Statistics getStats() {
 		return _stats;
+	}
+
+	/**
+	 * Shutdown our ScienceCenter by telling each laboratory to shutdown.
+	 */
+	public void shutdownScienceCenter() {
+		ListIterator<HeadOfLaboratory> it_lab = _labs.listIterator();
+		while (it_lab.hasNext()) {
+			it_lab.next().shutdownLab();
+		}
 	}
 }
