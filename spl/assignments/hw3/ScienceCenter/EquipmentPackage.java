@@ -12,7 +12,7 @@ public class EquipmentPackage {
 		_name = name;
 		_amount = amount;
 		_cost = cost;
-		_sm = new Semaphore(amount, true);
+		_sm = new Semaphore(amount, true); // a fair semaphore
 	}
 	
 	/**
@@ -39,17 +39,22 @@ public class EquipmentPackage {
 		_sm.acquire(amount);
 	}
 	
+	public boolean tryTakeAmount(int amount) {
+		return _sm.tryAcquire(amount);
+	}	
+	
 	/**
 	 * Returns equipment back to the equipment package.
 	 * @param amount The amount to return.
 	 * @throws RuntimeException If the amount returned is more than we actually have.
 	 */
-	public void returnAmount(int amount) {
+	public synchronized void returnAmount(int amount) {
 		if (amount > _amount) {
 			throw new RuntimeException("Returned too many "+_name+". ("+amount+" while only "+_amount+" are available)");
 		}
 		
 		_sm.release(amount);
+		this.notifyAll();		
 	}	
 	
 	/**
@@ -75,6 +80,10 @@ public class EquipmentPackage {
 	
 	public double getCostPerItem() {
 		return _cost / _amount;
+	}
+	
+	public boolean equals(Object other) {
+		return (other instanceof EquipmentPackage && ((EquipmentPackage)other).getName().compareTo(this.getName()) == 0);
 	}	
 	
 	public String toString() {

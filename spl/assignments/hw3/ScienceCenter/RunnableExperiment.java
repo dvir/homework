@@ -86,7 +86,6 @@ public class RunnableExperiment extends Observable implements Runnable {
 		}
 		
 		_experiment.complete();
-		
 		this.setChanged();
 		this.notifyObservers();
 	}

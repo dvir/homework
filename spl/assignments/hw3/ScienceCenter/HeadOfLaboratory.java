@@ -41,21 +41,7 @@ public class HeadOfLaboratory {
 	 * Shutdown laboratory by shutting down the ExecuterService.
 	 */
 	public void shutdownLab() {
-	   _executor.shutdown(); // Disable new tasks from being submitted
-	   try {
-	     // Wait a while for existing tasks to terminate
-	     if (!_executor.awaitTermination(60, TimeUnit.SECONDS)) {
-	    	 _executor.shutdownNow(); // Cancel currently executing tasks
-	       // Wait a while for tasks to respond to being cancelled
-	       if (!_executor.awaitTermination(60, TimeUnit.SECONDS))
-	           System.err.println("Pool did not terminate");
-	     }
-	   } catch (InterruptedException e) {
-	     // shutdown immediately if current thread also interrupted
-		   _executor.shutdownNow();
-	     // Preserve interrupt status
-		   Thread.currentThread().interrupt();
-	   }
+	   _executor.shutdown();
 	}	
 
 	/**

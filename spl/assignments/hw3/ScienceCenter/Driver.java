@@ -101,26 +101,26 @@ public class Driver {
 			Experiment exp = new Experiment(Integer.parseInt(data[0]), data[2], Integer.parseInt(data[4]), preExperiments, reqEquipment, Integer.parseInt(data[5]));
 			
 			// add experiments ordered by highest reward per hour first (so they have better chances grabbing equipment)
-//			int expIndex = 0;
-//			while (expIndex < experiments.size()) {
-//				Experiment curr = experiments.get(expIndex);
-//				if ((curr.getAllowedRuntime() / curr.getReward()) > (exp.getAllowedRuntime() / exp.getReward())) {
-//					break;
-//				}
-//				
-//				expIndex++;
-//			}
-			
-			// topologically sort experiments (an experiment which relies on another experiment will always appear after it in the list)
 			int expIndex = 0;
 			while (expIndex < experiments.size()) {
 				Experiment curr = experiments.get(expIndex);
-				if (curr.isPreExperiment(exp)) {
+				if ((curr.getAllowedRuntime() / curr.getReward()) > (exp.getAllowedRuntime() / exp.getReward())) {
 					break;
 				}
 				
 				expIndex++;
-			}			
+			}
+			
+			// topologically sort experiments (an experiment which relies on another experiment will always appear after it in the list)
+//			int expIndex = 0;
+//			while (expIndex < experiments.size()) {
+//				Experiment curr = experiments.get(expIndex);
+//				if (curr.isPreExperiment(exp)) {
+//					break;
+//				}
+//				
+//				expIndex++;
+//			}			
 			
 			experiments.add(expIndex, exp);
 		}

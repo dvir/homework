@@ -12,10 +12,26 @@ import java.util.*;
  *
  */
 public class ChiefScientistAssistant implements Runnable {
-	private static ChiefScientistAssistant _instance = null; // the ChiefScientistAssistant instance.
-	private ChiefScientist _chiefScientist; // the chief scientist object instance.
-	private List<Experiment> _pendingExperiments = new ArrayList<Experiment>(); // a list of experiments that have no pre-requirements and are waiting execution.
+	/**
+	 * the ChiefScientistAssistant instance.
+	 */
+	private static ChiefScientistAssistant _instance = null;
 	
+	/**
+	 * the chief scientist object instance.
+	 */
+	private ChiefScientist _chiefScientist; 
+	
+	/**
+	 * a list of experiments that have no pre-requirements and are waiting execution.
+	 */
+	private List<Experiment> _pendingExperiments = new ArrayList<Experiment>(); 
+	
+	/**
+	 * Get the current ChiefScientistAssistant instance.
+	 * If it doesn't exist, create it first.
+	 * @return The instance of our singleton.
+	 */
 	public static ChiefScientistAssistant getInstance() {
 		if (_instance == null) {
 			_instance = new ChiefScientistAssistant();
@@ -32,6 +48,10 @@ public class ChiefScientistAssistant implements Runnable {
 		getInstance().setChiefScientistInstance(chiefScientist);
 	}
 	
+	/**
+	 * Set the current ChiefScientist instance.
+	 * @param chiefScientist
+	 */
 	public void setChiefScientistInstance(ChiefScientist chiefScientist) {
 		_chiefScientist = chiefScientist;
 	}
@@ -123,7 +143,15 @@ public class ChiefScientistAssistant implements Runnable {
 		}
 	}
 	
-	public void completedExperiment(Experiment exp) {		
+	/**
+	 * React to the event where an experiment finished by:
+	 *   - Reporting it to statistics object.
+	 *   - Removing it from pending to be executed experiments list.
+	 *   - Check if all of the experiments finished, and if so initiate shutdown procedures.
+	 *   - Look for new experiments to execute that relied on this experiment.
+	 * @param exp
+	 */
+	public synchronized void completedExperiment(Experiment exp) {		
 		_chiefScientist.getStats().compeletedExperiment(exp);
 		
 		// remove it from pendingExperiments
@@ -180,7 +208,10 @@ public class ChiefScientistAssistant implements Runnable {
 		}
 	}
 	
-	public void executePendingExperiments() {
+	/**
+	 * Execute experiments that are pending execution - don't have any pre-requirements.
+	 */
+	public synchronized void executePendingExperiments() {
 		// go over pending experiments and try to execute any of them that isn't currently ongoing
 		ListIterator<Experiment> it = _pendingExperiments.listIterator();
 		while (it.hasNext()) {
@@ -192,7 +223,6 @@ public class ChiefScientistAssistant implements Runnable {
 			}
 			
 			if (exp.isComplete()) {
-				//throw new RuntimeException("Experiment " + exp.getId() + " is already finished!");
 				it.remove();
 				continue;
 			}
@@ -209,22 +239,88 @@ public class ChiefScientistAssistant implements Runnable {
 		}		
 	}
 	
+	/**
+	 * Reserve equipment for an experiment.
+	 * @param equipments List of equipment packages to reserve.
+	 * @throws InterruptedException
+	 */
 	public static void takeEquipment(List<EquipmentPackage> equipments) throws InterruptedException {
 		getInstance().getEquipment(equipments);
 	}
-	
+
+	/**
+	 * Reserve equipment for an experiment.
+	 * @param equipments List of equipment packages to reserve.
+	 * @throws InterruptedException
+	 */
 	public void getEquipment(List<EquipmentPackage> equipments) throws InterruptedException {
-		// try to acquire equipment.
-		// NOTE: BLOCKS UNTIL ALL EQUIPMENT IS AVAILABLE.
+		// make a list of equipment we need from the repository.
+		List<EquipmentPackage> requiredRepositoryEquipments = new ArrayList<EquipmentPackage>();
 		
 		ListIterator<EquipmentPackage> it_equipment = equipments.listIterator();
 		while (it_equipment.hasNext()) {
 			EquipmentPackage requiredEquipment = it_equipment.next();
 			EquipmentPackage repositoryEquipmentPackage = findEquipment(requiredEquipment.getName(), requiredEquipment.getAmount());
+			requiredRepositoryEquipments.add(repositoryEquipmentPackage);
+		}
+		
+		// try and take all the required equipment.
+		// if one of the equipment packages is missing, we return all the equipment we previously took
+		// and wait for some equipment to return before trying again.
+		while (true) {
+			boolean took_everything = true;
+			it_equipment = equipments.listIterator();
+			while (it_equipment.hasNext()) {
+				EquipmentPackage requiredEquipment = it_equipment.next();
+				EquipmentPackage ep = findEquipmentInList(requiredRepositoryEquipments, requiredEquipment);
+				
+				// check if we can take the amount we need from this equipment package.
+				if (!ep.tryTakeAmount(requiredEquipment.getAmount())) {
+					// not enough items in the equipment package.
+					// return the equipment we already took.
+					it_equipment.previous();
+					while (it_equipment.hasPrevious()) {
+						// find it in the repository array
+						EquipmentPackage prev = it_equipment.previous();
+						EquipmentPackage prev_repository = findEquipmentInList(requiredRepositoryEquipments, prev);
+						prev_repository.returnAmount(prev.getAmount());
+					}
+					
+					// wait until some are released from this package before trying again.
+					synchronized (ep) {
+						ep.wait();	
+					}
+					took_everything = false;
+					break;
+				}
+			}
 			
-			repositoryEquipmentPackage.takeAmount(requiredEquipment.getAmount());
+			if (took_everything) {
+				// we got all the equipment we needed! stop the fetching loop
+				break;
+			}
 		}
 	}
+	
+	/**
+	 * Searches for an equipment package in an equipments list.
+	 * Comparing done by EquipmentPackage.equals (which compares by getName() string)
+	 * @param equipments The equipment list to search on.
+	 * @param ep The equipment package to look for.
+	 * @return The equipment package with the name of the one we searched for, null if none was found.
+	 */
+	private EquipmentPackage findEquipmentInList(List<EquipmentPackage> equipments, EquipmentPackage ep) {
+		ListIterator<EquipmentPackage> it_ep = equipments.listIterator();
+		while (it_ep.hasNext()) {
+			EquipmentPackage curr = it_ep.next();
+			if (curr.equals(ep)) {
+				return curr;
+			}
+		}
+		
+		return null;
+	}
+	
 	
 	/**
 	 * Return equipments to the repository.
@@ -233,7 +329,11 @@ public class ChiefScientistAssistant implements Runnable {
 	public static void releaseEquipment(List<EquipmentPackage> equipments) {
 		getInstance().returnEquipment(equipments);
 	}
-	
+
+	/**
+	 * Return equipments to the repository.
+	 * @param equipments The equipmentPackages to return.
+	 */
 	public void returnEquipment(List<EquipmentPackage> equipments) {
 		ListIterator<EquipmentPackage> it_equipment = equipments.listIterator();
 		while (it_equipment.hasNext()) {
@@ -244,6 +344,13 @@ public class ChiefScientistAssistant implements Runnable {
 		}
 	}	
 	
+	/**
+	 * Search for an equipment package by a given name and amount.
+	 * We buy more equipment if we couldn't find enough of it.
+	 * @param name The equipment package name to look for.
+	 * @param amount The amount of units we need.
+	 * @return The equipment package with @param name provided and at least @param amount.
+	 */
 	public EquipmentPackage findEquipment(String name, int amount) {
 		EquipmentPackage ep = _chiefScientist.searchRepository(name);
 		if (ep == null) {
@@ -286,6 +393,12 @@ public class ChiefScientistAssistant implements Runnable {
 		return findEquipment(name, 0);
 	}	
 	
+	/**
+	 * Buy an equipment package from the science store by name and minimum amount of units.
+	 * The EquipmentPackage will be added to the repository directly.
+	 * @param name The name of the equipment package.
+	 * @param amount The amount of units we need.
+	 */
 	public void buyEquipmentPackage(String name, int amount) {
 		// find the relevant equipment packages in the store
 		List<EquipmentPackage> relevantEquipments = new ArrayList<EquipmentPackage>();
@@ -335,6 +448,12 @@ public class ChiefScientistAssistant implements Runnable {
 		}
 	}
 	
+	/**
+	 * Find a laboratory with a given @param spec.
+	 * If we couldn't find one, purchase it from the science store.
+	 * @param spec The specialization name we require the laboratory to be.
+	 * @return The laboratory we found and null if we couldn't find one AND couldn't purchase one. 
+	 */
 	public HeadOfLaboratory findLaboratory(String spec) {
 		HeadOfLaboratory lab = _chiefScientist.findLaboratory(spec);
 		if (lab == null) {
@@ -350,6 +469,11 @@ public class ChiefScientistAssistant implements Runnable {
 		return lab;
 	}
 	
+	/**
+	 * Buy a laboratory with a given @param spec from the science store.
+	 * Buy the best "costPerScientist" laboratory.
+	 * @param spec The specialization name of the laboratory we wish to purchase.
+	 */
 	public void buyLaboratory(String spec) {
 		// find the relevant equipment packages in the store
 		List<HeadOfLaboratory> relevantLaboratories = new ArrayList<HeadOfLaboratory>();
@@ -399,6 +523,9 @@ public class ChiefScientistAssistant implements Runnable {
 		return _chiefScientist.getStats();
 	}
 	
+	/**
+	 * Print statistics of our science center work.
+	 */
 	public static void printStats() {
 		System.out.println(getInstance().getStats());
 	}

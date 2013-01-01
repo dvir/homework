@@ -9,28 +9,95 @@ import java.util.*;
  *
  */
 public class Experiment {
-	// experiment state object.
+	/**
+	 *  experiment state object.
+	 */
 	private enum State {
-		INCOMPLETE, // hasn't started yet
-		INPROGRESS, // in progress
-		COMPLETE // finished
+		/**
+		 * experiment hasn't started yet.
+		 */
+		INCOMPLETE, 
+		
+		/**
+		 * experiment is in progress.
+		 */
+		INPROGRESS,
+		
+		/**
+		 * experiment has finished.
+		 */
+		COMPLETE
 	};	
 	
-	private int _id; // the experiment id
-	private String _spec; // the experiment specialization
-	private int _allowedRuntime; // the allowed runtime for the experiment, in real life hours.
-	private int _reward; // reward for finishing the experiment in time.
-	private State _state; // the experiment current state.
-	private List<EquipmentPackage> _reqEquipment; // a list of required equipment package for this experiment.
-	private List<Experiment> _preExperiments; // a list of pre-required experiments before this one.
-	private List<Experiment> _remainingPreExperiments; // a list of remaining pre-required experiments that has to be completed before executing this one.
+	/**
+	 *  the experiment id
+	 */
+	private int _id;
 	
-	private int _days = 0; // days that the experiment took to finish
-	private long _startTime = 0; // experiment start time 
-	private double _runtime = -1; // experiment total runtime
-	private long _timeTookToTakeEquipment = 0; // the total time it took to take equipment from the repository
-	private long _startWaitingForScientistTime = 0; // the time the experiment was sent to a laboratory
-	private long _timeWaitedForScientist = -1; // the time it took until an available scientist was found for the experiment
+	/**
+	 *  the experiment specialization
+	 */
+	private String _spec; 
+	
+	/**
+	 *  the allowed runtime for the experiment, in real life hours.
+	 */
+	private int _allowedRuntime;
+	
+	/**
+	 * reward for finishing the experiment in time.
+	 */
+	private int _reward;
+	
+	/**
+	 * the experiment current state.
+	 */
+	private State _state; 
+	
+	/**
+	 * a list of required equipment package for this experiment.
+	 */
+	private List<EquipmentPackage> _reqEquipment;
+	
+	/**
+	 * a list of pre-required experiments before this one.
+	 */
+	private List<Experiment> _preExperiments; 
+	
+	/**
+	 * a list of remaining pre-required experiments that has to be completed before executing this one.
+	 */
+	private List<Experiment> _remainingPreExperiments; 
+	
+	/**
+	 * days that the experiment took to finish
+	 */
+	private int _days = 0; 
+	
+	/**
+	 * experiment start time
+	 */
+	private long _startTime = 0;
+	
+	/**
+	 * experiment total runtime
+	 */
+	private double _runtime = -1; 
+	
+	/**
+	 *  the total time it took to take equipment from the repository
+	 */
+	private long _timeTookToTakeEquipment = 0; 
+	
+	/**
+	 *  the time the experiment was sent to a laboratory
+	 */
+	private long _startWaitingForScientistTime = 0;
+	
+	/**
+	 *  the time it took until an available scientist was found for the experiment
+	 */
+	private long _timeWaitedForScientist = -1;
 	
 	public Experiment(int id, String spec, int allowedRuntime, List<Experiment> preExperiments, List<EquipmentPackage> reqEquipment, int reward) {
 		this._id = id;
@@ -165,6 +232,10 @@ public class Experiment {
 		return _runtime;
 	}	
 	
+	/**
+	 * Increase our total time it took to take equipment during the experiment runtime by a given time.
+	 * @param time The amount of miliseconds to increase the counter by.
+	 */
 	public void increaseTimeTookToTakeEquipment(long time) {
 		_timeTookToTakeEquipment += time;
 	}
@@ -211,7 +282,7 @@ public class Experiment {
 	
 	public String getSpec() {
 		return _spec;
-	}	
+	}
 	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
