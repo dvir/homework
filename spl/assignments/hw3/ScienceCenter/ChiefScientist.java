@@ -104,7 +104,15 @@ public class ChiefScientist implements Observer {
 		return _repository;
 	}
 	
+	/**
+	 * Return statistics object of our science center. Create it if it doesn't exist.
+	 * @return Statistics object.
+	 */
 	public Statistics getStats() {
+		if (_stats == null) {
+			_stats = new Statistics();
+		}
+		
 		return _stats;
 	}
 	

@@ -100,31 +100,21 @@ public class Driver {
 			
 			Experiment exp = new Experiment(Integer.parseInt(data[0]), data[2], Integer.parseInt(data[4]), preExperiments, reqEquipment, Integer.parseInt(data[5]));
 			
-			// add experiments ordered by highest reward per hour first (so they have better chances grabbing equipment)
+			// topologically sort experiments (an experiment which relies on another experiment will always appear after it in the list)
 			int expIndex = 0;
 			while (expIndex < experiments.size()) {
 				Experiment curr = experiments.get(expIndex);
-				if ((curr.getAllowedRuntime() / curr.getReward()) > (exp.getAllowedRuntime() / exp.getReward())) {
+				if (curr.isPreExperiment(exp)) {
 					break;
 				}
 				
 				expIndex++;
-			}
-			
-			// topologically sort experiments (an experiment which relies on another experiment will always appear after it in the list)
-//			int expIndex = 0;
-//			while (expIndex < experiments.size()) {
-//				Experiment curr = experiments.get(expIndex);
-//				if (curr.isPreExperiment(exp)) {
-//					break;
-//				}
-//				
-//				expIndex++;
-//			}			
+			}			
 			
 			experiments.add(expIndex, exp);
 		}
 		
+		// read equipments for sale file and create equipment packages for them to be stored in the science store
 		List<EquipmentPackage> equipmentsForSale = new ArrayList<EquipmentPackage>();
 		lines = readfile(equipmentForSaleFileName);
 		for (i = 0; i < lines.size(); ++i) {
@@ -132,7 +122,8 @@ public class Driver {
 			EquipmentPackage ep = new EquipmentPackage(data[0], Integer.parseInt(data[1]), Integer.parseInt(data[2]));
 			equipmentsForSale.add(ep);
 		}		
-		
+
+		// read scientist for sale file and create scientists for them to be stored in the science store
 		List<Scientist> scientistsForSale = new ArrayList<Scientist>();
 		lines = readfile(scientistsForSaleFileName);
 		for (i = 0; i < lines.size(); ++i) {
@@ -141,6 +132,7 @@ public class Driver {
 			scientistsForSale.add(scientist);
 		}	
 		
+		// read laboratory for sale file and create laboratories for them to be stored in the science store
 		List<HeadOfLaboratory> labsForSale = new ArrayList<HeadOfLaboratory>();
 		lines = readfile(laboratoriesForSaleFileName);
 		for (i = 0; i < lines.size(); ++i) {
@@ -157,7 +149,10 @@ public class Driver {
 		t.start();
 	}
 
-   public static List<String> readfile(String inputFilename){
+	/*
+	 * Read a file and return a list of strings, which represents the file contents line by line.
+	 */
+	public static List<String> readfile(String inputFilename){
 	    List<String> lines = new ArrayList<String>();
         try {
             File inFile = new File(inputFilename);

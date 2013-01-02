@@ -55,7 +55,7 @@
 		<junit>
 			<formatter type="plain" usefile="false"/>
 			<classpath refid="SPL-Assignment-III.classpath" />
-			<test name="ScienceStore.ScienceStoreTest" />
+			<test name="ScienceCenter.ScienceStoreTest" />
 		</junit>
 	</target>
 </project>

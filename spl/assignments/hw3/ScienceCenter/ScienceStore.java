@@ -15,7 +15,9 @@ public class ScienceStore implements ScienceStoreInterface {
 	List<HeadOfLaboratory> _labs;
 
 	public ScienceStore (){
-		
+		_equipments = new ArrayList<EquipmentPackage>();
+		_scientists = new ArrayList<Scientist>();
+		_labs = new ArrayList<HeadOfLaboratory>();
 	}
 	
 	public ScienceStore (List<EquipmentPackage> equipments, List<Scientist> scientists, List<HeadOfLaboratory> labs){
