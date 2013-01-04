@@ -267,29 +267,63 @@ public class ChiefScientistAssistant implements Runnable {
 		// try and take all the required equipment.
 		// if one of the equipment packages is missing, we return all the equipment we previously took
 		// and wait for some equipment to return before trying again.
+		
+		EquipmentPackage ep_took_already = null; // this will point to an equipment package we already took and shouldn't try to take again.
+										 // NOTE: we should also return it if acquiring equipment failed again.
 		while (true) {
 			boolean took_everything = true;
 			it_equipment = equipments.listIterator();
+			
 			while (it_equipment.hasNext()) {
 				EquipmentPackage requiredEquipment = it_equipment.next();
 				EquipmentPackage ep = findEquipmentInList(requiredRepositoryEquipments, requiredEquipment);
 				
+				if (ep_took_already != null && ep_took_already.equals(ep)) {
+					// we already took this equipment package. skip to the next one.
+					continue;
+				}
+				
 				// check if we can take the amount we need from this equipment package.
+				// NOTE: this is a non-blocking call to the semaphore in the equipment package
 				if (!ep.tryTakeAmount(requiredEquipment.getAmount())) {
 					// not enough items in the equipment package.
 					// return the equipment we already took.
 					it_equipment.previous();
 					while (it_equipment.hasPrevious()) {
-						// find it in the repository array
 						EquipmentPackage prev = it_equipment.previous();
+						
+						// if it's an equipment we already took, mark it as "already returned" by setting it to null.
+						if (prev.equals(ep_took_already)) {
+							ep_took_already = null;
+						}
+						
+						// find it in the repository array
 						EquipmentPackage prev_repository = findEquipmentInList(requiredRepositoryEquipments, prev);
 						prev_repository.returnAmount(prev.getAmount());
 					}
 					
-					// wait until some are released from this package before trying again.
-					synchronized (ep) {
-						ep.wait();	
+					// check if we have an old equipment to return.
+					// if we still have to return it even though we returned equipment in the while block above,
+					// it's because it is after the problematic equipment package in the list.
+					// find it and return it.
+					if (ep_took_already != null) {
+						// find it in the repository array
+						EquipmentPackage requiredExperimentEquipment = findEquipmentInList(equipments, ep_took_already);
+						ep_took_already.returnAmount(requiredExperimentEquipment.getAmount());
+						
+						ep_took_already = null;
 					}
+					
+					// wait until some are released from this package before trying again.
+//					synchronized (ep) {
+//						ep.wait();	
+//					}
+					
+					// wait for the equipment in the semaphore queue.
+					// this is done to avoid starvation.
+					// NOTE: this is a blocking call to the semaphore!
+					ep.takeAmount(requiredEquipment.getAmount()); 
+					ep_took_already = ep;
 					took_everything = false;
 					break;
 				}

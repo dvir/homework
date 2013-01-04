@@ -53,8 +53,7 @@ public class EquipmentPackage {
 			throw new RuntimeException("Returned too many "+_name+". ("+amount+" while only "+_amount+" are available)");
 		}
 		
-		_sm.release(amount);
-		this.notifyAll();		
+		_sm.release(amount);		
 	}	
 	
 	/**
