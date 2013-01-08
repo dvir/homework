@@ -1,7 +1,7 @@
 # define some Makefile variables for the compiler and compiler flags
 # to use Makefile variables later in the Makefile: $()
 CC = g++
-CFLAGS = -g -Wall 
+CFLAGS = -g -Wall -Weffc++ 
 CLIBS = -lncurses -lboost_system -lboost_thread -lpthread
 
 # All Targets
@@ -14,12 +14,6 @@ main: bin/client.o
 	$(CC) -o bin/client bin/client.o bin/connectionHandler.o $(CLIBS)
 	@echo 'Finished building target: main'
 	@echo ' '
-	@echo 'Removed -Weffc++ flag!!!!!!'
-	@echo 'Removed -Weffc++ flag!!!!!!'
-	@echo 'Removed -Weffc++ flag!!!!!!'
-	@echo 'Removed -Weffc++ flag!!!!!!'
-	@echo 'Removed -Weffc++ flag!!!!!!'
-	@echo 'Removed -Weffc++ flag!!!!!!'
 
 bin/client.o: src/client.cpp bin/connectionHandler.o
 	@echo 'Rebuilding client.o...'
