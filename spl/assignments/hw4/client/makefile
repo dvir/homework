@@ -29,3 +29,6 @@ clean:
 run: main
 	./bin/client
 
+zip: clean
+	rm client.zip
+	zip -r client.zip .
