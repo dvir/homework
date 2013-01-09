@@ -148,15 +148,22 @@ int main(int argc, char *argv[])
                                 // no channel! 
                                 // alert the user that he should join first
                                 ui->history->addItem(
-                                    new Message("Can't send message - join a channel first!")
+                                    new Message("Can't leave channel"
+                                                "- join a channel first!", 
+                                                Message::SYSTEM) 
                                 );
 
                                 break;
                             }
                             
-                            server.send(std::string("PART ").append(ui->getChannel()->getName()));
+                            server.send(
+                                std::string("PART ")
+                                    .append(ui->getChannel()->getName())
+                            );
                         } else {
-                            server.send(std::string("PART ").append(params));
+                            server.send(
+                                std::string("PART ")
+                                    .append(params));
                         }
                         
                     } else if (command == "topic") {
@@ -165,7 +172,9 @@ int main(int argc, char *argv[])
                             // no channel! 
                             // alert the user that he should join first
                             ui->history->addItem(
-                                new Message("Can't send message - join a channel first!")
+                                new Message("Can't send message"
+                                            "- join a channel first!", 
+                                            Message::SYSTEM)
                             );
 
                             break;
