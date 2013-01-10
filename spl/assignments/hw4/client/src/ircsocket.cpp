@@ -9,13 +9,17 @@
 
 #include <string>
 
-IRCSocket::IRCSocket(ConnectionHandler* ch) : 
-    _ch(ch)
+IRCSocket::IRCSocket() :
+    _ch()
 {
 }
 
 IRCSocket::~IRCSocket() {
     delete _ch;
+}
+    
+void IRCSocket::server(std::string host, unsigned short port) {
+    _ch = new ConnectionHandler(host, port);
 }
 
 void IRCSocket::close() {
@@ -38,8 +42,19 @@ void IRCSocket::start(UI* ui, User* user) {
     std::string answer;
 
     while (true) {
-        // read from the socket. NOTE: blocking!
-        this->read(answer);
+        try {
+            // read from the socket. NOTE: blocking!
+            this->read(answer);
+        } catch (std::exception& e) {
+            // connection termianted. stop cleanly
+            ui->history->addItem(
+                new Message(
+                    "Disconnected from server.",
+                    Message::SYSTEM
+                )
+            );
+            return;
+        }
 
         answer = Utils::trim(answer);
         //        Utils::debug(ui->history, answer);

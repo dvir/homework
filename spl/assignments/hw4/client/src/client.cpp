@@ -24,7 +24,6 @@
 
 int main(int argc, char *argv[])
 {
-    
     if (argc != 4) {
         std::cout << "Usage: " << argv[0] << " host port nick" << std::endl;
         return 1;
@@ -33,41 +32,9 @@ int main(int argc, char *argv[])
     std::string host(argv[1]);
     unsigned short port = atoi(argv[2]);
     std::string nick(argv[3]);
-
-    std::cout << "Creating connection..." << std::endl;
-    ConnectionHandler socket(host, port);
-    
-    IRCSocket server(&socket);
-    
-    std::cout << "Connecting to server..." << std::endl;
-    try {
-        server.connect();
-    } catch (std::exception& e) {
-        std::cout << "Connection failed!" << std::endl;
-        return 1;
-    }
     
     User* user = new User(nick);
 
-    try {
-        server.send(std::string("NICK ").append(user->getNick()));
-    } catch (std::exception& e) {
-        std::cout << "Connection lost." << std::endl;
-        return 1;
-    }
-   
-    try {
-        server.send(
-            std::string("USER ")
-            .append(user->getNick())
-            .append(" 0 * :")
-            .append(user->getName())
-        );
-    } catch (std::exception& e) {
-        std::cout << "Connection lost." << std::endl;
-        return 1;
-    }
- 
     int ch = 0;
 
     initscr();          /* Start curses mode        */
@@ -102,11 +69,70 @@ int main(int argc, char *argv[])
 
     ui->history->addRefreshAfterWindow(wInput);
     ui->history->setVisibleSize(42);
-
-    // start server socket thread to handle data from the server.
-    // allows for non-blocking stdin.
-    boost::thread serverSocketThread(&IRCSocket::start, &server, ui, user);
+ 
+    IRCSocket server;
     
+    while (true) {
+        server.server(host, port);
+        
+        ui->history->addItem(
+            new Message(
+                "Connecting to server...",
+                Message::SYSTEM
+            )
+        );
+        try {
+            server.connect();
+        } catch (std::exception& e) {
+            ui->history->addItem(
+                new Message(
+                    "Connection failed!",
+                    Message::SYSTEM
+                )
+            );
+            
+            break;
+        }
+
+        try {
+            server.send(std::string("NICK ").append(user->getNick()));
+        } catch (std::exception& e) {
+            ui->history->addItem(
+                new Message(
+                    "Connection lost.",
+                    Message::SYSTEM
+                )
+            );
+            
+            break;
+        }
+       
+        try {
+            server.send(
+                std::string("USER ")
+                .append(user->getNick())
+                .append(" 0 * :")
+                .append(user->getName())
+            );
+        } catch (std::exception& e) {
+            ui->history->addItem(
+                new Message(
+                    "Connection lost.",
+                    Message::SYSTEM
+                )
+            );
+            
+            break;
+        }
+        
+        // start server socket thread to handle data from the server.
+        // allows for non-blocking stdin.
+        boost::thread serverSocketThread(&IRCSocket::start, &server, ui, user);
+
+        break;
+    }
+    
+    bool exit = false;
     std::string line;
     do {
         switch(ch) {   
@@ -194,6 +220,12 @@ int main(int argc, char *argv[])
                         server.send(params);
                     } else if (command == "debug") { // toggle debug messages
 //                        _debug = !_debug;
+                    } else if (command == "exit") {
+                        // exit client cleanly!
+                        exit = true;
+                    } else if (command == "server") {
+                        // change servers.
+
                     }
                 } else {
                     // this is a message.
@@ -226,10 +258,8 @@ int main(int argc, char *argv[])
                 ui->input->putChar(ch);
                 break;
         } 
-    } while((ch = ui->input->getChar()) != KEY_END);
+    } while (!exit && (ch = ui->input->getChar()) != KEY_END);
 
-    serverSocketThread.join();
-    
     // end curses mode
     endwin();
 

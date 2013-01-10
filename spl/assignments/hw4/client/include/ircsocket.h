@@ -5,9 +5,11 @@
 
 class IRCSocket {
     public:
-        IRCSocket(ConnectionHandler* ch);
+        IRCSocket();
 
         ~IRCSocket();
+
+        void server(std::string host, unsigned short pot);
 
         void connect();
 
