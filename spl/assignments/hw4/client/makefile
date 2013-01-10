@@ -11,12 +11,11 @@ all: main
 main: bin/client.o bin/connectionHandler.o bin/user.o bin/channel.o bin/message.o bin/utils.o bin/ui.o bin/ircsocket.o
 	@echo 'Building target: Mini IRC Client'
 	@echo 'Invoking: C++ Linker'
-	$(CC) -o bin/client bin/client.o bin/connectionHandler.o bin/user.o bin/channel.o bin/message.o bin/utils.o bin/ui.o bin/ircsocket.o $(CLIBS)
+	$(CC) -o ./client bin/client.o bin/connectionHandler.o bin/user.o bin/channel.o bin/message.o bin/utils.o bin/ui.o bin/ircsocket.o $(CLIBS)
 	@echo 'Finished building target: main'
 	@echo ' '
 
 bin/client.o: src/client.cpp bin/connectionHandler.o bin/message.o
-	@echo 'Rebuilding client.o...'
 	$(CC) $(CFLAGS) -c -Linclude -o bin/client.o src/client.cpp
 
 bin/ircsocket.o: bin/user.o bin/message.o bin/connectionHandler.o bin/utils.o bin/ui.o src/ircsocket.cpp include/ircsocket.h
@@ -41,11 +40,12 @@ bin/utils.o: src/utils.cpp include/utils.h
 	$(CC) $(CFLAGS) -c -Linclude -o bin/utils.o src/utils.cpp
 
 #Clean the build directory
-clean: 
+clean:
+	rm -f ./client
 	rm -rf bin/*
 
 run: main
-	./bin/client
+	./client
 
 zip: clean
 	rm client.zip
