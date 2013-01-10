@@ -1,75 +1,70 @@
 #include "../include/channel.h"
 
-class Channel {
-    public:
-        Channel(std::string name) : 
-            _name(name), 
-            _topic(""), 
-            _users() 
-        {
-        };
+#include <string>
+#include <algorithm>
 
-        virtual ~Channel() {
-        };
+Channel::Channel(std::string name) : 
+    _name(name), 
+    _topic(""), 
+    _users() 
+{
+}
 
-        void setTopic(std::string topic) {
-            this->_topic = topic;  
-        };
+Channel::~Channel() {
+}
 
-        void addUser(User* user) {
-            this->_users.push_back(user);
-        };
+void Channel::setTopic(std::string topic) {
+    this->_topic = topic;  
+}
 
-        /**
-         * Add a list of users.
-        **/
-        virtual void addUsers(Users users) {
-            for (Users::iterator it = users.begin();
-                 it != users.end();
-                 ++it)
-            {
-                this->addUser(*it);
-            }
-        };
+void Channel::addUser(User* user) {
+    this->_users.push_back(user);
+}
 
-        void removeUser(User* user) {
-            Users::iterator position = std::find(
-                                            this->_users.begin(), 
-                                            this->_users.end(),
-                                            user
-                                        );
+/**
+ * Add a list of users.
+**/
+void Channel::addUsers(Users users) {
+    for (Users::iterator it = users.begin();
+         it != users.end();
+         ++it)
+    {
+        this->addUser(*it);
+    }
+}
 
-            if (position != _users.end()) {
-                this->_users.erase(position);
-            }
-        };
+void Channel::removeUser(User* user) {
+    Users::iterator position = std::find(
+                                    this->_users.begin(), 
+                                    this->_users.end(),
+                                    user
+                                );
 
-        size_t getUsersCount() const {
-            return this->_users.size();
-        };
+    if (position != _users.end()) {
+        this->_users.erase(position);
+    }
+}
 
-        std::string getName() const {
-            return this->_name;
-        };
+size_t Channel::getUsersCount() const {
+    return this->_users.size();
+}
 
-        std::string getTopic() const {
-            return this->_topic;
-        };
+std::string Channel::getName() const {
+    return this->_name;
+}
 
-        Users getUsers() const {
-            return this->_users;
-        };
+std::string Channel::getTopic() const {
+    return this->_topic;
+}
 
-        std::string toString() const {
-            return string()
-                    .append(getName())
-                    .append(" - ")
-                    .append(getTopic())
-                  ;
-        };
+Users Channel::getUsers() const {
+    return this->_users;
+}
 
-    private:
-        std::string _name;
-        std::string _topic;
-        Users _users;
-};
+std::string Channel::toString() const {
+    return std::string()
+            .append(getName())
+            .append(" - ")
+            .append(getTopic())
+          ;
+}

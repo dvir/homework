@@ -201,6 +201,3 @@ template <typename T>
 size_t ListWindow<T>::size() {
     return _list.size();
 }
-
-template class ListWindow<User*>;
-template class ListWindow<Message*>;

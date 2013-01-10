@@ -1,14 +1,10 @@
+#include "../include/typedef.h"
 #include "../include/connectionHandler.h"
 
-using boost::asio::ip::tcp;
+#include <string>
+#include <iostream>
 
-using std::cin;
-using std::cout;
-using std::cerr;
-using std::endl;
-using std::string;
-
-ConnectionHandler::ConnectionHandler(string host, short port) : 
+ConnectionHandler::ConnectionHandler(std::string host, short port) : 
     host_(host), 
     port_(port), 
     io_service_(), 
@@ -17,27 +13,22 @@ ConnectionHandler::ConnectionHandler(string host, short port) :
 }
 
 ConnectionHandler::~ConnectionHandler() {
-    close();
+    this->close();
 }
 
-bool ConnectionHandler::connect() {
-    std::cout << "Trying to connect to " 
-        << host_ << ":" << port_ << "..." << std::endl;
-    try {
-        tcp::endpoint endpoint(
-            boost::asio::ip::address::from_string(host_), 
-            port_
-        ); // the server endpoint
-        boost::system::error_code error;
-        socket_.connect(endpoint, error);
-        if (error)
-            throw boost::system::system_error(error);
-    } catch (std::exception& e) {
-        std::cerr << "Connection failed (Error: " << e.what() << ')' << std::endl;
-        return false;
+void ConnectionHandler::connect() {
+    // create server endpoint
+    boost::asio::ip::tcp::endpoint endpoint(
+        boost::asio::ip::address::from_string(host_), 
+        port_
+    );
+    
+    boost::system::error_code error;
+    socket_.connect(endpoint, error);
+
+    if (error) {
+        throw boost::system::system_error(error);
     }
-   
-    return true;
 }
 
 void ConnectionHandler::getBytes(char bytes[], unsigned int bytesToRead) {
@@ -71,26 +62,12 @@ void ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite) {
     }
 }
 
-bool ConnectionHandler::read(std::string& line) {
-    try {
-        getFrameAscii(line, '\n');
-    } catch (std::exception& e) {
-        std::cout << "READ ERROR: " << e.what() << std::endl;
-        return false;
-    }
-
-    return true;
+void ConnectionHandler::read(std::string& line) {
+    getFrameAscii(line, '\n');
 }
 
-bool ConnectionHandler::send(const std::string& line) {
-    try {
-        sendFrameAscii(line, '\n');
-    } catch (std::exception& e) {
-        std::cout << "SEND ERROR: " << e.what() << std::endl;
-        return false;
-    }
-
-    return true;
+void ConnectionHandler::send(const std::string& line) {
+    sendFrameAscii(line, '\n');
 }
 
 void ConnectionHandler::getFrameAscii(std::string& frame, char delimiter) {
@@ -111,9 +88,5 @@ void ConnectionHandler::sendFrameAscii(const std::string& frame, char delimiter)
 
 // Close down the connection properly.
 void ConnectionHandler::close() {
-    try{
-        socket_.close();
-    } catch (...) {
-        std::cout << "closing failed: connection already closed" << std::endl;
-    }
+    socket_.close();
 }

@@ -1,98 +1,94 @@
 #include "../include/user.h"
 
-class User {
-    public:
-        User(std::string nick) :
-            _nick(nick),
-            _name(nick),
-            _chanMode(""),
-            _channels()
-        {
-            // detect channel modes in the nick and set them 
-            // accordingly.
-            if (nick.at(0) == '@' || nick.at(0) == '+') {
-                this->_chanMode = this->_nick.at(0);
-                this->_nick = this->_nick.substr(1);
-            }
-        };
+#include <string>
+#include <vector>
+#include <algorithm>
 
-        User(User& other) :
-            _nick(other.getNick()),
-            _name(other.getName()),
-            _chanMode(other.getChanMode()),
-            _channels(other.getChannels())
-        {           
-        };
+User::User(std::string nick) :
+    _nick(nick),
+    _name(nick),
+    _chanMode(""),
+    _channels()
+{
+    // detect channel modes in the nick and set them 
+    // accordingly.
+    if (nick.at(0) == '@' || nick.at(0) == '+') {
+        this->_chanMode = this->_nick.at(0);
+        this->_nick = this->_nick.substr(1);
+    }
+}
 
-        void addChannel(Channel* channel) {
-            _channels.push_back(channel);
-        };
+User::User(User& other) :
+    _nick(other.getNick()),
+    _name(other.getName()),
+    _chanMode(other.getChanMode()),
+    _channels(other.getChannels())
+{           
+}
 
-        void removeChannel(Channel* channel) {
-            Channels::iterator position = std::find(
-                                                _channels.begin(), 
-                                                _channels.end(),
-                                                channel
-                                                );
-            if (position != _channels.end()) {
-                _channels.erase(position);
-            }
-        };
-        
-        bool isInChannel(Channel* channel) {
-            Channels::iterator position = std::find(
-                                                _channels.begin(), 
-                                                _channels.end(),
-                                                channel
-                                                );
-            return (position != _channels.end());
-        };
+void User::addChannel(Channel* channel) {
+    _channels.push_back(channel);
+}
 
-        void setNick(std::string nick) {
-            this->_nick = nick;
-        };
+void User::removeChannel(Channel* channel) {
+    Channels::iterator position = std::find(
+                                        _channels.begin(), 
+                                        _channels.end(),
+                                        channel
+                                        );
+    if (position != _channels.end()) {
+        _channels.erase(position);
+    }
+}
 
-        void setName(std::string name) {
-            this->_name = name;
-        };
+bool User::isInChannel(Channel* channel) {
+    Channels::iterator position = std::find(
+                                        _channels.begin(), 
+                                        _channels.end(),
+                                        channel
+                                        );
+    return (position != _channels.end());
+}
 
-        std::string getName() const {
-            return this->_name;
-        };
+void User::setNick(std::string nick) {
+    this->_nick = nick;
+}
 
-        std::string getNick() const {
-            return this->_nick;
-        };
+void User::setName(std::string name) {
+    this->_name = name;
+}
 
-        Channels getChannels() const {
-            return this->_channels;
-        };
+std::string User::getName() const {
+    return this->_name;
+}
 
-        std::string toString() const {
-            return this->getFullNick();
-        };
+std::string User::getNick() const {
+    return this->_nick;
+}
 
-        std::string getChanMode() const {
-            return this->_chanMode;
-        };
+Channels User::getChannels() const {
+    return this->_channels;
+}
 
-        /**
-         * Return nick containing channel mode.
-        **/
-        std::string getFullNick() const {
-            return string(this->getChanMode()).append(this->getNick());
-        };
-    
-        bool operator <(const User& rhs) const {
-            return this->getFullNick() < rhs.getFullNick();
-        }
+std::string User::toString() const {
+    return this->getFullNick();
+}
 
-    private:
-        std::string _nick;
-        std::string _name;
-        std::string _chanMode;
-        Channels _channels;
-};
+std::string User::getChanMode() const {
+    return this->_chanMode;
+}
+
+/**
+ * Return nick containing channel mode.
+**/
+std::string User::getFullNick() const {
+    return std::string(this->getChanMode()).append(this->getNick());
+}
+
+bool User::operator<(const User& rhs) const {
+    return this->getFullNick() < rhs.getFullNick();
+}
+
 
 bool UserPointerCompare (const User* l, const User* r) {
     return *l < *r;

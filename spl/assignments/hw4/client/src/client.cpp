@@ -14,8 +14,8 @@
 #include "../include/user.h"
 #include "../include/channel.h"
 #include "../include/message.h"
-#include "../include/network.h"
-#include "../include/clientui.h"
+#include "../include/ircsocket.h"
+#include "../include/ui.h"
 #include "../include/window.h"
 #include "../include/contentwindow.h"
 #include "../include/listwindow.h"
@@ -35,37 +35,39 @@ int main(int argc, char *argv[])
     std::string nick(argv[3]);
 
     std::cout << "Creating connection..." << std::endl;
-    ConnectionHandler server(host, port);
+    ConnectionHandler socket(host, port);
+    
+    IRCSocket server(&socket);
+    
     std::cout << "Connecting to server..." << std::endl;
-    if (!server.connect()) {
-        std::cout << "Cannot connect to " << host << ":" << port << std::endl;
+    try {
+        server.connect();
+    } catch (std::exception& e) {
+        std::cout << "Connection failed!" << std::endl;
         return 1;
     }
     
     User* user = new User(nick);
 
-    if (!server.send(
-                std::string("NICK ")
-                .append(user->getNick())
-                )
-        ) 
-    {
-        std::cout << "Disconnected. Exiting..." << std::endl;
-        return 0;
+    try {
+        server.send(std::string("NICK ").append(user->getNick()));
+    } catch (std::exception& e) {
+        std::cout << "Connection lost." << std::endl;
+        return 1;
     }
    
-    if (!server.send(
-                std::string("USER ")
-                .append(user->getNick())
-                .append(" 0 * :")
-                .append(user->getName())
-            )
-        ) 
-    {
-        std::cout << "Disconnected. Exiting..." << std::endl;
-        return 0;
+    try {
+        server.send(
+            std::string("USER ")
+            .append(user->getNick())
+            .append(" 0 * :")
+            .append(user->getName())
+        );
+    } catch (std::exception& e) {
+        std::cout << "Connection lost." << std::endl;
+        return 1;
     }
-
+ 
     int ch = 0;
 
     initscr();          /* Start curses mode        */
@@ -82,7 +84,6 @@ int main(int argc, char *argv[])
 //    mvprintw(0, 0, "Press End to exit");
 //    refresh();
 //    attroff(COLOR_PAIR(1));
-    
 
     InputWindow* wInput = new InputWindow("input", 3, 153, 45, 0);
     ListWindow<User*>* wNames = new ListWindow<User*>("names", 46, 17, 2, 152);
@@ -90,7 +91,7 @@ int main(int argc, char *argv[])
     ListWindow<Message*>* wHistory = new ListWindow<Message*>("main", 44, 153, 2, 0);
    
     // UI is a set of title, history, names and input windows.
-    ClientUI* ui = new ClientUI(wTitle, wHistory, wNames, wInput);
+    UI* ui = new UI(wTitle, wHistory, wNames, wInput);
     
     ui->names->addRefreshAfterWindow(wInput);
     ui->names->setVisibleSize(44);
@@ -102,10 +103,9 @@ int main(int argc, char *argv[])
     ui->history->addRefreshAfterWindow(wInput);
     ui->history->setVisibleSize(42);
 
-//    Utils::debug(ui->history, "*** Starting... ***");
-
-    Network networkRead(&server);
-    boost::thread networkInputThread(&Network::read, &networkRead, ui, user);
+    // start server socket thread to handle data from the server.
+    // allows for non-blocking stdin.
+    boost::thread serverSocketThread(&IRCSocket::start, &server, ui, user);
     
     std::string line;
     do {
@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
         } 
     } while((ch = ui->input->getChar()) != KEY_END);
 
-    networkInputThread.join();
+    serverSocketThread.join();
     
     // end curses mode
     endwin();

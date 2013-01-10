@@ -1,6 +1,9 @@
 #include "../include/typedef.h"
 #include "../include/utils.h"
 
+#include "../include/message.h"
+#include "../include/user.h"
+
 #include <sstream>
 #include <ostream>
 #include <istream>
@@ -57,10 +60,10 @@ std::vector<std::string> Utils::split(const std::string &s, char delim) {
     return split(s, delim, elems);
 }
 
-void Utils::debug (ListWindow<Message*>* history, std::string message) {
-    if (true) {
-        return;
-    }
-
-    history->addItem(new Message(message, new User("debug"), Message::DEBUG));
-}
+//void Utils::debug (ListWindow<Message*>* history, std::string message) {
+//    if (true) {
+//        return;
+//    }
+//
+//    history->addItem(new Message(message, new User("debug"), Message::DEBUG));
+//}

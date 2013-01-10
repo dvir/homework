@@ -10,6 +10,8 @@ class Message;
 class Window;
 class InputWindow;
 class Utils;
+class UI;
+class ConnectionHandler;
 
 typedef std::vector<std::string> Strings;
 typedef std::vector<Window*> Windows;

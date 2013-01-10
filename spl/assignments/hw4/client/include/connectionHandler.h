@@ -1,25 +1,17 @@
 #ifndef CONNECTION_HANDLER_H
 #define CONNECTION_HANDLER_H
 
-#include <string>
-#include <iostream>
+#include "../include/typedef.h"
+
 #include <boost/asio.hpp>
 
-using boost::asio::ip::tcp;
-
 class ConnectionHandler {
-    private:
-        const std::string host_;
-        const short port_;
-        boost::asio::io_service io_service_;   // Provides core I/O functionality
-        tcp::socket socket_; 
-
     public:
         ConnectionHandler(std::string host, short port);
-        virtual ~ConnectionHandler();
+        ~ConnectionHandler();
 
         // Connect to the remote machine
-        bool connect();
+        void connect();
 
         // Read a fixed number of bytes from the server - blocking.
         // Returns false in case the connection is closed before bytesToRead bytes can be read.
@@ -31,11 +23,11 @@ class ConnectionHandler {
 
         // Read an ascii line from the server
         // Returns false in case connection closed before a newline can be read.
-        bool read(std::string& line);
+        void read(std::string& line);
 
         // Send an ascii line from the server
         // Returns false in case connection closed before all the data is sent.
-        bool send(const std::string& line);
+        void send(const std::string& line);
 
         // Get Ascii data from the server until the delimiter character
         // Returns false in case connection closed before null can be read.
@@ -48,6 +40,11 @@ class ConnectionHandler {
         // Close down the connection properly.
         void close();
 
+    private:
+        const std::string host_;
+        const short port_;
+        boost::asio::io_service io_service_;   // Provides core I/O functionality
+        boost::asio::ip::tcp::socket socket_; 
 };
 
 #endif
