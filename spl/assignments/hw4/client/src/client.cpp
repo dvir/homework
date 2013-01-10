@@ -32,6 +32,8 @@ int main(int argc, char *argv[])
     std::string host(argv[1]);
     unsigned short port = atoi(argv[2]);
     std::string nick(argv[3]);
+
+    boost::thread_group thread_group;
     
     User* user = new User(nick);
 
@@ -127,7 +129,14 @@ int main(int argc, char *argv[])
         
         // start server socket thread to handle data from the server.
         // allows for non-blocking stdin.
-        boost::thread serverSocketThread(&IRCSocket::start, &server, ui, user);
+        boost::thread* serverSocketThread = new boost::thread(
+                &IRCSocket::start, 
+                &server, 
+                ui, 
+                user
+        );
+
+        thread_group.add_thread(serverSocketThread);
 
         break;
     }
@@ -259,6 +268,9 @@ int main(int argc, char *argv[])
                 break;
         } 
     } while (!exit && (ch = ui->input->getChar()) != KEY_END);
+
+    // wait for all threads to finish
+    thread_group.join_all();
 
     // end curses mode
     endwin();
