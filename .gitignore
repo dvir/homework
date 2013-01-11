@@ -21,3 +21,6 @@ bin/
 
 # ignore vim files
 .vim
+
+# ignore swap files
+.*.swp
