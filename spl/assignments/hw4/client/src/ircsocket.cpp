@@ -38,7 +38,7 @@ void IRCSocket::read(std::string& message) {
     this->_ch->read(message);
 }
 
-void IRCSocket::start(UI* ui, User* user) { 
+void IRCSocket::start(UI_ptr ui, User_ptr user) { 
     std::string answer;
 
     while (true) {
@@ -48,10 +48,10 @@ void IRCSocket::start(UI* ui, User* user) {
         } catch (std::exception& e) {
             // connection termianted. stop cleanly
             ui->history->addItem(
-                new Message(
+                Message_ptr(new Message(
                     "Disconnected from server.",
                     Message::SYSTEM
-                )
+                ))
             );
             return;
         }
@@ -85,38 +85,38 @@ void IRCSocket::start(UI* ui, User* user) {
             if (command == "JOIN") {
                 if (nick == user->getNick()) {
                     // joined a new channel!
-                    ui->setChannel(new Channel(target));
+                    ui->setChannel(Channel_ptr(new Channel(target)));
 
                     ui->history->addItem(
-                            new Message(
+                            Message_ptr(new Message(
                                 std::string("Now talking on ").append(target),
                                 Message::SYSTEM
-                                )
+                                ))
                             );
                 } else {
                     // someone else joined a channel we are in
                     // add him to the names list.
-                    User* newUser = new User(nick);
+                    User_ptr newUser(new User(nick));
                     ui->addUser(newUser);
                     ui->history->addItem(
-                            new Message(
+                            Message_ptr(new Message(
                                 std::string("has joined ").append(target),
                                 newUser,
                                 Message::ACTION
-                                )
+                                ))
                             );
                 }
 
             } else if (command == "PART") {
                 if (nick == user->getNick()) {
                     // quit channel. 
-                    ui->setChannel(NULL);
+                    ui->setChannel(Channel_ptr());
 
                     ui->history->addItem(
-                            new Message(
+                            Message_ptr(new Message(
                                 std::string("You have left ").append(target),
                                 Message::SYSTEM
-                                )
+                                ))
                             );
                 } else {
                     // someone quit the current channel.
@@ -133,11 +133,11 @@ void IRCSocket::start(UI* ui, User* user) {
                                 text.append(" (").append(msg).append(")");
                             }
                             ui->history->addItem(
-                                    new Message(
+                                    Message_ptr(new Message(
                                         text,
                                         users[ii],
                                         Message::ACTION
-                                        )
+                                        ))
                                     );
 
                             break;
@@ -150,19 +150,19 @@ void IRCSocket::start(UI* ui, User* user) {
                         && target == ui->getChannel()->getName()) {
                     // message to current channel!
                     ui->history->addItem(
-                            new Message(
+                            Message_ptr(new Message(
                                 msg,
-                                new User(nick)
-                                )
+                                User_ptr(new User(nick))
+                                ))
                             );
                 } else if (target == user->getNick()) {
                     // a private message to the user
                     ui->history->addItem(
-                            new Message(
+                            Message_ptr(new Message(
                                 msg,
-                                new User(nick),
+                                User_ptr(new User(nick)),
                                 Message::PRIVATE 
-                                )
+                                ))
                             );
                 }
 
@@ -180,11 +180,11 @@ void IRCSocket::start(UI* ui, User* user) {
                             text.append(" (").append(msg).append(")");
                         }
                         ui->history->addItem(
-                                new Message(
+                                Message_ptr(new Message(
                                     text,
                                     users[ii],
                                     Message::ACTION
-                                    )
+                                    ))
                                 );
 
                         break;
@@ -207,12 +207,12 @@ void IRCSocket::start(UI* ui, User* user) {
                             ui->names->redraw();
 
                             ui->history->addItem(
-                                    new Message(
+                                    Message_ptr(new Message(
                                         std::string("is now known as ")
                                         .append(msg),
                                         users[ii],
                                         Message::ACTION
-                                        )
+                                        ))
                                     );
 
                             break;
@@ -225,19 +225,19 @@ void IRCSocket::start(UI* ui, User* user) {
                         target == ui->getChannel()->getName()) {
                     // message to current channel!
                     ui->history->addItem(
-                            new Message(
+                            Message_ptr(new Message(
                                 msg,
-                                new User(nick)
-                                )
+                                User_ptr(new User(nick))
+                                ))
                             );
                 } else if (target == user->getNick()) {
                     // a private notice to the user
                     ui->history->addItem(
-                            new Message(
+                            Message_ptr(new Message(
                                 msg,
-                                new User(nick),
+                                User_ptr(new User(nick)),
                                 Message::PRIVATE 
-                                )
+                                ))
                             );
                 }
 
@@ -248,12 +248,12 @@ void IRCSocket::start(UI* ui, User* user) {
                 ui->title->redraw();
 
                 ui->history->addItem(
-                        new Message(
+                        Message_ptr(new Message(
                             std::string("has changed the topic to: ")
                             .append(msg),
-                            new User(nick),
+                            User_ptr(new User(nick)),
                             Message::ACTION
-                            )
+                            ))
                         );
             } else if (command == "353") { // names list
                 // this will start a names stream 
@@ -281,10 +281,10 @@ void IRCSocket::start(UI* ui, User* user) {
                     || command == "376"
                     ) {
                 ui->history->addItem(
-                        new Message(
+                        Message_ptr(new Message(
                             msg,
                             Message::SYSTEM
-                            )
+                            ))
                         );
             }
         } else {
@@ -298,10 +298,10 @@ void IRCSocket::start(UI* ui, User* user) {
                 _ch->send(response.str());
             } else if (command == "NOTICE AUTH") {
                 ui->history->addItem(
-                        new Message(
+                        Message_ptr(new Message(
                             params[1],
                             Message::SYSTEM
-                            )
+                            ))
                         );
             }
         }

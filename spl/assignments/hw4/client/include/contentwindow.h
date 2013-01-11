@@ -22,7 +22,7 @@ class ContentWindow : public Window {
         ) :
             Window(name, height, width, starty, startx),
             _content(""),
-            _contentElement(NULL),
+            _contentElement(),
             _offsetY(1),
             _offsetX(1)
         {

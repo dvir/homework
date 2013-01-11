@@ -9,6 +9,9 @@
 #include <iomanip>
 
 #include <boost/thread.hpp>
+#include <boost/shared_ptr.hpp>
+
+#include "../include/typedef.h"
 
 #include "../include/connectionHandler.h"
 #include "../include/user.h"
@@ -35,7 +38,7 @@ int main(int argc, char *argv[])
 
     boost::thread_group thread_group;
     
-    User* user = new User(nick);
+    User_ptr user(new User(nick));
 
     int ch = 0;
 
@@ -55,12 +58,12 @@ int main(int argc, char *argv[])
 //    attroff(COLOR_PAIR(1));
 
     InputWindow* wInput = new InputWindow("input", 3, 153, 45, 0);
-    ListWindow<User*>* wNames = new ListWindow<User*>("names", 46, 17, 2, 152);
-    ContentWindow<Channel*>* wTitle = new ContentWindow<Channel*>("title", 3, 169, 0, 0);
-    ListWindow<Message*>* wHistory = new ListWindow<Message*>("main", 44, 153, 2, 0);
+    ListWindow<User_ptr>* wNames = new ListWindow<User_ptr>("names", 46, 17, 2, 152);
+    ContentWindow<Channel_ptr>* wTitle = new ContentWindow<Channel_ptr>("title", 3, 169, 0, 0);
+    ListWindow<Message_ptr>* wHistory = new ListWindow<Message_ptr>("main", 44, 153, 2, 0);
    
     // UI is a set of title, history, names and input windows.
-    UI* ui = new UI(wTitle, wHistory, wNames, wInput);
+    UI_ptr ui(new UI(wTitle, wHistory, wNames, wInput));
     
     ui->names->addRefreshAfterWindow(wInput);
     ui->names->setVisibleSize(44);
@@ -78,19 +81,19 @@ int main(int argc, char *argv[])
         server.server(host, port);
         
         ui->history->addItem(
-            new Message(
+            Message_ptr(new Message(
                 "Connecting to server...",
                 Message::SYSTEM
-            )
+            ))
         );
         try {
             server.connect();
         } catch (std::exception& e) {
             ui->history->addItem(
-                new Message(
+                Message_ptr(new Message(
                     "Connection failed!",
                     Message::SYSTEM
-                )
+                    ))
             );
             
             break;
@@ -100,10 +103,10 @@ int main(int argc, char *argv[])
             server.send(std::string("NICK ").append(user->getNick()));
         } catch (std::exception& e) {
             ui->history->addItem(
-                new Message(
+                Message_ptr(new Message(
                     "Connection lost.",
                     Message::SYSTEM
-                )
+                    ))
             );
             
             break;
@@ -118,10 +121,10 @@ int main(int argc, char *argv[])
             );
         } catch (std::exception& e) {
             ui->history->addItem(
-                new Message(
+                Message_ptr(new Message(
                     "Connection lost.",
                     Message::SYSTEM
-                )
+                ))
             );
             
             break;
@@ -183,9 +186,9 @@ int main(int argc, char *argv[])
                                 // no channel! 
                                 // alert the user that he should join first
                                 ui->history->addItem(
-                                    new Message("Can't leave channel"
+                                    Message_ptr(new Message("Can't leave channel"
                                                 "- join a channel first!", 
-                                                Message::SYSTEM) 
+                                                Message::SYSTEM)) 
                                 );
 
                                 break;
@@ -207,9 +210,9 @@ int main(int argc, char *argv[])
                             // no channel! 
                             // alert the user that he should join first
                             ui->history->addItem(
-                                new Message("Can't send message"
+                                Message_ptr(new Message("Can't send message"
                                             "- join a channel first!", 
-                                            Message::SYSTEM)
+                                            Message::SYSTEM))
                             );
 
                             break;
@@ -243,14 +246,14 @@ int main(int argc, char *argv[])
                         // no channel! 
                         // alert the user that he should join first
                         ui->history->addItem(
-                            new Message("Can't send message - join a channel first!")
+                            Message_ptr(new Message("Can't send message - join a channel first!"))
                         );
 
                         break;
                     }
                     
                     // put it in the channel history list
-                    Message* message = new Message(line, user);
+                    Message_ptr message(new Message(line, user));
                     ui->history->addItem(message);
 
                     // transmit message to the server

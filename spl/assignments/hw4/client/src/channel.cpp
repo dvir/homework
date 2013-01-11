@@ -1,4 +1,5 @@
 #include "../include/channel.h"
+#include "../include/user.h"
 
 #include <string>
 #include <algorithm>
@@ -17,7 +18,7 @@ void Channel::setTopic(std::string topic) {
     this->_topic = topic;  
 }
 
-void Channel::addUser(User* user) {
+void Channel::addUser(User_ptr user) {
     this->_users.push_back(user);
 }
 
@@ -33,7 +34,7 @@ void Channel::addUsers(Users users) {
     }
 }
 
-void Channel::removeUser(User* user) {
+void Channel::removeUser(User_ptr user) {
     Users::iterator position = std::find(
                                     this->_users.begin(), 
                                     this->_users.end(),

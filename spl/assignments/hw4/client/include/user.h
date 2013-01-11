@@ -2,6 +2,9 @@
 #define USER_H
 
 #include "../include/typedef.h"
+#include "../include/channel.h"
+
+#include <boost/shared_ptr.hpp>
 
 class User {
     public:
@@ -9,11 +12,11 @@ class User {
 
         User(User& other);
 
-        void addChannel(Channel* channel);
+        void addChannel(Channel_ptr channel);
 
-        void removeChannel(Channel* channel);
+        void removeChannel(Channel_ptr channel);
         
-        bool isInChannel(Channel* channel);
+        bool isInChannel(Channel_ptr channel);
 
         void setNick(std::string nick);
 
@@ -43,6 +46,6 @@ class User {
         Channels _channels;
 };
 
-bool UserPointerCompare (const User* l, const User* r);
+bool UserPointerCompare (const User_ptr l, const User_ptr r);
 
 #endif

@@ -8,9 +8,9 @@
 
 #include <algorithm>
 
-UI::UI(ContentWindow<Channel*>* wTitle, 
-   ListWindow<Message*>* wHistory, 
-   ListWindow<User*>* wNames, 
+UI::UI(ContentWindow<Channel_ptr>* wTitle, 
+   ListWindow<Message_ptr>* wHistory, 
+   ListWindow<User_ptr>* wNames, 
    InputWindow* wInput) :
     title(wTitle),
     history(wHistory),
@@ -19,6 +19,9 @@ UI::UI(ContentWindow<Channel*>* wTitle,
     _hasStartedNamesStream(false)
 {
 }
+
+UI::~UI() {
+};
 
 void UI::startNamesStream() {
     if (false == _hasStartedNamesStream) {
@@ -37,7 +40,7 @@ void UI::endNamesStream() {
              it != _namesStream.end();
              ++it)
         {
-            User* newUser = new User(*it);
+            User_ptr newUser(new User(*it));
             users.push_back(newUser);
         }
 
@@ -57,17 +60,17 @@ void UI::addNames(std::string str) {
     }
 }
 
-Channel* UI::getChannel() {
+Channel_ptr UI::getChannel() {
     return _channel;
 }
 
-void UI::setChannel(Channel* newChannel) {
+void UI::setChannel(Channel_ptr newChannel) {
     _channel = newChannel;
     this->title->setContent(_channel);
     this->names->removeAll();
 }
 
-void UI::addUser(User* newUser) {
+void UI::addUser(User_ptr newUser) {
     this->names->addItem(newUser);
 
     if (NULL != this->getChannel()) {

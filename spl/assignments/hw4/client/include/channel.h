@@ -11,14 +11,14 @@ class Channel {
 
         void setTopic(std::string topic);
 
-        void addUser(User* user);
+        void addUser(User_ptr user);
 
         /**
          * Add a list of users.
         **/
         virtual void addUsers(Users users);
 
-        void removeUser(User* user);
+        void removeUser(User_ptr user);
 
         size_t getUsersCount() const;
 

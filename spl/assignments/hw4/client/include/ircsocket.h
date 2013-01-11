@@ -17,7 +17,7 @@ class IRCSocket {
 
         void read(std::string& message);
         
-        void start(UI* ui, User* user);
+        void start(UI_ptr ui, User_ptr user);
 
         void close();
 

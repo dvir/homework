@@ -1,4 +1,5 @@
 #include "../include/user.h"
+#include "../include/channel.h"
 
 #include <string>
 #include <vector>
@@ -26,11 +27,11 @@ User::User(User& other) :
 {           
 }
 
-void User::addChannel(Channel* channel) {
+void User::addChannel(Channel_ptr channel) {
     _channels.push_back(channel);
 }
 
-void User::removeChannel(Channel* channel) {
+void User::removeChannel(Channel_ptr channel) {
     Channels::iterator position = std::find(
                                         _channels.begin(), 
                                         _channels.end(),
@@ -41,7 +42,7 @@ void User::removeChannel(Channel* channel) {
     }
 }
 
-bool User::isInChannel(Channel* channel) {
+bool User::isInChannel(Channel_ptr channel) {
     Channels::iterator position = std::find(
                                         _channels.begin(), 
                                         _channels.end(),
@@ -90,6 +91,6 @@ bool User::operator<(const User& rhs) const {
 }
 
 
-bool UserPointerCompare (const User* l, const User* r) {
+bool UserPointerCompare (const User_ptr l, const User_ptr r) {
     return *l < *r;
 };

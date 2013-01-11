@@ -7,7 +7,7 @@
 #include <iomanip>
 
 Message::Message(std::string text) :
-    _user(NULL),
+    _user(User_ptr()),
     _text(text),
     _nick(""),
     _timestamp(time(0)),
@@ -15,7 +15,7 @@ Message::Message(std::string text) :
 {
 }
 
-Message::Message(std::string text, User* user) :
+Message::Message(std::string text, User_ptr user) :
     _user(user),
     _text(text),
     _nick(user->getFullNick()),
@@ -25,7 +25,7 @@ Message::Message(std::string text, User* user) :
 }
 
 Message::Message(std::string text, Message::Type type) :
-    _user(NULL),
+    _user(User_ptr()),
     _text(text),
     _nick(""),
     _timestamp(time(0)),
@@ -33,7 +33,7 @@ Message::Message(std::string text, Message::Type type) :
 {
 }
 
-Message::Message(std::string text, User* user, Message::Type type) :
+Message::Message(std::string text, User_ptr user, Message::Type type) :
     _user(user),
     _text(text),
     _nick(user->getFullNick()),
@@ -43,7 +43,7 @@ Message::Message(std::string text, User* user, Message::Type type) :
 }
 
 Message::Message (Message& other) :
-    _user(new User(*other.getUser())),
+    _user(User_ptr(new User(*other.getUser()))),
     _text(other.getText()),
     _nick(other.getNick()),
     _timestamp(other.getTimestamp()),
@@ -56,14 +56,14 @@ Message Message::operator=(const Message& other) {
         return *this;
     }
 
-    this->_user = new User(*other.getUser());
+    this->_user = other.getUser();
     this->_text = other.getText();
     this->_nick = other.getNick();
     this->_type = other.getType();
     return *this;
 }
 
-User* Message::getUser() const {
+User_ptr Message::getUser() const {
     return _user;
 }
 

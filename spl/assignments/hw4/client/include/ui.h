@@ -9,9 +9,9 @@
 
 class UI {
     public:
-        UI(ContentWindow<Channel*>* wTitle, 
-           ListWindow<Message*>* wHistory, 
-           ListWindow<User*>* wNames, 
+        UI(ContentWindow<Channel_ptr>* wTitle, 
+           ListWindow<Message_ptr>* wHistory, 
+           ListWindow<User_ptr>* wNames, 
            InputWindow* wInput);
 
         ~UI();
@@ -22,23 +22,23 @@ class UI {
         
         void addNames(std::string str);
 
-        Channel* getChannel();
+        Channel_ptr getChannel();
 
-        void setChannel(Channel* newChannel);
+        void setChannel(Channel_ptr newChannel);
 
-        void addUser(User* newUser);
+        void addUser(User_ptr newUser);
 
         void addUsers(Users users);
 
-        ContentWindow<Channel*>* title;
-        ListWindow<Message*>* history;
-        ListWindow<User*>* names;
+        ContentWindow<Channel_ptr>* title;
+        ListWindow<Message_ptr>* history;
+        ListWindow<User_ptr>* names;
         InputWindow* input;
 
     private:
         bool _hasStartedNamesStream;
         Strings _namesStream;
-        Channel* _channel;
+        Channel_ptr _channel;
 };
 
 #endif
