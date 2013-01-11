@@ -8,7 +8,7 @@ CLIBS = -lncurses -lboost_system -lboost_thread -lpthread
 all: main
 
 # Tool invocations
-main: bin/client.o bin/connectionHandler.o bin/user.o bin/channel.o bin/message.o bin/utils.o bin/ui.o bin/ircsocket.o
+main: bin/client.o bin/connectionHandler.o bin/user.o bin/channel.o bin/message.o bin/utils.o bin/ui.o bin/ircsocket.o include/window.h include/contentwindow.h include/listwindow.h include/inputwindow.h
 	@echo 'Building target: Mini IRC Client'
 	@echo 'Invoking: C++ Linker'
 	$(CC) -o ./client bin/client.o bin/connectionHandler.o bin/user.o bin/channel.o bin/message.o bin/utils.o bin/ui.o bin/ircsocket.o $(CLIBS)

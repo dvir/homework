@@ -48,15 +48,9 @@ int main(int argc, char *argv[])
                          * everty thing to me       */
     keypad(stdscr, TRUE);       /* I need that nifty F1     */
     noecho();
-    init_pair(1, COLOR_GREEN, COLOR_BLACK);
 
-    assume_default_colors(COLOR_GREEN, COLOR_BLACK);
+//    assume_default_colors(COLOR_GREEN, COLOR_BLACK);
     
-//    attron(COLOR_PAIR(1));
-//    mvprintw(0, 0, "Press End to exit");
-//    refresh();
-//    attroff(COLOR_PAIR(1));
-
     InputWindow* wInput = new InputWindow("input", 3, 153, 45, 0);
     ListWindow<User_ptr>* wNames = new ListWindow<User_ptr>("names", 46, 17, 2, 152);
     ContentWindow<Channel_ptr>* wTitle = new ContentWindow<Channel_ptr>("title", 3, 169, 0, 0);
@@ -146,7 +140,7 @@ int main(int argc, char *argv[])
     
     bool exit = false;
     std::string line;
-    do {
+    do { break;
         switch(ch) {   
             case 0: // first run!
                 // do nothing here for now.
@@ -277,6 +271,12 @@ int main(int argc, char *argv[])
 
     // end curses mode
     endwin();
+
+    // clean
+    delete wInput;
+    delete wHistory;
+    delete wNames;
+    delete wTitle;
 
     return 0;
 }
