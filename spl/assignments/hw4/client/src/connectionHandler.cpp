@@ -3,12 +3,15 @@
 
 #include <string>
 #include <iostream>
+#include <cstdlib>
+
+using boost::asio::ip::tcp;
 
 ConnectionHandler::ConnectionHandler(std::string host, short port) : 
-    host_(host), 
-    port_(port), 
-    io_service_(), 
-    socket_(io_service_)
+    _host(host), 
+    _port(port), 
+    _io_service(), 
+    _socket(_io_service)
 {
 }
 
@@ -18,13 +21,31 @@ ConnectionHandler::~ConnectionHandler() {
 
 void ConnectionHandler::connect() {
     // create server endpoint
-    boost::asio::ip::tcp::endpoint endpoint(
-        boost::asio::ip::address::from_string(host_), 
-        port_
-    );
-    
+    tcp::endpoint endpoint;    
+   
     boost::system::error_code error;
-    socket_.connect(endpoint, error);
+
+    tcp::resolver resolver(_io_service);
+
+    std::stringstream ss;
+    ss << _port;
+    tcp::resolver::query query(_host, ss.str());
+
+    tcp::resolver::iterator end; // End marker.
+    for (
+        tcp::resolver::iterator it = resolver.resolve(query);
+        it != end;
+        ++it
+        )
+    {
+        endpoint = *it;
+        _socket.connect(endpoint, error);
+        if (!error) {
+            // connected successfully.
+            // stop trying.
+            return;
+        }
+    }
 
     if (error) {
         throw boost::system::system_error(error);
@@ -35,7 +56,7 @@ void ConnectionHandler::getBytes(char bytes[], unsigned int bytesToRead) {
     size_t tmp = 0;
     boost::system::error_code error;
     while (!error && bytesToRead > tmp ) {
-        tmp += socket_.read_some(boost::asio::buffer(bytes+tmp, bytesToRead-tmp), error);            
+        tmp += _socket.read_some(boost::asio::buffer(bytes+tmp, bytesToRead-tmp), error);            
     }
     
     if (error) {
@@ -48,7 +69,7 @@ void ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite) {
     boost::system::error_code error;
     
     while (!error && bytesToWrite > tmp ) {
-        tmp += socket_.write_some(
+        tmp += _socket.write_some(
                     boost::asio::buffer(
                         bytes + tmp, 
                         bytesToWrite - tmp
@@ -88,5 +109,5 @@ void ConnectionHandler::sendFrameAscii(const std::string& frame, char delimiter)
 
 // Close down the connection properly.
 void ConnectionHandler::close() {
-    socket_.close();
+    _socket.close();
 }

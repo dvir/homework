@@ -5,7 +5,14 @@
 
 class Message {
     public:
-        enum Type { DEFAULT, PRIVATE, ACTION, SYSTEM, DEBUG };
+        enum Type { 
+            DEFAULT, 
+            PRIVATE, 
+            ACTION, 
+            SYSTEM, 
+            DEBUG, 
+            ERROR 
+        };
 
         Message(std::string text);
 

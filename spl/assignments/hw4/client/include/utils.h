@@ -28,8 +28,6 @@ class Utils {
         static std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems);
 
         static std::vector<std::string> split(const std::string &s, char delim);
-
-//        static void debug (ListWindow<Message*>* history, std::string message);
 };
 
 #endif

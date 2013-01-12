@@ -15,7 +15,7 @@ main: bin/client.o bin/connectionHandler.o bin/user.o bin/channel.o bin/message.
 	@echo 'Finished building target: main'
 	@echo ' '
 
-bin/client.o: src/client.cpp bin/connectionHandler.o bin/message.o
+bin/client.o: src/client.cpp bin/connectionHandler.o bin/message.o bin/ircsocket.o bin/ircsocket.o
 	$(CC) $(CFLAGS) -c -Linclude -o bin/client.o src/client.cpp
 
 bin/ircsocket.o: bin/user.o bin/message.o bin/connectionHandler.o bin/utils.o bin/ui.o src/ircsocket.cpp include/ircsocket.h
@@ -48,5 +48,5 @@ run: main
 	./client
 
 zip: clean
-	rm client.zip
+	rm -f client.zip
 	zip -r client.zip .

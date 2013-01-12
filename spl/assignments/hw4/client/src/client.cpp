@@ -1,3 +1,5 @@
+#define DBG
+
 #include <curses.h>
 #include <iostream>
 #include <sstream>
@@ -25,6 +27,17 @@
 #include "../include/inputwindow.h"
 #include "../include/utils.h"
 
+void debug (ListWindow<Message_ptr>* history, std::string message) {
+    history->addItem(
+        Message_ptr(
+            new Message(
+                message, 
+                User_ptr(new User("debug")) 
+            )
+        )
+    );
+}
+
 int main(int argc, char *argv[])
 {
     if (argc != 4) {
@@ -49,7 +62,7 @@ int main(int argc, char *argv[])
     keypad(stdscr, TRUE);       /* I need that nifty F1     */
     noecho();
 
-//    assume_default_colors(COLOR_GREEN, COLOR_BLACK);
+    assume_default_colors(COLOR_GREEN, COLOR_BLACK);
     
     InputWindow* wInput = new InputWindow("input", 3, 153, 45, 0);
     ListWindow<User_ptr>* wNames = new ListWindow<User_ptr>("names", 46, 17, 2, 152);
@@ -69,7 +82,7 @@ int main(int argc, char *argv[])
     ui->history->addRefreshAfterWindow(wInput);
     ui->history->setVisibleSize(42);
  
-    IRCSocket server;
+    IRCSocket server(ui, user);
     
     while (true) {
         server.server(host, port);
@@ -93,8 +106,14 @@ int main(int argc, char *argv[])
             break;
         }
 
+        ui->history->addItem(
+            Message_ptr(new Message(
+                "Authenticating...",
+                Message::SYSTEM
+            ))
+        );
         try {
-            server.send(std::string("NICK ").append(user->getNick()));
+            server.auth(user->getNick(), user->getName());
         } catch (std::exception& e) {
             ui->history->addItem(
                 Message_ptr(new Message(
@@ -106,31 +125,11 @@ int main(int argc, char *argv[])
             break;
         }
        
-        try {
-            server.send(
-                std::string("USER ")
-                .append(user->getNick())
-                .append(" 0 * :")
-                .append(user->getName())
-            );
-        } catch (std::exception& e) {
-            ui->history->addItem(
-                Message_ptr(new Message(
-                    "Connection lost.",
-                    Message::SYSTEM
-                ))
-            );
-            
-            break;
-        }
-        
         // start server socket thread to handle data from the server.
         // allows for non-blocking stdin.
         boost::thread* serverSocketThread = new boost::thread(
                 &IRCSocket::start, 
-                &server, 
-                ui, 
-                user
+                &server 
         );
 
         thread_group.add_thread(serverSocketThread);
@@ -140,7 +139,7 @@ int main(int argc, char *argv[])
     
     bool exit = false;
     std::string line;
-    do { break;
+    do {
         switch(ch) {   
             case 0: // first run!
                 // do nothing here for now.
@@ -150,7 +149,8 @@ int main(int argc, char *argv[])
                 ui->input->deleteLastChar();
                 break;
 
-            case 10: // send message to server!
+            case 10: { // send message to server!
+                
                 line = ui->input->str();
                 ui->input->clearInput(); 
                 
@@ -159,109 +159,91 @@ int main(int argc, char *argv[])
                     break;
                 }
                 
-                if (line.at(0) == '/') {
-                    // this is a command!
-                    std::string command = line.substr(1, line.find(' ')-1);
-                    std::string params;
-                    if (line.find(' ') != std::string::npos) {
-                        params = line.substr(line.find(' ')+1);
-                    }
-                    
-                    if (command == "nick") {
-                        // changing nick.
-                        server.send(std::string("NICK ").append(params));
-                    } else if (command == "join") {
-                        server.send(std::string("JOIN ").append(params));
-                    } else if (command == "part") {
-                        if (params == "") {
-                            // part current channel
-                            // check if we are already in a channel
-                            if (NULL == ui->getChannel()) {
-                                // no channel! 
-                                // alert the user that he should join first
-                                ui->history->addItem(
-                                    Message_ptr(new Message("Can't leave channel"
-                                                "- join a channel first!", 
-                                                Message::SYSTEM)) 
-                                );
+                std::string response;
 
-                                break;
-                            }
-                            
-                            server.send(
-                                std::string("PART ")
-                                    .append(ui->getChannel()->getName())
-                            );
-                        } else {
-                            server.send(
-                                std::string("PART ")
-                                    .append(params));
-                        }
+                try {
                         
-                    } else if (command == "topic") {
-                        // check if we are already in a channel
-                        if (NULL == ui->getChannel()) {
-                            // no channel! 
-                            // alert the user that he should join first
-                            ui->history->addItem(
-                                Message_ptr(new Message("Can't send message"
-                                            "- join a channel first!", 
-                                            Message::SYSTEM))
-                            );
+                    IRCSocket::ClientCommand command = IRCSocket::parseClientCommand(line);
 
-                            break;
-                        }
-                        
-                        server.send(
-                            std::string("TOPIC ")
-                            .append(ui->getChannel()->getName())
-                            .append(" :")
-                            .append(params)
-                        );
-                    } else if (command == "quit") {
-                        server.send(std::string("QUIT :").append(params));
-                    } else if (command == "clear") {
+                    // if it's any of client only commands, handle here
+                    // and don't send to the protocol.
+                    if (command.name == "clear") {
                         ui->history->removeAll();
-                    } else if (command == "raw") { // allow sending raw messages to server
-                        server.send(params);
-                    } else if (command == "debug") { // toggle debug messages
-//                        _debug = !_debug;
-                    } else if (command == "exit") {
+                    } else if (command.name == "raw") { // allow sending raw messages to server
+                        response = command.params;
+                    } else if (command.name == "debug") { // toggle debug messages
+                        //_debug = !_debug;
+                    } else if (command.name == "exit") {
                         // exit client cleanly!
+                        ui->history->addItem(
+                            Message_ptr(new Message(
+                                "Shutting down...",
+                                Message::SYSTEM
+                            ))
+                        );
+                        
+                        // first, disconnect from server if we are logged in.
+                        response = server.clientCommand("/quit");
+
+                        // stop stdin loop
                         exit = true;
-                    } else if (command == "server") {
+                    } else if (command.name == "server") {
                         // change servers.
 
-                    }
-                } else {
-                    // this is a message.
-                    // check if we are already in a channel
-                    if (NULL == ui->getChannel()) {
-                        // no channel! 
-                        // alert the user that he should join first
-                        ui->history->addItem(
-                            Message_ptr(new Message("Can't send message - join a channel first!"))
+                    } else if (command.name == "chanmsg") { 
+                        // if we got here, this is a message.
+                        // check if we are already in a channel
+                        if (NULL == ui->getChannel()) {
+                            // no active channel! 
+                            // alert the user that he should join first
+                            throw (
+                                std::logic_error(
+                                    "Can't send message - no active channels."
+                                )
+                            );
+                        }
+                
+                        // put it in the channel history list
+                        Message_ptr message(new Message(line, user));
+                        ui->history->addItem(message);
+
+                        // transmit message to the server
+                        response = server.message(
+                            std::string(ui->getChannel()->getName())
+                            .append(" ")
+                            .append(line)
                         );
+                    } else {
+                        // not any of client only commands.
+                        // call the protocol.
 
-                        break;
+                        response = server.clientCommand(line);
                     }
-                    
-                    // put it in the channel history list
-                    Message_ptr message(new Message(line, user));
-                    ui->history->addItem(message);
 
-                    // transmit message to the server
-                    server.send(
-                        std::string("PRIVMSG ")
-                        .append(ui->getChannel()->getName())
-                        .append(" :")
-                        .append(line)
+                } catch (std::exception& error) {
+                    // display error to client
+                    ui->history->addItem(
+                        Message_ptr(
+                            new Message(
+                                error.what(),
+                                Message::ERROR
+                            )
+                        ) 
                     );
+
                 }
-                break;
-            
+
+                if (response != "") {
+                    server.send(response);
+                }
+
+                break; // end enter case
+            }
+
             default:
-                ui->input->putChar(ch);
+                if (ch >= 32 && ch <= 126) { // valid ascii character
+                    ui->input->putChar(ch);
+                }
                 break;
         } 
     } while (!exit && (ch = ui->input->getChar()) != KEY_END);

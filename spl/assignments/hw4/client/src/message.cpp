@@ -103,6 +103,8 @@ std::string Message::toString() const {
         str.append("*** ");
     } else if (Message::DEBUG == this->getType()) {
         str.append("==debug==  ");
+    } else if (Message::ERROR == this->getType()) {
+        str.append("Error: ");
     } else if (Message::ACTION == this->getType()) {
         str.append("* ").append(this->getNick()).append(" ");
     } else {
