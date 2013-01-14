@@ -20,7 +20,7 @@ bin/
 *.out
 
 # ignore vim files
-.vim
+*.vim
 
 # ignore swap files
 .*.swp
