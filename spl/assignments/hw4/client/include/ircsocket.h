@@ -13,6 +13,7 @@ class IRCSocket {
                 std::string host;
             } origin;
 
+            std::string raw;
             std::string command;
             std::string target;
             std::string text;
@@ -66,6 +67,10 @@ class IRCSocket {
         
         std::string message(std::string params);
         std::string message(std::string target, std::string params);
+
+        std::string names(std::string params);
+
+        std::string list();
 
         /* SERVER */
 

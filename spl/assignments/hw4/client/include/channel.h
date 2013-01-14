@@ -5,8 +5,9 @@
 
 class Channel {
     public:
-        Channel(std::string name);
-
+        static Channel_ptr getChannel(std::string name);
+        static Channel_ptr getChannel(std::string name, bool create);
+        
         virtual ~Channel();
 
         void setTopic(std::string topic);
@@ -31,6 +32,10 @@ class Channel {
         std::string toString() const;
 
     private:
+        Channel(std::string name);
+        
+        static Channels _channels;
+        
         std::string _name;
         std::string _topic;
         Users _users;

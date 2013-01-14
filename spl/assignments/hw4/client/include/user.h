@@ -8,7 +8,8 @@
 
 class User {
     public:
-        User(std::string nick);
+        static User_ptr getUser(std::string nick);
+        static User_ptr getUser(std::string nick, bool create);
 
         User(User& other);
 
@@ -40,6 +41,9 @@ class User {
         bool operator <(const User& rhs) const;
 
     private:
+        User(std::string nick);
+        static Users _users;
+        
         std::string _nick;
         std::string _name;
         std::string _chanMode;

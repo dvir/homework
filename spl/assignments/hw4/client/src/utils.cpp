@@ -60,10 +60,13 @@ std::vector<std::string> Utils::split(const std::string &s, char delim) {
     return split(s, delim, elems);
 }
 
-//void Utils::debug (ListWindow<Message*>* history, std::string message) {
-//    if (true) {
-//        return;
-//    }
-//
-//    history->addItem(new Message(message, new User("debug"), Message::DEBUG));
-//}
+size_t Utils::find_nth(const std::string &s, const std::string &delim, unsigned long n) {
+    size_t idx = -1;
+
+    while (n > 0) {
+        idx = s.find(delim, idx+1);
+        n--;
+    }
+
+    return idx;
+}

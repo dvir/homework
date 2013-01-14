@@ -4,6 +4,38 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <sstream>
+
+Users User::_users = Users();
+
+User_ptr User::getUser(std::string nick) {
+    return User::getUser(nick, true);
+}
+
+User_ptr User::getUser(std::string nick, bool create) {
+    std::string rawNick = nick;
+
+    // detect channel modes in the nick 
+    if (nick.at(0) == '@' || nick.at(0) == '+') {
+        nick = nick.substr(1);
+    }
+    
+    for (Users::iterator it = _users.begin(); it != _users.end(); ++it) {
+        User_ptr user = *it;
+        if (user->getNick() == nick) {
+            return user;
+        }
+    }
+
+    if (create) {
+        // use rawNick in case the nick had any chan modes
+        // attached to it.
+        User_ptr newUser(new User(rawNick));
+        return newUser;
+    }
+
+    return User_ptr();
+}
 
 User::User(std::string nick) :
     _nick(nick),
@@ -14,8 +46,9 @@ User::User(std::string nick) :
     // detect channel modes in the nick and set them 
     // accordingly.
     if (nick.at(0) == '@' || nick.at(0) == '+') {
-        this->_chanMode = this->_nick.at(0);
-        this->_nick = this->_nick.substr(1);
+        this->_chanMode = nick.substr(0, 1);
+        this->_nick = nick.substr(1);
+        this->_name = this->_nick;
     }
 }
 

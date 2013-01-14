@@ -23,11 +23,13 @@ class Utils {
          * @param size_t width    Width to wordwrap it to.
          * @return std::string Wordwrapped string.
         **/
-        static std::string wordwrap(const std::string& str, size_t width);
+        static std::string wordwrap(const std::string &str, size_t width);
 
         static std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems);
 
         static std::vector<std::string> split(const std::string &s, char delim);
+       
+        static size_t find_nth(const std::string &s, const std::string &delim, unsigned long n);
 };
 
 #endif

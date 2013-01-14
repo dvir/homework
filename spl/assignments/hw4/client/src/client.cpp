@@ -32,7 +32,7 @@ void debug (ListWindow<Message_ptr>* history, std::string message) {
         Message_ptr(
             new Message(
                 message, 
-                User_ptr(new User("debug")) 
+                User::getUser("debug")
             )
         )
     );
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 
     boost::thread_group thread_group;
     
-    User_ptr user(new User(nick));
+    User_ptr user = User::getUser(nick);
 
     int ch = 0;
 
@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
                     } else if (command.name == "chanmsg") { 
                         // if we got here, this is a message.
                         // check if we are already in a channel
-                        if (NULL == ui->getChannel()) {
+                        if (!ui->getChannel()) {
                             // no active channel! 
                             // alert the user that he should join first
                             throw (

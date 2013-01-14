@@ -102,7 +102,7 @@ std::string Message::toString() const {
     } else if (Message::SYSTEM == this->getType()) {
         str.append("*** ");
     } else if (Message::DEBUG == this->getType()) {
-        str.append("==debug==  ");
+        str.append("==debug== ");
     } else if (Message::ERROR == this->getType()) {
         str.append("Error: ");
     } else if (Message::ACTION == this->getType()) {

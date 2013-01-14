@@ -1,3 +1,5 @@
+#define DBG
+
 #include "../include/ircsocket.h"
 
 #include "../include/ui.h"
@@ -53,17 +55,26 @@ IRCSocket::ServerMessage IRCSocket::parseServerMessage(std::string line) {
     IRCSocket::ServerMessage message;
     std::string prefix;
 
+    message.raw = line;
+
     // check if we got a prefix
     // if we do, set it and remove from the answer
     if (line.at(0) == ':') {
         prefix = line.substr(1, line.find(' '));
+        prefix = Utils::rtrim(prefix);
+
         // if the one who commited the action is a user,
         // his host will be: nick!user@host
         message.origin.raw = prefix;
-        message.origin.nick = prefix.substr(0, prefix.find('!'));
-        message.origin.user = prefix.substr(prefix.find('!')+1, prefix.find('@'));
-        message.origin.host = prefix.substr(prefix.find('@')+1);
-    
+        if (prefix.find('!') != std::string::npos) {
+            message.origin.nick = prefix.substr(0, prefix.find('!'));
+            message.origin.user = prefix.substr(prefix.find('!')+1, prefix.find('@'));
+            message.origin.host = prefix.substr(prefix.find('@')+1);
+        } else {
+            // there's just a nick in the prefix
+            message.origin.nick = prefix;
+        }
+
         line = line.substr(line.find(' ')+1);
     }
 
@@ -80,6 +91,10 @@ IRCSocket::ServerMessage IRCSocket::parseServerMessage(std::string line) {
         // find the first occurrence of ':'
         // and fetch the whole string AFTER it
         message.text = line.substr(line.find(':')+1);
+//    } else if (std::count(line.begin(), line.end(), ' ') > 2) {
+    } else {
+        // find third occurrence of a space and get the string after it
+        message.text = line.substr(Utils::find_nth(line, " ", 3)+1);
     }
 
     return message;
@@ -110,6 +125,15 @@ void IRCSocket::start() {
 #ifdef DBG
     this->_ui->history->addItem(
         Message_ptr(new Message(
+            std::string().append(message.target).append(" | ").append(message.text),
+            Message::DEBUG
+        ))
+    );
+#endif
+
+#ifdef DBG
+    this->_ui->history->addItem(
+        Message_ptr(new Message(
             answer,
             Message::DEBUG
         ))
@@ -120,7 +144,7 @@ void IRCSocket::start() {
         if (message.command == "JOIN") {
             if (message.origin.nick == this->_user->getNick()) {
                 // joined a new channel!
-                this->_ui->setChannel(Channel_ptr(new Channel(message.target)));
+                this->_ui->setChannel(Channel::getChannel(message.target));
 
                 this->_ui->history->addItem(
                         Message_ptr(new Message(
@@ -131,7 +155,7 @@ void IRCSocket::start() {
             } else {
                 // someone else joined a channel we are in
                 // add him to the names list.
-                User_ptr newUser(new User(message.origin.nick));
+                User_ptr newUser = User::getUser(message.origin.nick);
                 this->_ui->addUser(newUser);
                 this->_ui->history->addItem(
                         Message_ptr(new Message(
@@ -181,13 +205,13 @@ void IRCSocket::start() {
             }
 
         } else if (message.command == "PRIVMSG") {
-            if (NULL != this->_ui->getChannel() 
+            if (this->_ui->getChannel() 
                     && message.target == this->_ui->getChannel()->getName()) {
                 // message to current channel!
                 this->_ui->history->addItem(
                         Message_ptr(new Message(
                             message.text,
-                            User_ptr(new User(message.origin.nick))
+                            User::getUser(message.origin.nick)
                             ))
                         );
             } else if (message.target == this->_user->getNick()) {
@@ -195,7 +219,7 @@ void IRCSocket::start() {
                 this->_ui->history->addItem(
                         Message_ptr(new Message(
                             message.text,
-                            User_ptr(new User(message.origin.nick)),
+                            User::getUser(message.origin.nick),
                             Message::PRIVATE 
                             ))
                         );
@@ -256,13 +280,13 @@ void IRCSocket::start() {
             }
 
         } else if (message.command == "NOTICE") {
-            if (NULL != this->_ui->getChannel() && 
+            if (this->_ui->getChannel() && 
                     message.target == this->_ui->getChannel()->getName()) {
                 // message to current channel!
                 this->_ui->history->addItem(
                         Message_ptr(new Message(
                             message.text,
-                            User_ptr(new User(message.origin.nick))
+                            User::getUser(message.origin.nick)
                             ))
                         );
             } else if (message.target == this->_user->getNick()) {
@@ -270,7 +294,7 @@ void IRCSocket::start() {
                 this->_ui->history->addItem(
                         Message_ptr(new Message(
                             message.text,
-                            User_ptr(new User(message.origin.nick)),
+                            User::getUser(message.origin.nick),
                             Message::PRIVATE 
                             ))
                         );
@@ -286,7 +310,7 @@ void IRCSocket::start() {
                     Message_ptr(new Message(
                         std::string("has changed the topic to: ")
                         .append(message.text),
-                        User_ptr(new User(message.origin.nick)),
+                        User::getUser(message.origin.nick),
                         Message::ACTION
                         ))
                     );
@@ -295,7 +319,6 @@ void IRCSocket::start() {
             // only if there is none active
             this->_ui->startNamesStream();
             this->_ui->addNames(message.text);
-
         } else if (message.command == "366") { // end names list
             // stop streaming names to the ui.
             // this will set the names list.
@@ -379,6 +402,12 @@ std::string IRCSocket::clientCommand(std::string line) {
 
     } else if (command.name == "msg") {
         return message(command.params);
+
+    } else if (command.name == "names") {
+        return names(command.params);
+
+    } else if (command.name == "list") {
+        return list();
 
     } else {
         // unknown command.
@@ -470,4 +499,17 @@ std::string IRCSocket::message(std::string params) {
     }
 
     return this->message(target, msg);
+}
+
+std::string IRCSocket::names(std::string params) {
+    std::string response("NAMES");
+    if (params.size() > 0) {
+        response.append(" ").append(params);
+    }
+
+    return response;
+}
+
+std::string IRCSocket::list() {
+    return std::string("LIST");
 }

@@ -40,7 +40,7 @@ void UI::endNamesStream() {
              it != _namesStream.end();
              ++it)
         {
-            User_ptr newUser(new User(*it));
+            User_ptr newUser = User::getUser(*it);
             users.push_back(newUser);
         }
 
@@ -51,7 +51,7 @@ void UI::endNamesStream() {
 }
 
 void UI::addNames(std::string str) {
-    Strings names = Utils::split(str, ' ');
+    Strings names = Utils::split(Utils::trim(str), ' ');
     for (Strings::iterator it = names.begin();
          it != names.end();
          ++it)
@@ -73,7 +73,7 @@ void UI::setChannel(Channel_ptr newChannel) {
 void UI::addUser(User_ptr newUser) {
     this->names->addItem(newUser);
 
-    if (NULL != this->getChannel()) {
+    if (this->getChannel()) {
         this->getChannel()->addUser(newUser);
     }
 }
@@ -81,7 +81,7 @@ void UI::addUser(User_ptr newUser) {
 void UI::addUsers(Users users) {
     this->names->addItems(users);
     
-    if (NULL != this->getChannel()) {
+    if (this->getChannel()) {
         this->getChannel()->addUsers(users);
     }
 }
