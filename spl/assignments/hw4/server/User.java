@@ -77,7 +77,7 @@ public class User {
     public void quitNotification(User user, String message) {
         String response = ":" + user.getNick() + " QUIT";
         if (message.length() > 0) {
-            response += " :" + message;
+            response += " " + message;
         }
 
         send(response);
