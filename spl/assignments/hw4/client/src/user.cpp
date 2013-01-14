@@ -31,6 +31,7 @@ User_ptr User::getUser(std::string nick, bool create) {
         // use rawNick in case the nick had any chan modes
         // attached to it.
         User_ptr newUser(new User(rawNick));
+        _users.push_back(newUser);
         return newUser;
     }
 
@@ -92,6 +93,10 @@ void User::setName(std::string name) {
     this->_name = name;
 }
 
+void User::setChanMode(std::string mode) {
+    this->_chanMode = mode;
+}
+
 std::string User::getName() const {
     return this->_name;
 }
@@ -120,7 +125,8 @@ std::string User::getFullNick() const {
 }
 
 bool User::operator<(const User& rhs) const {
-    return this->getFullNick() < rhs.getFullNick();
+    return (this->getChanMode() == "@" && rhs.getChanMode() != "@")
+            || (this->getFullNick() < rhs.getFullNick());
 }
 
 

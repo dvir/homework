@@ -70,3 +70,15 @@ size_t Utils::find_nth(const std::string &s, const std::string &delim, unsigned 
 
     return idx;
 }
+
+bool BothAreSpaces(char lhs, char rhs) { return (lhs == rhs) && (lhs == ' '); }
+
+std::string Utils::collapseMultipleSpaces(const std::string &s) {
+     std::string str(s);
+
+     std::string::iterator new_end = std::unique(str.begin(), str.end(), BothAreSpaces);
+     str.erase(new_end, str.end()); 
+
+     return str;
+}
+

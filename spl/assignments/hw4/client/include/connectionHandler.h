@@ -13,6 +13,9 @@ class ConnectionHandler {
         // Connect to the remote machine
         void connect();
 
+        // Whether we are still connected to the host or not
+        bool isConnected();
+
         // Read a fixed number of bytes from the server - blocking.
         // Returns false in case the connection is closed before bytesToRead bytes can be read.
         void getBytes(char bytes[], unsigned int bytesToRead);
@@ -45,6 +48,7 @@ class ConnectionHandler {
         const short _port;
         boost::asio::io_service _io_service;   // Provides core I/O functionality
         boost::asio::ip::tcp::socket _socket; 
+        bool _connected;
 };
 
 #endif

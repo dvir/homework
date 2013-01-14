@@ -34,6 +34,10 @@ void IRCSocket::connect() {
     this->_ch->connect();
 }
 
+bool IRCSocket::isConnected() {
+    return this->_ch->isConnected();
+}
+
 void IRCSocket::send(std::string message) {
 #ifdef DBG
     this->_ui->history->addItem(
@@ -118,14 +122,18 @@ void IRCSocket::start() {
             return;
         }
 
-        answer = Utils::trim(answer);
-      
+        answer = Utils::collapseMultipleSpaces(Utils::trim(answer));
+        
         IRCSocket::ServerMessage message = this->parseServerMessage(answer);
 
 #ifdef DBG
     this->_ui->history->addItem(
         Message_ptr(new Message(
-            std::string().append(message.target).append(" | ").append(message.text),
+            std::string()
+            .append("origin.nick: ").append(message.origin.nick).append(" - ")
+            .append("command: ").append(message.command).append(" - ")
+            .append("text: ").append(message.text).append(" - ")
+            .append("target: ").append(message.target).append(" - "),
             Message::DEBUG
         ))
     );
@@ -134,7 +142,7 @@ void IRCSocket::start() {
 #ifdef DBG
     this->_ui->history->addItem(
         Message_ptr(new Message(
-            answer,
+            message.raw,
             Message::DEBUG
         ))
     );
@@ -250,10 +258,12 @@ void IRCSocket::start() {
                 }
             }
         } else if (message.command == "NICK") {
+            User_ptr user;
+
             if (message.origin.nick == this->_user->getNick()) {
                 // current user changed nick!
                 // update current user
-                this->_user->setNick(message.text);
+                user = this->_user;
             } else {
                 // someone else changed nick.
                 // find him in channel list and update his nick.
@@ -262,23 +272,23 @@ void IRCSocket::start() {
                     if (message.origin.nick == users[ii]->getNick()) {
                         // found the user. change his nick
                         // to the new nick.
-                        users[ii]->setNick(message.text);
-                        this->_ui->names->redraw();
-
-                        this->_ui->history->addItem(
-                                Message_ptr(new Message(
-                                    std::string("is now known as ")
-                                    .append(message.text),
-                                    users[ii],
-                                    Message::ACTION
-                                    ))
-                                );
-
+                        user = users[ii];
                         break;
                     }
                 }
             }
-
+            
+            this->_ui->history->addItem(
+                Message_ptr(new Message(
+                    std::string("is now known as ")
+                    .append(message.text),
+                    user,
+                    Message::ACTION
+                ))
+            );
+            
+            user->setNick(message.text);
+            this->_ui->names->redraw();
         } else if (message.command == "NOTICE") {
             if (this->_ui->getChannel() && 
                     message.target == this->_ui->getChannel()->getName()) {
@@ -477,6 +487,9 @@ std::string IRCSocket::quit(std::string params) {
     if (params != "") {
         response.append(" :").append(params);
     }
+
+    // reset the ui
+    this->_ui->reset();
 
     return response;
 }

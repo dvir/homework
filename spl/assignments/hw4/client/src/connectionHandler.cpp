@@ -11,7 +11,8 @@ ConnectionHandler::ConnectionHandler(std::string host, short port) :
     _host(host), 
     _port(port), 
     _io_service(), 
-    _socket(_io_service)
+    _socket(_io_service),
+    _connected(false)
 {
 }
 
@@ -43,6 +44,7 @@ void ConnectionHandler::connect() {
         if (!error) {
             // connected successfully.
             // stop trying.
+            _connected = true;
             return;
         }
     }
@@ -50,6 +52,10 @@ void ConnectionHandler::connect() {
     if (error) {
         throw boost::system::system_error(error);
     }
+}
+
+bool ConnectionHandler::isConnected() {
+    return _connected;
 }
 
 void ConnectionHandler::getBytes(char bytes[], unsigned int bytesToRead) {
@@ -60,6 +66,7 @@ void ConnectionHandler::getBytes(char bytes[], unsigned int bytesToRead) {
     }
     
     if (error) {
+        _connected = false;
         throw boost::system::system_error(error);
     }
 }
@@ -79,6 +86,7 @@ void ConnectionHandler::sendBytes(const char bytes[], int bytesToWrite) {
     }
     
     if (error) {
+        _connected = false;
         throw boost::system::system_error(error);
     }
 }
@@ -110,4 +118,5 @@ void ConnectionHandler::sendFrameAscii(const std::string& frame, char delimiter)
 // Close down the connection properly.
 void ConnectionHandler::close() {
     _socket.close();
+    _connected = false;
 }

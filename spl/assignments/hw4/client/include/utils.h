@@ -30,6 +30,8 @@ class Utils {
         static std::vector<std::string> split(const std::string &s, char delim);
        
         static size_t find_nth(const std::string &s, const std::string &delim, unsigned long n);
+
+        static std::string collapseMultipleSpaces(const std::string &s);
 };
 
 #endif

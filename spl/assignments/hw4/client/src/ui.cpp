@@ -23,6 +23,10 @@ UI::UI(ContentWindow<Channel_ptr>* wTitle,
 UI::~UI() {
 };
 
+void UI::reset() {
+    this->setChannel(Channel_ptr());
+}
+
 void UI::startNamesStream() {
     if (false == _hasStartedNamesStream) {
         _hasStartedNamesStream = true;
@@ -40,7 +44,13 @@ void UI::endNamesStream() {
              it != _namesStream.end();
              ++it)
         {
-            User_ptr newUser = User::getUser(*it);
+            std::string nick = *it;
+            User_ptr newUser = User::getUser(nick);
+            std::string chanMode;
+            if (nick.at(0) == '@' || nick.at(0) == '+') {
+                chanMode = nick.substr(0, 1);
+            }
+            newUser->setChanMode(chanMode);
             users.push_back(newUser);
         }
 

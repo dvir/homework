@@ -181,15 +181,81 @@ int main(int argc, char *argv[])
                                 Message::SYSTEM
                             ))
                         );
-                        
+                       
                         // first, disconnect from server if we are logged in.
-                        response = server.clientCommand("/quit");
+                        if (server.isConnected()) {
+                            response = server.clientCommand("/quit");
+                        }
 
                         // stop stdin loop
                         exit = true;
                     } else if (command.name == "server") {
                         // change servers.
+                        // first, disconnect from current server
+                        if (server.isConnected()) {
+                            response = server.clientCommand("/quit");
+                        }
 
+                        // construct host information from params
+                        Strings params = Utils::split(command.params, ' ');
+                        std::string host = params[0];
+                        unsigned short port = atoi(params[1].c_str());
+
+                        // try to connect to the new server.
+                        // NOTE: the while construct is used for its
+                        // break feature;
+                        while (true) {
+                            server.server(host, port);
+                            
+                            ui->history->addItem(
+                                Message_ptr(new Message(
+                                    "Connecting to server...",
+                                    Message::SYSTEM
+                                ))
+                            );
+                            try {
+                                server.connect();
+                            } catch (std::exception& e) {
+                                ui->history->addItem(
+                                    Message_ptr(new Message(
+                                        "Connection failed!",
+                                        Message::SYSTEM
+                                        ))
+                                );
+                                
+                                break;
+                            }
+
+                            ui->history->addItem(
+                                Message_ptr(new Message(
+                                    "Authenticating...",
+                                    Message::SYSTEM
+                                ))
+                            );
+                            try {
+                                server.auth(user->getNick(), user->getName());
+                            } catch (std::exception& e) {
+                                ui->history->addItem(
+                                    Message_ptr(new Message(
+                                        "Connection lost.",
+                                        Message::SYSTEM
+                                        ))
+                                );
+                                
+                                break;
+                            }
+                           
+                            // start server socket thread to handle data from the server.
+                            // allows for non-blocking stdin.
+                            boost::thread* serverSocketThread = new boost::thread(
+                                    &IRCSocket::start, 
+                                    &server 
+                            );
+
+                            thread_group.add_thread(serverSocketThread);
+
+                            break;
+                        }
                     } else if (command.name == "chanmsg") { 
                         // if we got here, this is a message.
                         // check if we are already in a channel
@@ -198,7 +264,7 @@ int main(int argc, char *argv[])
                             // alert the user that he should join first
                             throw (
                                 std::logic_error(
-                                    "Can't send message - no active channels."
+                                    "Can't send message - no active channels"
                                 )
                             );
                         }
@@ -216,6 +282,16 @@ int main(int argc, char *argv[])
                     } else {
                         // not any of client only commands.
                         // call the protocol.
+                        //
+                        // but, check first if we are connected
+                        // to a server.
+                        if (!server.isConnected()) {
+                            throw (
+                                std::logic_error(
+                                    "Connect to a server first"
+                                )
+                            );
+                        }
 
                         response = server.clientCommand(line);
                     }

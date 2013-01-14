@@ -20,6 +20,7 @@ Channel_ptr Channel::getChannel(std::string name, bool create) {
 
     if (create) {
         Channel_ptr newChannel(new Channel(name));
+        _channels.push_back(newChannel);
         return newChannel;
     }
 

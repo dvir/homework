@@ -32,6 +32,8 @@ class IRCSocket {
 
         void connect();
 
+        bool isConnected();
+
         void send(std::string message);
 
         void read(std::string& message);

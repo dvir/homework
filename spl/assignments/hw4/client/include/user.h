@@ -23,6 +23,8 @@ class User {
 
         void setName(std::string name);
 
+        void setChanMode(std::string mode);
+
         std::string getName() const;
 
         std::string getNick() const;

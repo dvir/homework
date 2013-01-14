@@ -16,6 +16,11 @@ class UI {
 
         ~UI();
 
+        /**
+         * Reset the UI by unsetting the active channel
+         */
+        void reset();
+
         void startNamesStream();
 
         void endNamesStream();
