@@ -162,26 +162,34 @@ public class IRCProtocol implements MessagingProtocol {
             data = msg.substring(msg.indexOf(" ")+1);
         }
         
-        if (command.equals("QUIT")) {
-            return quit(data);
-        } else if (command.equals("JOIN")) {
-            return join(data);
-        } else if (command.equals("PART")) {
-            return part(data);
-        } else if (command.equals("PRIVMSG")) {
-            return privmsg(data);
-        } else if (command.equals("NOTICE")) {
-//            return notice(data);
-        } else if (command.equals("TOPIC")) {
-//            return topic(data);
-        } else if (command.equals("NICK")) {
-            return nick(data);
-        } else if (command.equals("USER")) {
-            return user(data);
-        } else if (command.equals("NAMES")) {
-            return names(data);
-        } else if (command.equals("LIST")) {
-            return list();
+        if (command.equals("NICK") || command.equals("USER")) {
+            if (command.equals("NICK")) {
+                return nick(data);
+            } else if (command.equals("USER")) {
+                return user(data);
+            }
+        } else {
+            if (!_user.isRegistered()) {
+                return errorReply(IRCProtocol.ERR.NOTREGISTERED, _user);
+            }
+
+            if (command.equals("QUIT")) {
+                return quit(data);
+            } else if (command.equals("JOIN")) {
+                return join(data);
+            } else if (command.equals("PART")) {
+                return part(data);
+            } else if (command.equals("PRIVMSG")) {
+                return privmsg(data);
+            } else if (command.equals("NOTICE")) {
+    //            return notice(data);
+            } else if (command.equals("TOPIC")) {
+    //            return topic(data);
+            } else if (command.equals("NAMES")) {
+                return names(data);
+            } else if (command.equals("LIST")) {
+                return list();
+            }
         }
 
         return command + " :Unknown command";
@@ -282,7 +290,7 @@ public class IRCProtocol implements MessagingProtocol {
         User other = User.getUser(data);
         if (other != null) {
             // nick is taken
-            return errorReply(IRCProtocol.ERR.NICKNAMEINUSE, _user);
+            return errorReply(IRCProtocol.ERR.NICKNAMEINUSE, _user, data);
         }
 
         String oldNick = _user.getNick();
@@ -332,6 +340,10 @@ public class IRCProtocol implements MessagingProtocol {
         for (int ii = 0; ii < channelNames.length; ++ii) {
             // get channel by name
             Channel channel = Channel.getChannel(channelNames[ii]);
+            if (null == channel) {
+                return errorReply(IRCProtocol.ERR.NOSUCHCHANNEL, _user, channelNames[ii]);
+            }
+
             _user.removeChannel(channel);
             channel.removeUser(_user);
             channel.notifyPart(_user);
@@ -356,7 +368,7 @@ public class IRCProtocol implements MessagingProtocol {
             List<Channel> channels = Channel.getChannels();
             for (int ii = 0; ii < channels.size(); ++ii) {
                 Channel channel = channels.get(ii); 
-                user.send(IRCProtocol.RPL.NAMEREPLY, channel.getName() + " " + channel.getNames()); 
+                user.send(reply(IRCProtocol.RPL.NAMEREPLY, user, channel.getName() + " " + channel.getNames())); 
             }
 
             user.send(reply(IRCProtocol.RPL.ENDOFNAMES, user, ":End of /NAMES list.")); 
