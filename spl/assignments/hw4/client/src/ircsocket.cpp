@@ -1,4 +1,6 @@
-#define DBG
+//#define DBG_PARSING
+//#define DBG_SERVER
+//#define DBG_SEND
 
 #include "../include/ircsocket.h"
 
@@ -39,7 +41,7 @@ bool IRCSocket::isConnected() {
 }
 
 void IRCSocket::send(std::string message) {
-#ifdef DBG
+#ifdef DBG_SEND
     this->_ui->history->addItem(
         Message_ptr(new Message(
             std::string("send -> ").append(message),
@@ -126,7 +128,7 @@ void IRCSocket::start() {
         
         IRCSocket::ServerMessage message = this->parseServerMessage(answer);
 
-#ifdef DBG
+#ifdef DBG_PARSING
     this->_ui->history->addItem(
         Message_ptr(new Message(
             std::string()
@@ -139,7 +141,7 @@ void IRCSocket::start() {
     );
 #endif
 
-#ifdef DBG
+#ifdef DBG_SERVER
     this->_ui->history->addItem(
         Message_ptr(new Message(
             message.raw,
@@ -155,23 +157,25 @@ void IRCSocket::start() {
                 this->_ui->setChannel(Channel::getChannel(message.target));
 
                 this->_ui->history->addItem(
-                        Message_ptr(new Message(
-                            std::string("Now talking on ").append(message.target),
-                            Message::SYSTEM
-                            ))
-                        );
+                    Message_ptr(new Message(
+                        std::string("Now talking on ").append(message.target),
+                        Message::SYSTEM
+                        )
+                    )
+                );
             } else {
                 // someone else joined a channel we are in
                 // add him to the names list.
                 User_ptr newUser = User::getUser(message.origin.nick);
                 this->_ui->addUser(newUser);
                 this->_ui->history->addItem(
-                        Message_ptr(new Message(
-                            std::string("has joined ").append(message.target),
-                            newUser,
-                            Message::ACTION
-                            ))
-                        );
+                    Message_ptr(new Message(
+                        std::string("has joined ").append(message.target),
+                        newUser,
+                        Message::ACTION
+                        )
+                    )
+                );
             }
 
         } else if (message.command == "PART") {
@@ -317,22 +321,79 @@ void IRCSocket::start() {
             this->_ui->title->redraw();
 
             this->_ui->history->addItem(
-                    Message_ptr(new Message(
-                        std::string("has changed the topic to: ")
-                        .append(message.text),
-                        User::getUser(message.origin.nick),
-                        Message::ACTION
-                        ))
-                    );
+                Message_ptr(new Message(
+                    std::string("has changed the topic to: ")
+                    .append(message.text),
+                    User::getUser(message.origin.nick),
+                    Message::ACTION
+                    )
+                )
+            );
         } else if (message.command == "353") { // names list
             // this will start a names stream 
             // only if there is none active
             this->_ui->startNamesStream();
             this->_ui->addNames(message.text);
+           
+            Strings params = Utils::split(message.raw, ' ');
+            std::cout << params[3] << ": " << message.text << std::endl << std::flush;
         } else if (message.command == "366") { // end names list
+            std::cout << "End of /NAMES list." << std::endl << std::flush;
             // stop streaming names to the ui.
             // this will set the names list.
             this->_ui->endNamesStream();
+
+        } else if (message.command == "403") {
+            Strings params = Utils::split(message.raw, ' ');
+            std::cout << params[3] << " :No such channel" << std::endl << std::flush;
+
+        } else if (message.command == "421") {
+            Strings params = Utils::split(message.raw, ' ');
+            std::cout << params[3] << " :Unknown command" << std::endl << std::flush;
+
+        } else if (message.command == "431") {
+            std::cout << "No nickname given" << std::endl << std::flush;
+
+        } else if (message.command == "433") {
+            Strings params = Utils::split(message.raw, ' ');
+            std::cout << params[3]  << " :Nickname is already in use" << std::endl << std::flush;
+
+        } else if (message.command == "451") {
+            std::cout << "You have not registered" << std::endl << std::flush;
+
+        } else if (message.command == "461") {
+            Strings params = Utils::split(message.raw, ' ');
+            std::cout << params[3] << " :Not enough parameters" << std::endl << std::flush;
+
+        } else if (message.command == "462") {
+            std::cout << "You may not reregister" << std::endl << std::flush;
+
+        } else if (message.command == "482") {
+            Strings params = Utils::split(message.raw, ' ');
+            std::cout << params[3] << " :You're not channel operator" << std::endl << std::flush;
+
+        } else if (message.command == "321") {
+            std::cout << "LIST:" << std::endl << std::flush;
+
+        } else if (message.command == "322") {
+            Strings params = Utils::split(message.raw, ' ');
+            std::cout << params[3] << std::endl << std::flush;
+
+        } else if (message.command == "323") {
+            std::cout << "End of /LIST" << std::endl << std::flush;
+
+        } else if (message.command == "401") {
+            this->_user->nickAccepted();
+            std::cout << "NICK accepted" << std::endl << std::flush;
+
+        } else if (message.command == "402") {
+            std::cout << "USER accepted" << std::endl << std::flush;
+
+        } else if (message.command == "404") {
+            std::cout << "User kicked" << std::endl << std::flush;
+
+        } else if (message.command == "405") {
+            std::cout << "PART success" << std::endl << std::flush;
 
         } else if (message.command == "001"
                 || message.command == "002"
@@ -397,6 +458,10 @@ std::string IRCSocket::clientCommand(std::string line) {
         // changing nick.
         return nick(command.params);
 
+    } else if (command.name == "user") {
+        // registering user
+        return user(command.params);
+
     } else if (command.name == "join") {
         // join a new channel
         return join(command.params);
@@ -439,6 +504,9 @@ void IRCSocket::auth(std::string nick, std::string name) {
 }
 
 std::string IRCSocket::nick(std::string params) {
+    // set as a pending nickname, 
+    // awaiting confirmation (401) from the server.
+    this->_user->setPendingNick(params);
     return std::string("NICK ").append(params);
 }
 

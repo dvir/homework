@@ -100,6 +100,7 @@ class ListWindow : public ContentWindow<T> {
          * Add an item to the list.
          **/
         virtual void addItem(T item) {
+std::cout << item->toString() << std::endl << std::flush;
             _list.push_back(item);
 
             this->redraw();

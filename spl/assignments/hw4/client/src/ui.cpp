@@ -30,6 +30,7 @@ void UI::reset() {
 void UI::startNamesStream() {
     if (false == _hasStartedNamesStream) {
         _hasStartedNamesStream = true;
+        std::cout << "NAMES:" << std::endl << std::flush;
     }
 }
 

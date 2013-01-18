@@ -19,6 +19,10 @@ class User {
         
         bool isInChannel(Channel_ptr channel);
 
+        void setPendingNick(std::string nick);
+
+        void nickAccepted();
+
         void setNick(std::string nick);
 
         void setName(std::string name);
@@ -50,6 +54,7 @@ class User {
         std::string _name;
         std::string _chanMode;
         Channels _channels;
+        std::string _pendingNick;
 };
 
 bool UserPointerCompare (const User_ptr l, const User_ptr r);

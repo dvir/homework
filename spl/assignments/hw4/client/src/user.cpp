@@ -42,7 +42,8 @@ User::User(std::string nick) :
     _nick(nick),
     _name(nick),
     _chanMode(""),
-    _channels()
+    _channels(),
+    _pendingNick()
 {
     // detect channel modes in the nick and set them 
     // accordingly.
@@ -57,7 +58,8 @@ User::User(User& other) :
     _nick(other.getNick()),
     _name(other.getName()),
     _chanMode(other.getChanMode()),
-    _channels(other.getChannels())
+    _channels(other.getChannels()),
+    _pendingNick()
 {           
 }
 
@@ -83,6 +85,15 @@ bool User::isInChannel(Channel_ptr channel) {
                                         channel
                                         );
     return (position != _channels.end());
+}
+
+void User::setPendingNick(std::string nick) {
+    this->_pendingNick = nick;
+}
+
+void User::nickAccepted() {
+    this->_nick = this->_pendingNick;
+    this->_pendingNick.clear();
 }
 
 void User::setNick(std::string nick) {

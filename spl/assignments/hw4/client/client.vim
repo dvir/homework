@@ -6,9 +6,7 @@ set cpo&vim
 noremap <NL> 
 noremap  
 nnoremap  :echo line(".") - line("'a") + 1
-nnoremap ; :
 nnoremap <m> :wall | !clear && make run
-map C :s/^\/\///
 nnoremap M :wall | !clear && g++ -g -Wall -Weffc++ -o %.out % && ./%.out && rm %.out
 nnoremap [ di{
 nnoremap <silent> \ :TagbarToggle
@@ -17,7 +15,6 @@ nnoremap <silent> ` :Errors
 nmap <silent> b <Plug>CamelCaseMotion_b
 xmap <silent> b <Plug>CamelCaseMotion_b
 omap <silent> b <Plug>CamelCaseMotion_b
-map c :s/^/\/\//
 nmap <silent> e <Plug>CamelCaseMotion_e
 xmap <silent> e <Plug>CamelCaseMotion_e
 omap <silent> e <Plug>CamelCaseMotion_e
