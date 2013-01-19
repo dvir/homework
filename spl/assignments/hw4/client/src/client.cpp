@@ -54,9 +54,7 @@ int main(int argc, char *argv[])
 
     boost::thread_group thread_group;
     
-    User_ptr user = User::getUser("unknown");
-
-    int ch = 0;
+    User_ptr user = User::getUser("");
    
     if (GUI) {
         initscr();          /* Start curses mode        */
@@ -84,6 +82,7 @@ int main(int argc, char *argv[])
     
     ui->title->addRefreshAfterWindow(wInput);
 
+    ui->history->setPrintToScreen(true);
     ui->history->addRefreshAfterWindow(wInput);
     ui->history->setVisibleSize(42);
  
@@ -128,7 +127,7 @@ int main(int argc, char *argv[])
     if (GUI) {
         /** with curses: **/
         std::string line; 
-        short ch;
+        short ch = 0;
         do {
             switch(ch) {   
                 case 0: // first run!
@@ -371,25 +370,6 @@ int main(int argc, char *argv[])
                             break;
                         }
 
-                        ui->history->addItem(
-                            Message_ptr(new Message(
-                                "Authenticating...",
-                                Message::SYSTEM
-                            ))
-                        );
-                        try {
-                            server.auth(user->getNick(), user->getName());
-                        } catch (std::exception& e) {
-                            ui->history->addItem(
-                                Message_ptr(new Message(
-                                    "Connection lost.",
-                                    Message::SYSTEM
-                                    ))
-                            );
-                            
-                            break;
-                        }
-                       
                         // start server socket thread to handle data from the server.
                         // allows for non-blocking stdin.
                         boost::thread* serverSocketThread = new boost::thread(

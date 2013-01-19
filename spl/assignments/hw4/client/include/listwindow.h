@@ -23,7 +23,8 @@ class ListWindow : public ContentWindow<T> {
             ContentWindow<T>(name, height, width, starty, startx),
             _list(),
             _visibleSize(-1),
-            _reverseList(true)
+            _reverseList(true),
+            _printToScreen(false)
         {
         }
 
@@ -96,11 +97,18 @@ class ListWindow : public ContentWindow<T> {
             this->refreshWindow();
         };
 
+        virtual void setPrintToScreen(bool printToScreen) {
+            this->_printToScreen = printToScreen;  
+        };
+
         /**
          * Add an item to the list.
          **/
         virtual void addItem(T item) {
-std::cout << item->toString() << std::endl << std::flush;
+            if (this->_printToScreen) {
+                std::cout << '\r' << item->toString() << std::endl << std::flush;
+            }
+
             _list.push_back(item);
 
             this->redraw();
@@ -158,6 +166,7 @@ std::cout << item->toString() << std::endl << std::flush;
         std::vector<T> _list;
         size_t _visibleSize;
         bool _reverseList;
+        bool _printToScreen;
 };
 
 #endif

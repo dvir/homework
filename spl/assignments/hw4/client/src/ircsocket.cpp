@@ -336,64 +336,69 @@ void IRCSocket::start() {
             this->_ui->addNames(message.text);
            
             Strings params = Utils::split(message.raw, ' ');
-            std::cout << params[3] << ": " << message.text << std::endl << std::flush;
+            std::cout << params[3] << ": " << message.text << std::endl;
         } else if (message.command == "366") { // end names list
-            std::cout << "End of /NAMES list." << std::endl << std::flush;
+            std::cout << "End of /NAMES list." << std::endl;
             // stop streaming names to the ui.
             // this will set the names list.
             this->_ui->endNamesStream();
 
         } else if (message.command == "403") {
             Strings params = Utils::split(message.raw, ' ');
-            std::cout << params[3] << " :No such channel" << std::endl << std::flush;
+            std::cout << params[3] << " :No such channel" << std::endl;
 
         } else if (message.command == "421") {
             Strings params = Utils::split(message.raw, ' ');
-            std::cout << params[3] << " :Unknown command" << std::endl << std::flush;
+            std::cout << params[3] << " :Unknown command" << std::endl;
 
         } else if (message.command == "431") {
-            std::cout << "No nickname given" << std::endl << std::flush;
+            std::cout << "No nickname given" << std::endl;
 
         } else if (message.command == "433") {
             Strings params = Utils::split(message.raw, ' ');
-            std::cout << params[3]  << " :Nickname is already in use" << std::endl << std::flush;
+            if (this->_user->getNick() == "") {
+                std::cout << params[2];
+            } else {
+                std::cout << params[3];
+            }
+            std::cout << " :Nickname is already in use" << std::endl;
 
         } else if (message.command == "451") {
-            std::cout << "You have not registered" << std::endl << std::flush;
+            std::cout << "You have not registered" << std::endl;
 
         } else if (message.command == "461") {
             Strings params = Utils::split(message.raw, ' ');
-            std::cout << params[3] << " :Not enough parameters" << std::endl << std::flush;
+            std::cout << params[3] << " :Not enough parameters" << std::endl;
 
         } else if (message.command == "462") {
-            std::cout << "You may not reregister" << std::endl << std::flush;
+            std::cout << "You may not reregister" << std::endl;
 
         } else if (message.command == "482") {
             Strings params = Utils::split(message.raw, ' ');
-            std::cout << params[3] << " :You're not channel operator" << std::endl << std::flush;
+            std::cout << params[3] << " :You're not channel operator" << std::endl;
 
         } else if (message.command == "321") {
-            std::cout << "LIST:" << std::endl << std::flush;
+            std::cout << "LIST:" << std::endl;
 
         } else if (message.command == "322") {
             Strings params = Utils::split(message.raw, ' ');
-            std::cout << params[3] << std::endl << std::flush;
+            std::cout << params[3] << std::endl;
 
         } else if (message.command == "323") {
-            std::cout << "End of /LIST" << std::endl << std::flush;
+            std::cout << "End of /LIST" << std::endl;
 
         } else if (message.command == "401") {
             this->_user->nickAccepted();
-            std::cout << "NICK accepted" << std::endl << std::flush;
+            std::cout << "NICK accepted" << std::endl;
 
         } else if (message.command == "402") {
-            std::cout << "USER accepted" << std::endl << std::flush;
+            std::cout << "USER accepted" << std::endl;
 
         } else if (message.command == "404") {
-            std::cout << "User kicked" << std::endl << std::flush;
+            std::cout << "User kicked" << std::endl;
 
         } else if (message.command == "405") {
-            std::cout << "PART success" << std::endl << std::flush;
+            std::cout << "PART success" << std::endl;
 
         } else if (message.command == "001"
                 || message.command == "002"

@@ -16,7 +16,7 @@ User_ptr User::getUser(std::string nick, bool create) {
     std::string rawNick = nick;
 
     // detect channel modes in the nick 
-    if (nick.at(0) == '@' || nick.at(0) == '+') {
+    if (nick.size() > 0 && (nick.at(0) == '@' || nick.at(0) == '+')) {
         nick = nick.substr(1);
     }
     
@@ -47,7 +47,7 @@ User::User(std::string nick) :
 {
     // detect channel modes in the nick and set them 
     // accordingly.
-    if (nick.at(0) == '@' || nick.at(0) == '+') {
+    if (nick.size() > 0 && (nick.at(0) == '@' || nick.at(0) == '+')) {
         this->_chanMode = nick.substr(0, 1);
         this->_nick = nick.substr(1);
         this->_name = this->_nick;
