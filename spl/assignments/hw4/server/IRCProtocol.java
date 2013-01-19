@@ -149,6 +149,10 @@ public class IRCProtocol implements MessagingProtocol {
     }
 
     public String processMessage(String msg) {
+        if (!_user.hasConnectionHandler()) {
+            throw new RuntimeException("Must set ConnectionHandler before processing messages through IRCProtocol.");
+        }
+
         if (msg.length() == 0) {
             // 3.3.1 empty messages are silently dropped
             return null;

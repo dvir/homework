@@ -56,6 +56,10 @@ public class User {
         _ch = ch;
     }
 
+    public boolean hasConnectionHandler() {
+        return (null != _ch);
+    }
+
     public List<Channel> getChannels() {
         return _channels;
     }
