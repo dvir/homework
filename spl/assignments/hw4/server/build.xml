@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="build" name="Server">
+	<presetdef name="javac">
+		<javac includeantruntime="false" />
+	</presetdef>    
+    
+    <property environment="env"/>
+    <path id="Server.classpath">
+        <pathelement location="."/>
+    </path>
+    
+    <target name="init">
+        <copy includeemptydirs="false" todir=".">
+            <fileset dir=".">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    
+    <target name="clean">
+        <delete>
+            <fileset dir="." includes="**/*.class"/>
+        </delete>
+    </target>
+    
+    <target depends="clean" name="cleanall"/>
+    
+    <target depends="init" name="build">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac destdir=".">
+            <src path="."/>
+            <classpath refid="Server.classpath"/>
+        </javac>
+    </target>
+    
+    <target name="run">
+        <java classname="Server" failonerror="true" fork="yes">
+            <arg line="6667"/>
+            <classpath refid="Server.classpath"/>
+        </java>
+    </target>
+</project>

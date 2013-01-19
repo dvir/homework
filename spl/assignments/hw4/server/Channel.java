@@ -13,7 +13,7 @@ public class Channel {
      */
     public static Channel getChannel(String name, boolean create) {
         for (int ii = 0; ii < _allChannels.size(); ++ii) {
-            if (_allChannels.get(ii).getName().equals(name)) {
+            if (_allChannels.get(ii).getName().compareTo(name) == 0) {
                 return _allChannels.get(ii);
             }
         }

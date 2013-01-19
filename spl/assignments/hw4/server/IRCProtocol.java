@@ -128,11 +128,10 @@ public class IRCProtocol implements MessagingProtocol {
     };
 
     private boolean _shouldClose;
-
     private User _user;
 
     public IRCProtocol() {
-        _user = new User();
+        _user = User.createUser();
         _shouldClose = false;
     }
 
@@ -287,8 +286,7 @@ public class IRCProtocol implements MessagingProtocol {
         }
 
         // check if the nick is taken
-        User other = User.getUser(data);
-        if (other != null) {
+        if (null != User.getUser(data)) {
             // nick is taken
             return errorReply(IRCProtocol.ERR.NICKNAMEINUSE, _user, data);
         }

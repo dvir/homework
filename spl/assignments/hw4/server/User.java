@@ -13,13 +13,30 @@ public class User {
      */
     public static User getUser(String nick) {
         for (int ii = 0; ii < _allUsers.size(); ++ii) {
-            if (_allUsers.get(ii).getNick().equals(nick)) {
+            if (_allUsers.get(ii).getNick().compareTo(nick) == 0) {
                 return _allUsers.get(ii);
             }
         }
 
         return null;
     }
+    
+    public static void removeUser(User user) {
+        for (int ii = 0; ii < _allUsers.size(); ++ii) {
+            if (_allUsers.get(ii).equals(user)) {
+                _allUsers.remove(ii);
+                break;
+            }
+        }
+    }
+
+    public static User createUser() {
+        User user = new User();
+        _allUsers.add(user);
+        return user; 
+    }
+
+    /** NON-STATIC DEFINITIONS **/
 
     private ConnectionHandler _ch;
     private boolean _isRegistered;
@@ -141,6 +158,7 @@ public class User {
     }
 
     public void hasQuit() {
+        User.removeUser(this);
         System.out.println(getNick() + " has quit.");
     }
 }
