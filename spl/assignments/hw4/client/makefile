@@ -1,7 +1,7 @@
 # define some Makefile variables for the compiler and compiler flags
 # to use Makefile variables later in the Makefile: $()
 CC = g++
-CFLAGS = -g -Wall #-Weffc++ 
+CFLAGS = -g -Wall -Weffc++ 
 CLIBS = -lncurses -lboost_system -lboost_thread -lpthread
 
 # All Targets

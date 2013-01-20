@@ -6,6 +6,25 @@
 #include <istream>
 #include <iomanip>
 
+Message_ptr Message::createMessage(std::string text) {
+    return Message_ptr(new Message(text));
+}
+
+Message_ptr Message::createMessage(std::string text, User_ptr user) {
+    return Message_ptr(new Message(text, user));
+}
+
+Message_ptr Message::createMessage(std::string text, Message::Type type) {
+    return Message_ptr(new Message(text, type));
+}
+
+Message_ptr Message::createMessage(std::string text, 
+                                   User_ptr user, 
+                                   Message::Type type) 
+{
+    return Message_ptr(new Message(text, user, type));
+}
+
 Message::Message(std::string text) :
     _user(User_ptr()),
     _text(text),
@@ -43,7 +62,7 @@ Message::Message(std::string text, User_ptr user, Message::Type type) :
 }
 
 Message::Message (Message& other) :
-    _user(User_ptr(new User(*other.getUser()))),
+    _user(User::getUser(*other.getUser())),
     _text(other.getText()),
     _nick(other.getNick()),
     _timestamp(other.getTimestamp()),
@@ -75,7 +94,7 @@ std::string Message::getNick() const {
     return _nick;
 }
 
-short Message::getType() const {
+Message::Type Message::getType() const {
     return _type;
 }
 

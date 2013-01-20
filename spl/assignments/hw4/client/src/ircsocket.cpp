@@ -43,10 +43,10 @@ bool IRCSocket::isConnected() {
 void IRCSocket::send(std::string message) {
 #ifdef DBG_SEND
     this->_ui->history->addItem(
-        Message_ptr(new Message(
+        Message::createMessage(
             std::string("send -> ").append(message),
             Message::DEBUG
-        ))
+        )
     );
 #endif
 
@@ -116,10 +116,10 @@ void IRCSocket::start() {
         } catch (std::exception& e) {
             // connection termianted. stop cleanly
             this->_ui->history->addItem(
-                Message_ptr(new Message(
+                Message::createMessage(
                     "Disconnected from server.",
                     Message::SYSTEM
-                ))
+                )
             );
             return;
         }
@@ -130,23 +130,23 @@ void IRCSocket::start() {
 
 #ifdef DBG_PARSING
     this->_ui->history->addItem(
-        Message_ptr(new Message(
+        Message::createMessage(
             std::string()
             .append("origin.nick: ").append(message.origin.nick).append(" - ")
             .append("command: ").append(message.command).append(" - ")
             .append("text: ").append(message.text).append(" - ")
             .append("target: ").append(message.target).append(" - "),
             Message::DEBUG
-        ))
+        )
     );
 #endif
 
 #ifdef DBG_SERVER
     this->_ui->history->addItem(
-        Message_ptr(new Message(
+        Message::createMessage(
             message.raw,
             Message::DEBUG
-        ))
+        )
     );
 #endif
 
@@ -157,10 +157,9 @@ void IRCSocket::start() {
                 this->_ui->setChannel(Channel::getChannel(message.target));
 
                 this->_ui->history->addItem(
-                    Message_ptr(new Message(
+                    Message::createMessage(
                         std::string("Now talking on ").append(message.target),
                         Message::SYSTEM
-                        )
                     )
                 );
             } else {
@@ -169,11 +168,10 @@ void IRCSocket::start() {
                 User_ptr newUser = User::getUser(message.origin.nick);
                 this->_ui->addUser(newUser);
                 this->_ui->history->addItem(
-                    Message_ptr(new Message(
+                    Message::createMessage(
                         std::string("has joined ").append(message.target),
                         newUser,
                         Message::ACTION
-                        )
                     )
                 );
             }
@@ -184,11 +182,11 @@ void IRCSocket::start() {
                 this->_ui->setChannel(Channel_ptr());
 
                 this->_ui->history->addItem(
-                        Message_ptr(new Message(
-                            std::string("You have left ").append(message.target),
-                            Message::SYSTEM
-                            ))
-                        );
+                    Message::createMessage(
+                        std::string("You have left ").append(message.target),
+                        Message::SYSTEM
+                    )
+                );
             } else {
                 // someone quit the current channel.
                 // find him on the names list and remove him.
@@ -204,12 +202,12 @@ void IRCSocket::start() {
                             text.append(" (").append(message.text).append(")");
                         }
                         this->_ui->history->addItem(
-                                Message_ptr(new Message(
-                                    text,
-                                    users[ii],
-                                    Message::ACTION
-                                    ))
-                                );
+                            Message::createMessage(
+                                text,
+                                users[ii],
+                                Message::ACTION
+                            )
+                        );
 
                         break;
                     }
@@ -221,20 +219,20 @@ void IRCSocket::start() {
                     && message.target == this->_ui->getChannel()->getName()) {
                 // message to current channel!
                 this->_ui->history->addItem(
-                        Message_ptr(new Message(
-                            message.text,
-                            User::getUser(message.origin.nick)
-                            ))
-                        );
+                    Message::createMessage(
+                        message.text,
+                        User::getUser(message.origin.nick)
+                    )
+                );
             } else if (message.target == this->_user->getNick()) {
                 // a private message to the user
                 this->_ui->history->addItem(
-                        Message_ptr(new Message(
-                            message.text,
-                            User::getUser(message.origin.nick),
-                            Message::PRIVATE 
-                            ))
-                        );
+                    Message::createMessage(
+                        message.text,
+                        User::getUser(message.origin.nick),
+                        Message::PRIVATE 
+                    )
+                );
             }
 
         } else if (message.command == "QUIT") {
@@ -251,12 +249,12 @@ void IRCSocket::start() {
                         text.append(" (").append(message.text).append(")");
                     }
                     this->_ui->history->addItem(
-                            Message_ptr(new Message(
-                                text,
-                                users[ii],
-                                Message::ACTION
-                                ))
-                            );
+                        Message::createMessage(
+                            text,
+                            users[ii],
+                            Message::ACTION
+                        )
+                    );
 
                     break;
                 }
@@ -283,12 +281,12 @@ void IRCSocket::start() {
             }
             
             this->_ui->history->addItem(
-                Message_ptr(new Message(
+                Message::createMessage(
                     std::string("is now known as ")
                     .append(message.text),
                     user,
                     Message::ACTION
-                ))
+                )
             );
             
             user->setNick(message.text);
@@ -298,20 +296,20 @@ void IRCSocket::start() {
                     message.target == this->_ui->getChannel()->getName()) {
                 // message to current channel!
                 this->_ui->history->addItem(
-                        Message_ptr(new Message(
-                            message.text,
-                            User::getUser(message.origin.nick)
-                            ))
-                        );
+                    Message::createMessage(
+                        message.text,
+                        User::getUser(message.origin.nick)
+                    )
+                );
             } else if (message.target == this->_user->getNick()) {
                 // a private notice to the user
                 this->_ui->history->addItem(
-                        Message_ptr(new Message(
-                            message.text,
-                            User::getUser(message.origin.nick),
-                            Message::PRIVATE 
-                            ))
-                        );
+                    Message::createMessage(
+                        message.text,
+                        User::getUser(message.origin.nick),
+                        Message::PRIVATE 
+                    )
+                );
             }
 
         } else if (message.command == "332" || message.command == "TOPIC") {
@@ -321,12 +319,11 @@ void IRCSocket::start() {
             this->_ui->title->redraw();
 
             this->_ui->history->addItem(
-                Message_ptr(new Message(
+                Message::createMessage(
                     std::string("has changed the topic to: ")
                     .append(message.text),
                     User::getUser(message.origin.nick),
                     Message::ACTION
-                    )
                 )
             );
         } else if (message.command == "353") { // names list
@@ -415,22 +412,20 @@ void IRCSocket::start() {
                 || message.command == "376"
                 ) {
             this->_ui->history->addItem(
-                    Message_ptr(new Message(
-                        message.text,
-                        Message::SYSTEM
-                        ))
-                    );
+                Message::createMessage(
+                    message.text,
+                    Message::SYSTEM
+                )
+            );
         } else if (message.command == "PING") {
             std::ostringstream response;
             response << "PONG :" << message.text;
             _ch->send(response.str());
         } else if (message.command == "NOTICE AUTH") {
             this->_ui->history->addItem(
-                Message_ptr(
-                    new Message(
-                        message.text,
-                        Message::SYSTEM
-                    )
+                Message::createMessage(
+                    message.text,
+                    Message::SYSTEM
                 )
             );
         }

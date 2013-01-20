@@ -38,6 +38,11 @@ User_ptr User::getUser(std::string nick, bool create) {
     return User_ptr();
 }
 
+User_ptr User::getUser(const User& user) {
+    return User_ptr(new User(user));
+}
+
+
 User::User(std::string nick) :
     _nick(nick),
     _name(nick),
@@ -54,7 +59,7 @@ User::User(std::string nick) :
     }
 }
 
-User::User(User& other) :
+User::User(const User& other) :
     _nick(other.getNick()),
     _name(other.getName()),
     _chanMode(other.getChanMode()),
@@ -141,6 +146,6 @@ bool User::operator<(const User& rhs) const {
 }
 
 
-bool UserPointerCompare (const User_ptr l, const User_ptr r) {
+bool User::PointerCompare (const User_ptr l, const User_ptr r) {
     return *l < *r;
 };

@@ -27,17 +27,10 @@
 #include "../include/inputwindow.h"
 #include "../include/utils.h"
 
-void debug (ListWindow<Message_ptr>* history, std::string message) {
-    history->addItem(
-        Message_ptr(
-            new Message(
-                message, 
-                User::getUser("debug")
-            )
-        )
-    );
-}
-
+/**
+ * Command line parameters:
+ * ./bin/client host port [with_gui]
+ */
 int main(int argc, char *argv[])
 {
     if (argc < 2 || argc > 3) {
@@ -52,10 +45,20 @@ int main(int argc, char *argv[])
         GUI = false;
     }
 
+    /**
+     * Thread group holding the server connection thread(s).
+     * Makes it easier to .join_all() threads in the end of the program.
+     */
     boost::thread_group thread_group;
-    
-    User_ptr user = User::getUser("");
    
+    /**
+     * Create current user object.
+     */
+    User_ptr user = User::getUser("");
+  
+    /**
+     * If allowed, start GUI mode 
+     */
     if (GUI) {
         initscr();          /* Start curses mode        */
         start_color();          /* Start the color functionality */
@@ -67,49 +70,52 @@ int main(int argc, char *argv[])
         assume_default_colors(COLOR_GREEN, COLOR_BLACK);
     }
 
+    // input window (down bottom)
     InputWindow* wInput = new InputWindow("input", 3, 153, 45, 0);
+
+    // names window (all across the right side of the UI)
     ListWindow<User_ptr>* wNames = new ListWindow<User_ptr>("names", 46, 17, 2, 152);
+    
+    // set options for names window
+    wNames->addRefreshAfterWindow(wInput);
+    wNames->setVisibleSize(44);
+    wNames->setReverseList(false);
+    wNames->addItem(user);
+
+    // title window (all across the top of the UI)
     ContentWindow<Channel_ptr>* wTitle = new ContentWindow<Channel_ptr>("title", 3, 169, 0, 0);
+   
+    // set options for title window
+    wTitle->addRefreshAfterWindow(wInput);
+
+    // history window (huge window in the middle), holding channel messages
+    // and server communication messages.
     ListWindow<Message_ptr>* wHistory = new ListWindow<Message_ptr>("main", 44, 153, 2, 0);
+    
+    // set options for history window
+    wHistory->setPrintToScreen(true);
+    wHistory->addRefreshAfterWindow(wInput);
+    wHistory->setVisibleSize(42);
    
     // UI is a set of title, history, names and input windows.
     UI_ptr ui(new UI(wTitle, wHistory, wNames, wInput));
     
-    ui->names->addRefreshAfterWindow(wInput);
-    ui->names->setVisibleSize(44);
-    ui->names->setReverseList(false);
-    ui->names->addItem(user);
-    
-    ui->title->addRefreshAfterWindow(wInput);
-
-    ui->history->setPrintToScreen(true);
-    ui->history->addRefreshAfterWindow(wInput);
-    ui->history->setVisibleSize(42);
- 
+    // set UI and current user for the IRC client
     IRCSocket server(ui, user);
+   
+    // try to connect to the given host and port.
+    server.server(host, port);
     
-    while (true) {
-        server.server(host, port);
-        
-        ui->history->addItem(
-            Message_ptr(new Message(
-                "Connecting to server...",
-                Message::SYSTEM
-            ))
-        );
-        try {
-            server.connect();
-        } catch (std::exception& e) {
-            ui->history->addItem(
-                Message_ptr(new Message(
-                    "Connection failed!",
-                    Message::SYSTEM
-                    ))
-            );
-            
-            break;
-        }
+    ui->history->addItem(
+        Message::createMessage(
+            "Connecting to server...",
+            Message::SYSTEM
+        )
+    );
 
+    try {
+        server.connect();
+        
         // start server socket thread to handle data from the server.
         // allows for non-blocking stdin.
         boost::thread* serverSocketThread = new boost::thread(
@@ -119,7 +125,13 @@ int main(int argc, char *argv[])
 
         thread_group.add_thread(serverSocketThread);
 
-        break;
+    } catch (std::exception& e) {
+        ui->history->addItem(
+            Message::createMessage(
+                "Connection failed!",
+                Message::SYSTEM
+            )
+        );
     }
     
     bool exit = false;
@@ -164,10 +176,10 @@ int main(int argc, char *argv[])
                         } else if (command.name == "exit") {
                             // exit client cleanly!
                             ui->history->addItem(
-                                Message_ptr(new Message(
+                                Message::createMessage(
                                     "Shutting down...",
                                     Message::SYSTEM
-                                ))
+                                )
                             );
                            
                             // first, disconnect from server if we are logged in.
@@ -190,30 +202,18 @@ int main(int argc, char *argv[])
                             unsigned short port = atoi(params[1].c_str());
 
                             // try to connect to the new server.
-                            // NOTE: the while construct is used for its
-                            // break feature;
-                            while (true) {
-                                server.server(host, port);
-                                
-                                ui->history->addItem(
-                                    Message_ptr(new Message(
-                                        "Connecting to server...",
-                                        Message::SYSTEM
-                                    ))
-                                );
-                                try {
-                                    server.connect();
-                                } catch (std::exception& e) {
-                                    ui->history->addItem(
-                                        Message_ptr(new Message(
-                                            "Connection failed!",
-                                            Message::SYSTEM
-                                            ))
-                                    );
-                                    
-                                    break;
-                                }
+                            server.server(host, port);
+                            
+                            ui->history->addItem(
+                                Message::createMessage(
+                                    "Connecting to server...",
+                                    Message::SYSTEM
+                                )
+                            );
 
+                            try {
+                                server.connect();
+                                
                                 // start server socket thread to handle data from the server.
                                 // allows for non-blocking stdin.
                                 boost::thread* serverSocketThread = new boost::thread(
@@ -223,7 +223,13 @@ int main(int argc, char *argv[])
 
                                 thread_group.add_thread(serverSocketThread);
 
-                                break;
+                            } catch (std::exception& e) {
+                                ui->history->addItem(
+                                    Message::createMessage(
+                                        "Connection failed!",
+                                        Message::SYSTEM
+                                    )
+                                );
                             }
                         } else if (command.name == "chanmsg") { 
                             // if we got here, this is a message.
@@ -239,8 +245,12 @@ int main(int argc, char *argv[])
                             }
                     
                             // put it in the channel history list
-                            Message_ptr message(new Message(line, user));
-                            ui->history->addItem(message);
+                            ui->history->addItem(
+                                    Message::createMessage(
+                                        line,
+                                        user
+                                    )
+                            );
 
                             // transmit message to the server
                             response = server.message(
@@ -268,11 +278,9 @@ int main(int argc, char *argv[])
                     } catch (std::exception& error) {
                         // display error to client
                         ui->history->addItem(
-                            Message_ptr(
-                                new Message(
-                                    error.what(),
-                                    Message::ERROR
-                                )
+                            Message::createMessage(
+                                error.what(),
+                                Message::ERROR
                             ) 
                         );
 
@@ -306,7 +314,10 @@ int main(int argc, char *argv[])
             std::string response;
 
             try {
-                    
+                   
+                // parse the client command. if it isn't starting
+                // with a slash ('/') it will be regarded
+                // as a channel message.
                 IRCSocket::ClientCommand command = IRCSocket::parseClientCommand(line);
                 
                 // if it's any of client only commands, handle here
@@ -320,10 +331,10 @@ int main(int argc, char *argv[])
                 } else if (command.name == "exit") {
                     // exit client cleanly!
                     ui->history->addItem(
-                        Message_ptr(new Message(
+                        Message::createMessage(
                             "Shutting down...",
                             Message::SYSTEM
-                        ))
+                        )
                     );
                    
                     // first, disconnect from server if we are logged in.
@@ -348,27 +359,16 @@ int main(int argc, char *argv[])
                     // try to connect to the new server.
                     // NOTE: the while construct is used for its
                     // break feature;
-                    while (true) {
-                        server.server(host, port);
-                        
-                        ui->history->addItem(
-                            Message_ptr(new Message(
-                                "Connecting to server...",
-                                Message::SYSTEM
-                            ))
-                        );
-                        try {
-                            server.connect();
-                        } catch (std::exception& e) {
-                            ui->history->addItem(
-                                Message_ptr(new Message(
-                                    "Connection failed!",
-                                    Message::SYSTEM
-                                    ))
-                            );
-                            
-                            break;
-                        }
+                    server.server(host, port);
+                    
+                    ui->history->addItem(
+                        Message::createMessage(
+                            "Connecting to server...",
+                            Message::SYSTEM
+                        )
+                    );
+                    try {
+                        server.connect();
 
                         // start server socket thread to handle data from the server.
                         // allows for non-blocking stdin.
@@ -379,7 +379,13 @@ int main(int argc, char *argv[])
 
                         thread_group.add_thread(serverSocketThread);
 
-                        break;
+                    } catch (std::exception& e) {
+                        ui->history->addItem(
+                            Message::createMessage(
+                                "Connection failed!",
+                                Message::SYSTEM
+                            )
+                        );
                     }
                 } else if (command.name == "chanmsg") { 
                     // if we got here, this is a message.
@@ -395,8 +401,13 @@ int main(int argc, char *argv[])
                     }
             
                     // put it in the channel history list
-                    Message_ptr message(new Message(line, user));
-                    ui->history->addItem(message);
+                    ui->history->addItem(
+                            Message::createMessage(
+                                line,
+                                user
+                            )
+                    );
+
 
                     // transmit message to the server
                     response = server.message(
@@ -424,11 +435,9 @@ int main(int argc, char *argv[])
             } catch (std::exception& error) {
                 // display error to client
                 ui->history->addItem(
-                    Message_ptr(
-                        new Message(
-                            error.what(),
-                            Message::ERROR
-                        )
+                    Message::createMessage(
+                        error.what(),
+                        Message::ERROR
                     ) 
                 );
 

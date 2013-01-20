@@ -55,7 +55,7 @@ void UI::endNamesStream() {
             users.push_back(newUser);
         }
 
-        sort(users.begin(), users.end(), UserPointerCompare);
+        sort(users.begin(), users.end(), User::PointerCompare);
         this->addUsers(users);
         _namesStream.clear();
     }

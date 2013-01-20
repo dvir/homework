@@ -8,13 +8,19 @@
 
 class Utils {
     public:
-        // trim from start
+        /**
+         * Trim string from left.
+         */
         static std::string &ltrim(std::string &s);
 
-        // trim from end
+        /**
+         * Trim string from right.
+         */
         static std::string &rtrim(std::string &s);
 
-        // trim from both ends
+        /**
+         * Trim string from both left and right.
+         */
         static std::string &trim(std::string &s);
 
         /**
@@ -25,12 +31,20 @@ class Utils {
         **/
         static std::string wordwrap(const std::string &str, size_t width);
 
+        /**
+         * Split a string into a vector of strings by a delimiter.
+         */
+        static std::vector<std::string> split(const std::string &s, char delim);
         static std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems);
 
-        static std::vector<std::string> split(const std::string &s, char delim);
-       
+        /**
+         * Find the index of the nth character of a kind in a string.
+         */
         static size_t find_nth(const std::string &s, const std::string &delim, unsigned long n);
 
+        /**
+         * Collapse multiple spaces into one space.
+         */
         static std::string collapseMultipleSpaces(const std::string &s);
 };
 

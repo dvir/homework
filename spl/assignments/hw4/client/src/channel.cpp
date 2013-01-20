@@ -34,9 +34,6 @@ Channel::Channel(std::string name) :
 {
 }
 
-Channel::~Channel() {
-}
-
 void Channel::setTopic(std::string topic) {
     this->_topic = topic;  
 }

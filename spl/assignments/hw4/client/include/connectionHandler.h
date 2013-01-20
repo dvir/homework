@@ -7,47 +7,80 @@
 
 class ConnectionHandler {
     public:
+        /**
+         * Construct a ConnectionHandler with a given host and port.
+         */
         ConnectionHandler(std::string host, short port);
+
+        /**
+         * Destroy a ConnectionHandler by closing the socket connection.
+         */
         ~ConnectionHandler();
 
-        // Connect to the remote machine
+        /**
+         * Initiates connection process to the given host and port.
+         * Tries to resolve host names.
+         */
         void connect();
 
-        // Whether we are still connected to the host or not
+        /**
+         * Whether we are still connected to the host or not
+         */
         bool isConnected();
 
-        // Read a fixed number of bytes from the server - blocking.
-        // Returns false in case the connection is closed before bytesToRead bytes can be read.
+        /**
+         * Read a fixed number of bytes from the server - blocking.
+         * @throws an exception if an error occurred.
+         */
         void getBytes(char bytes[], unsigned int bytesToRead);
 
-        // Send a fixed number of bytes from the client - blocking.
-        // Returns false in case the connection is closed before all the data is sent.
+        /**
+         * Send a fixed number of bytes from the client - blocking.
+         * @throws an exception if an error occurred.
+         */
         void sendBytes(const char bytes[], int bytesToWrite);
 
-        // Read an ascii line from the server
-        // Returns false in case connection closed before a newline can be read.
+        /**
+         * Read an ascii line from the server
+         * @throws an exception if an error occurred.
+         */
         void read(std::string& line);
 
-        // Send an ascii line from the server
-        // Returns false in case connection closed before all the data is sent.
+        /**
+         * Send an ascii line from the server
+         * @throws an exception if an error occurred.
+         */
         void send(const std::string& line);
 
-        // Get Ascii data from the server until the delimiter character
-        // Returns false in case connection closed before null can be read.
+        /**
+         * Get Ascii data from the server until the delimiter character
+         * @throws an exception if an error occurred.
+         */
         void getFrameAscii(std::string& frame, char delimiter);
 
-        // Send a message to the remote host.
-        // Returns false in case connection is closed before all the data is sent.
+        /**
+         * Send a message to the remote host.
+         * @throws an exception if an error occurred.
+         */
         void sendFrameAscii(const std::string& frame, char delimiter);
 
         // Close down the connection properly.
         void close();
 
     private:
+        /** Current host name/address. **/
         const std::string _host;
+
+        /** Current host port. **/
         const short _port;
-        boost::asio::io_service _io_service;   // Provides core I/O functionality
+
+        /** IO service. **/
+        boost::asio::io_service _io_service;
+
+        /** Connection socket. **/
         boost::asio::ip::tcp::socket _socket; 
+
+        /** Connection state. **/
         bool _connected;
 };
 
