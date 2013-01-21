@@ -8,7 +8,10 @@ public class ConnectionHandler implements Runnable {
     private final Tokenizer _tokenizer;
     private final MessagingProtocol _protocol;
 
-
+    /**
+     * Construct a ConnectionHandler from a set of Sockett, Encoder,
+     * Tokenizer and MessagingProtocol.
+     */
     public ConnectionHandler(Socket s, Encoder encoder, Tokenizer tokenizer, MessagingProtocol protocol) {
         _socket = s;
         _encoder = encoder;
@@ -16,7 +19,16 @@ public class ConnectionHandler implements Runnable {
         _protocol = protocol;
     }
 
-    public void run() {
+    /**
+     * Runnable method for ConnectionHandler.
+     * Each ConnectionHandler (possibly) runs in it's own
+     * thread to avoid blocking when having multiple
+     * ConnectionHandler running concurrently.
+     */
+     public void run() {
+        // while the protocol isn't initiating a shutdown
+        // procedure, and the socket is still open - try to read
+        // a new token from the socket and process it by the protocol.
         while (!_protocol.shouldClose() && !_socket.isClosed()) {                          
             try {
                 if (!_tokenizer.isAlive())
@@ -33,6 +45,7 @@ public class ConnectionHandler implements Runnable {
                     }
                 }
             } catch (IOException e) {
+                // in case an error occurred, terminate connection.
                 _protocol.connectionTerminated();
                 break;
             }
@@ -47,6 +60,10 @@ public class ConnectionHandler implements Runnable {
         System.out.println("thread done");
     }
 
+    /**
+     * Send a string message to the associated socket,
+     * encoded by the given Encoder.
+     */
     public boolean send(String data) { 
         try {
             byte[] buf = _encoder.toBytes(data + "\n");

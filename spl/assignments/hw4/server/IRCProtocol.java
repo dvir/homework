@@ -1,6 +1,9 @@
 import java.util.*;
 
 public class IRCProtocol implements MessagingProtocol {
+    /**
+     * IRC ERR numeric replies.
+     */
     public enum ERR {
         /*
         403 ERR NOSUCHCHANNEL “< channelname > :No such channel”
@@ -57,8 +60,8 @@ public class IRCProtocol implements MessagingProtocol {
         */
         CHANOPRIVSNEEDED(482, "You’re not channel operator");
 
-        private final int _numericReply;
-        private final String _text;
+        private final int _numericReply; // numeric reply
+        private final String _text; // numeric reply text
 
         ERR(int numericReply, String text) { 
             _numericReply = numericReply; 
@@ -74,6 +77,9 @@ public class IRCProtocol implements MessagingProtocol {
         }
     };
 
+    /**
+     * IRC RPL numeric replies
+     */
     public enum RPL {
         /*
          * “< channel >< nick >< nick > [...]]]”
@@ -116,7 +122,7 @@ public class IRCProtocol implements MessagingProtocol {
          */
         PARTSUCCESS(405);
 
-        private final int _numericReply;
+        private final int _numericReply; // numeric reply
 
         RPL(int numericReply) { 
             _numericReply = numericReply; 
@@ -127,27 +133,41 @@ public class IRCProtocol implements MessagingProtocol {
         }
     };
 
-    private boolean _shouldClose;
-    private User _user;
+    private boolean _shouldClose; // should we close the connection
+    private User _user; // the user associated with the protocol instance
 
     public IRCProtocol() {
         _user = User.createUser();
         _shouldClose = false;
     }
 
+    /**
+     * Set current user ConnectionHandler.
+     */
     public void setConnectionHandler(ConnectionHandler ch) {
         _user.setConnectionHandler(ch);
     }
 
+    /**
+     * Whether we should close the connection or not.
+     */
     public boolean shouldClose() {
         return _shouldClose;
     }
 
+    /**
+     * Terminate connection.
+     */
     public void connectionTerminated() {
         _shouldClose = true;
         _user.hasQuit();
     }
 
+    /**
+     * Process a given message.
+     *
+     * @return the answer to send back.
+     */
     public String processMessage(String msg) {
         if (!_user.hasConnectionHandler()) {
             throw new RuntimeException("Must set ConnectionHandler before processing messages through IRCProtocol.");
@@ -158,13 +178,16 @@ public class IRCProtocol implements MessagingProtocol {
             return null;
         }
 
+        // split message received to relevant parts 
         String[] params = msg.split(" ", 2);
         String command = params[0];
         String data = "";
         if (msg.indexOf(" ") > -1) {
             data = msg.substring(msg.indexOf(" ")+1);
         }
-        
+       
+        // we treat NICK and USER commands differently,
+        // as they may happen even if the user isn't registered yet
         if (command.equals("NICK") || command.equals("USER")) {
             if (command.equals("NICK")) {
                 return nick(data);
@@ -184,10 +207,6 @@ public class IRCProtocol implements MessagingProtocol {
                 return part(data);
             } else if (command.equals("PRIVMSG")) {
                 return privmsg(data);
-            } else if (command.equals("NOTICE")) {
-    //            return notice(data);
-            } else if (command.equals("TOPIC")) {
-    //            return topic(data);
             } else if (command.equals("NAMES")) {
                 return names(data);
             } else if (command.equals("LIST")) {
@@ -198,10 +217,17 @@ public class IRCProtocol implements MessagingProtocol {
         return command + " :Unknown command";
     }
 
+    /**
+     * Proxy for errorReply with no message.
+     */
     private static String errorReply(IRCProtocol.ERR type, User user) {
         return errorReply(type, user, "");
     }
 
+    /**
+     * Construct an error reply string of a given type, 
+     * with an associated user and given text message.
+     */
     private static String errorReply(IRCProtocol.ERR type, User user, String text) {
         if (text.length() > 0) {
             text = " " + text;
@@ -210,10 +236,17 @@ public class IRCProtocol implements MessagingProtocol {
         return ":server " + type.getNumericReply() + " " + user.getNick() + text + " :" + type.getText();
     }
 
+    /**
+     * Proxy for a reply with no message.
+     */
     private static String reply(IRCProtocol.RPL type, User user) {
         return reply(type, user, "");
     }
 
+    /**
+     * Construct a reply string of a given type,
+     * with an associated user and a given text message.
+     */
     private static String reply(IRCProtocol.RPL type, User user, String text) {
         if (text.length() > 0) {
             text = " " + text;
@@ -284,6 +317,9 @@ public class IRCProtocol implements MessagingProtocol {
         return reply(IRCProtocol.RPL.USERACCEPTED, _user);
     }
 
+    /**
+     * NICK <nick>
+     */
     private String nick(String data) {
         if (data.length() == 0) {
             return errorReply(IRCProtocol.ERR.NEEDMOREPARAMS, _user, "NICK");
@@ -306,6 +342,9 @@ public class IRCProtocol implements MessagingProtocol {
         return reply(IRCProtocol.RPL.NICKACCEPTED, _user);
     }
 
+    /**
+     * JOIN #channel 
+     */
     private String join(String data) {
         if (data.length() == 0) {
             return errorReply(IRCProtocol.ERR.NEEDMOREPARAMS, _user, "JOIN");
@@ -331,6 +370,9 @@ public class IRCProtocol implements MessagingProtocol {
         return null;
     }
 
+    /**
+     * PART #channel
+     */
     private String part(String data) {
         if (data.length() == 0) {
             return errorReply(IRCProtocol.ERR.NEEDMOREPARAMS, _user, "PART");
@@ -354,6 +396,9 @@ public class IRCProtocol implements MessagingProtocol {
         return reply(IRCProtocol.RPL.PARTSUCCESS, _user);
     }
 
+    /**
+     * QUIT <:message>
+     */
     private String quit(String data) {
         _shouldClose = true;
         _user.notifyQuit(data);
@@ -361,10 +406,16 @@ public class IRCProtocol implements MessagingProtocol {
         return null;
     }
 
+    /**
+     * Create channel names string. Part of /NAMES command reply.
+     */
     public static String sendNames(User user, Channel channel) {
         return sendNames(user, channel.getName());
     }
 
+    /**
+     * Create channel names string. Part of /NAMES command reply.
+     */
     public static String sendNames(User user, String data) {
         if (data.length() == 0) {
             List<Channel> channels = Channel.getChannels();
@@ -387,7 +438,10 @@ public class IRCProtocol implements MessagingProtocol {
         return null;
     }
 
+    /**
+     * Socket close method.
+     */
     public boolean isEnd(String msg) {
-        return msg.equalsIgnoreCase("bye");
+        return msg.equalsIgnoreCase("QUIT");
     }
 }

@@ -1,8 +1,14 @@
 import java.util.*;
 
 public class Channel {
+    /**
+     * Static list of channels created by our factory.
+     */
     private static List<Channel> _allChannels = new ArrayList<Channel>();
 
+    /**
+     * Returns list of channels created by our factory.
+     */
     public static List<Channel> getChannels() {
         return _allChannels;
     }
@@ -10,6 +16,7 @@ public class Channel {
     /**
      * Find channel with a given name and return the 
      * Channel object representing it.
+     * If it doesn't exist and @param create is true, create it.
      */
     public static Channel getChannel(String name, boolean create) {
         for (int ii = 0; ii < _allChannels.size(); ++ii) {
@@ -29,10 +36,16 @@ public class Channel {
         return null;
     }
 
+    /**
+     * Proxy for getChannel, defining @param create to be false.
+     */
     public static Channel getChannel(String name) {
         return getChannel(name, false);
     }
 
+    /**
+     * Remove a channel from our factory.
+     */
     public static void removeChannel(Channel channel) {
         for (int ii = 0; ii < _allChannels.size(); ++ii) {
             if (_allChannels.get(ii).equals(channel)) {
@@ -43,28 +56,69 @@ public class Channel {
     }
 
 
-    private String _name;
-    private List<User> _users;
-    private User _chanop;
+    /** NON-STATIC DEFINITIONS **/
+    
+    private String _name; // the channel name
+    private List<User> _users; // the list of users in the Channel
+    private User _chanop; // the chanop user.
 
-    public Channel(String name) {
+    /**
+     * Channel constructor, receiving only a name.
+     * NOTE: Private because this is factory class.
+     */
+    private Channel(String name) {
         _name = name;
         _users = new ArrayList<User>();
         _chanop = null;
     }
 
+    /**
+     * Set the channel's chanop user.
+     */
     public void setChanOp(User user) {
         _chanop = user;
     }
 
+    /**
+     * Get the channel's chanop user.
+     */
     public User getChanOp() {
         return _chanop;
     }
 
+    /**
+     * Get a list of users currently in the channel.
+     */
     public List<User> getUsers() {
         return _users;
     }
 
+    /**
+     * Add user to the channel users list.
+     */
+    public void addUser(User user) {
+        _users.add(user);
+    }
+    
+    /**
+     * Remove user from the channel users list.
+     */
+    public void removeUser(User user) {
+        for (int ii = 0; ii < _users.size(); ++ii) {
+            if (_users.get(ii).equals(user)) {
+                _users.remove(ii);
+                break;
+            }
+        }
+
+        if (_users.size() == 0) {
+            Channel.removeChannel(this);
+        }
+    }
+
+    /**
+     * Get the channel name.
+     */
     public String getName() {
         return _name;
     }
@@ -119,6 +173,10 @@ public class Channel {
         IRCProtocol.sendNames(user, this);
     }
 
+    /**
+     * Get a space-separated string of all names in the channel, 
+     * with their chan mode prefixing their name.
+     */
     public String getNames() {
         String names = "";
         for (int jj = 0; jj < _users.size(); ++jj) {
@@ -135,10 +193,6 @@ public class Channel {
         return names;
     }
 
-    public void addUser(User user) {
-        _users.add(user);
-    }
-    
     /**
      * Notify all the users in the channel that a user has parted.
      */
@@ -148,19 +202,6 @@ public class Channel {
             _users.get(jj).partNotification(user, this);
 
             names += _users.get(jj).getNick() + " ";
-        }
-    }
-
-    public void removeUser(User user) {
-        for (int ii = 0; ii < _users.size(); ++ii) {
-            if (_users.get(ii).equals(user)) {
-                _users.remove(ii);
-                break;
-            }
-        }
-
-        if (_users.size() == 0) {
-            Channel.removeChannel(this);
         }
     }
 }
