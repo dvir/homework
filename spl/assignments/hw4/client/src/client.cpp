@@ -1,5 +1,3 @@
-#define DBG
-
 #include <curses.h>
 #include <iostream>
 #include <sstream>
@@ -33,7 +31,7 @@
  */
 int main(int argc, char *argv[])
 {
-    if (argc < 2 || argc > 3) {
+    if (argc < 3 || argc > 4) {
         std::cout << "Usage: " << argv[0] << " host port [with_gui]" << std::endl;
         return 1;
     }
@@ -93,9 +91,12 @@ int main(int argc, char *argv[])
     ListWindow<Message_ptr>* wHistory = new ListWindow<Message_ptr>("main", 44, 153, 2, 0);
     
     // set options for history window
-    wHistory->setPrintToScreen(true);
     wHistory->addRefreshAfterWindow(wInput);
     wHistory->setVisibleSize(42);
+
+    if (!GUI) {
+        wHistory->setPrintToScreen(true);
+    }
    
     // UI is a set of title, history, names and input windows.
     UI_ptr ui(new UI(wTitle, wHistory, wNames, wInput));
@@ -302,8 +303,8 @@ int main(int argc, char *argv[])
         } while (!exit && (ch = ui->input->getChar()) != KEY_END);
     } else {
         /** without GUI **/
-        char buf[512];
-        while (!exit && std::cin.getline(buf, 512)) {
+        char buf[2048];
+        while (!exit && std::cin.getline(buf, 2048)) {
             std::string line(buf);
             
             if (line.size() == 0) {

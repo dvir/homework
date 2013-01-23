@@ -124,6 +124,23 @@ void IRCSocket::start() {
             return;
         }
 
+        answer.erase(std::remove(answer.begin(), answer.end(), '\n'), answer.end());
+
+#ifdef DBG_SERVER
+    std::stringstream dbg;
+    dbg << "(" << answer.size() << ") " << answer; 
+    this->_ui->history->addItem(
+        Message::createMessage(
+            dbg.str(),
+            Message::DEBUG
+        )
+    );
+#endif
+
+        if (answer.size() == 0) {
+            continue;
+        }
+
         answer = Utils::collapseMultipleSpaces(Utils::trim(answer));
         
         IRCSocket::ServerMessage message = this->parseServerMessage(answer);
@@ -136,15 +153,6 @@ void IRCSocket::start() {
             .append("command: ").append(message.command).append(" - ")
             .append("text: ").append(message.text).append(" - ")
             .append("target: ").append(message.target).append(" - "),
-            Message::DEBUG
-        )
-    );
-#endif
-
-#ifdef DBG_SERVER
-    this->_ui->history->addItem(
-        Message::createMessage(
-            message.raw,
             Message::DEBUG
         )
     );
@@ -333,69 +341,192 @@ void IRCSocket::start() {
             this->_ui->addNames(message.text);
            
             Strings params = Utils::split(message.raw, ' ');
-            std::cout << params[3] << ": " << message.text << std::endl;
+            std::stringstream response;
+            response << params[3] << ": " << message.text << std::endl;
+            
+            this->_ui->history->addItem(
+                Message::createMessage(
+                    response.str(),
+                    Message::SYSTEM
+                )
+            );
         } else if (message.command == "366") { // end names list
-            std::cout << "End of /NAMES list." << std::endl;
+            std::stringstream response;
+            response << "End of /NAMES list." << std::endl;
+            this->_ui->history->addItem(
+                Message::createMessage(
+                    response.str(),
+                    Message::SYSTEM
+                )
+            );
+
             // stop streaming names to the ui.
             // this will set the names list.
             this->_ui->endNamesStream();
 
         } else if (message.command == "403") {
             Strings params = Utils::split(message.raw, ' ');
-            std::cout << params[3] << " :No such channel" << std::endl;
+            std::stringstream response;
+            response << params[3] << " :No such channel" << std::endl;
+            this->_ui->history->addItem(
+                Message::createMessage(
+                    response.str(),
+                    Message::SYSTEM
+                )
+            );
 
         } else if (message.command == "421") {
             Strings params = Utils::split(message.raw, ' ');
-            std::cout << params[3] << " :Unknown command" << std::endl;
+            std::stringstream response;
+            response << params[3] << " :Unknown command" << std::endl;
+            this->_ui->history->addItem(
+                Message::createMessage(
+                    response.str(),
+                    Message::SYSTEM
+                )
+            );
 
         } else if (message.command == "431") {
-            std::cout << "No nickname given" << std::endl;
+            std::stringstream response;
+            response << "No nickname given" << std::endl;
+            this->_ui->history->addItem(
+                Message::createMessage(
+                    response.str(),
+                    Message::SYSTEM
+                )
+            );
 
         } else if (message.command == "433") {
             Strings params = Utils::split(message.raw, ' ');
+
+            std::stringstream response;
             if (this->_user->getNick() == "") {
-                std::cout << params[2];
+                response << params[2];
             } else {
-                std::cout << params[3];
+                response << params[3];
             }
-            std::cout << " :Nickname is already in use" << std::endl;
+
+            response << " :Nickname is already in use";
+            this->_ui->history->addItem(
+                Message::createMessage(
+                    response.str(),
+                    Message::SYSTEM
+                )
+            );
 
         } else if (message.command == "451") {
-            std::cout << "You have not registered" << std::endl;
+            std::stringstream response;
+            response << "You have not registered" << std::endl;
+            this->_ui->history->addItem(
+                Message::createMessage(
+                    response.str(),
+                    Message::SYSTEM
+                )
+            );
 
         } else if (message.command == "461") {
             Strings params = Utils::split(message.raw, ' ');
-            std::cout << params[3] << " :Not enough parameters" << std::endl;
+            std::stringstream response;
+            response << params[3] << " :Not enough parameters" << std::endl;
+            this->_ui->history->addItem(
+                Message::createMessage(
+                    response.str(),
+                    Message::SYSTEM
+                )
+            );
 
         } else if (message.command == "462") {
-            std::cout << "You may not reregister" << std::endl;
+            std::stringstream response;
+            response << "You may not reregister" << std::endl;
+            this->_ui->history->addItem(
+                Message::createMessage(
+                    response.str(),
+                    Message::SYSTEM
+                )
+            );
 
         } else if (message.command == "482") {
             Strings params = Utils::split(message.raw, ' ');
-            std::cout << params[3] << " :You're not channel operator" << std::endl;
+            std::stringstream response;
+            response << params[3] << " :You're not channel operator" << std::endl;
+            this->_ui->history->addItem(
+                Message::createMessage(
+                    response.str(),
+                    Message::SYSTEM
+                )
+            );
 
         } else if (message.command == "321") {
-            std::cout << "LIST:" << std::endl;
+            std::stringstream response;
+            response << "LIST:" << std::endl;
+            this->_ui->history->addItem(
+                Message::createMessage(
+                    response.str(),
+                    Message::SYSTEM
+                )
+            );
 
         } else if (message.command == "322") {
             Strings params = Utils::split(message.raw, ' ');
-            std::cout << params[3] << std::endl;
+            std::stringstream response;
+            response << params[3] << std::endl;
+            this->_ui->history->addItem(
+                Message::createMessage(
+                    response.str(),
+                    Message::SYSTEM
+                )
+            );
 
         } else if (message.command == "323") {
-            std::cout << "End of /LIST" << std::endl;
+            std::stringstream response;
+            response << "End of /LIST" << std::endl;
+            this->_ui->history->addItem(
+                Message::createMessage(
+                    response.str(),
+                    Message::SYSTEM
+                )
+            );
 
         } else if (message.command == "401") {
             this->_user->nickAccepted();
-            std::cout << "NICK accepted" << std::endl;
+            std::stringstream response;
+            response << "NICK accepted" << std::endl;
+            this->_ui->history->addItem(
+                Message::createMessage(
+                    response.str(),
+                    Message::SYSTEM
+                )
+            );
 
         } else if (message.command == "402") {
-            std::cout << "USER accepted" << std::endl;
+            std::stringstream response;
+            response << "USER accepted" << std::endl;
+            this->_ui->history->addItem(
+                Message::createMessage(
+                    response.str(),
+                    Message::SYSTEM
+                )
+            );
 
         } else if (message.command == "404") {
-            std::cout << "User kicked" << std::endl;
+            std::stringstream response;
+            response << "User kicked" << std::endl;
+            this->_ui->history->addItem(
+                Message::createMessage(
+                    response.str(),
+                    Message::SYSTEM
+                )
+            );
 
         } else if (message.command == "405") {
-            std::cout << "PART success" << std::endl;
+            std::stringstream response;
+            response << "PART success" << std::endl;
+            this->_ui->history->addItem(
+                Message::createMessage(
+                    response.str(),
+                    Message::SYSTEM
+                )
+            );
 
         } else if (message.command == "001"
                 || message.command == "002"
