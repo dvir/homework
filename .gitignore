@@ -18,6 +18,7 @@ test.java
 bin/
 *.o
 *.out
+*.jar
 
 # ignore vim files
 *.vim
