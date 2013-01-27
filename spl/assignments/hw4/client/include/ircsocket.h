@@ -16,22 +16,45 @@ class IRCSocket {
          * from the server after it was processed.
          */
         struct ServerMessage {
-            struct {
+            struct ServerMessageOrigin {
                 std::string raw;
                 std::string nick;
                 std::string user;
                 std::string host;
+	    
+		ServerMessageOrigin() :
+			raw(""),
+			nick(""),
+			user(""),
+			host("")
+	   	 {
+		 }
             } origin; // sender prefix details
 
             std::string raw; // the raw message
             std::string command; // the IRC command received
             std::string target; // target of the command
             std::string text; // additional text
+
+	    ServerMessage() :
+		origin(),
+		raw(""),
+		command(""),
+		target(""),
+		text("")
+	    {
+	    }
         };
 
         struct ClientCommand {
             std::string name;
             std::string params;
+
+	    ClientCommand() :
+		name(""),
+		params("")
+	    {
+	    }
         };
 
         /**
@@ -39,6 +62,18 @@ class IRCSocket {
          * representing the current state of the application.
          */
         IRCSocket(UI_ptr ui, User_ptr user);
+
+	/**
+	 * Copy constructor
+         *
+        */
+	IRCSocket (IRCSocket& other);
+	
+	/**
+         * operator=
+         *
+        */
+	IRCSocket& operator=(const IRCSocket& other);
 
         /**
          * Destructor that cleans the socket before releasing.

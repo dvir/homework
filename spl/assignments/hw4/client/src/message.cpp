@@ -70,7 +70,7 @@ Message::Message (Message& other) :
 {
 }
 
-Message Message::operator=(const Message& other) {
+Message& Message::operator=(const Message& other) {
     if (this == &other) {
         return *this;
     }

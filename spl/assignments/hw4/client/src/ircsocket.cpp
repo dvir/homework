@@ -20,6 +20,24 @@ IRCSocket::IRCSocket(UI_ptr ui, User_ptr user) :
 {
 }
 
+IRCSocket::IRCSocket (IRCSocket& other) :
+    _ch(),
+    _ui(),
+    _user()
+{
+}
+
+IRCSocket& IRCSocket::operator=(const IRCSocket& other) {
+    if (this == &other) {
+        return *this;
+    }
+
+    this->_ch = other._ch;
+    this->_ui = other._ui;
+    this->_user = other._user;
+    return *this;
+}
+
 IRCSocket::~IRCSocket() {
     delete _ch;
 }

@@ -16,8 +16,36 @@ UI::UI(ContentWindow<Channel_ptr>* wTitle,
     history(wHistory),
     names(wNames),
     input(wInput),
-    _hasStartedNamesStream(false)
+    _hasStartedNamesStream(false),
+    _namesStream(),
+    _channel(Channel_ptr())
 {
+}
+
+UI::UI (const UI& other) :
+    title(other.title),
+    history(other.history),
+    names(other.names),
+    input(other.input),
+    _hasStartedNamesStream(other._hasStartedNamesStream),
+    _namesStream(other._namesStream),
+    _channel(other._channel)
+{
+}
+
+UI& UI::operator=(const UI& other) {
+	if (this == &other) {
+		return *this;
+	}
+	
+        this->title = other.title;
+        this->history = other.history;
+        this->names = other.names;
+        this->input = other.input;
+        this->_hasStartedNamesStream = other._hasStartedNamesStream;
+        this->_namesStream = other._namesStream;
+        this->_channel = other._channel;
+	return *this;
 }
 
 UI::~UI() {

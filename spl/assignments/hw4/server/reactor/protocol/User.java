@@ -1,5 +1,7 @@
 package protocol;
 
+import java.nio.charset.CharacterCodingException;
+
 import reactor.*;
 import tokenizer.*;
 
@@ -23,40 +25,46 @@ public class User {
      * User object representing it.
      */
     public static User getUser(String nick) {
-        for (int ii = 0; ii < _allUsers.size(); ++ii) {
-            if (_allUsers.get(ii).getNick().compareTo(nick) == 0) {
-                return _allUsers.get(ii);
+	synchronized (_allUsers) {
+            for (int ii = 0; ii < _allUsers.size(); ++ii) {
+                if (_allUsers.get(ii).getNick().compareTo(nick) == 0) {
+                    return _allUsers.get(ii);
+                }
             }
-        }
-
-        return null;
+    
+            return null;
+	}
     }
    
     /**
      * Remove a user from all users list.
      */
     public static void removeUser(User user) {
-        for (int ii = 0; ii < _allUsers.size(); ++ii) {
-            if (_allUsers.get(ii).equals(user)) {
-                _allUsers.remove(ii);
-                break;
+	synchronized (_allUsers) {
+            for (int ii = 0; ii < _allUsers.size(); ++ii) {
+                if (_allUsers.get(ii).equals(user)) {
+                    _allUsers.remove(ii);
+                    break;
+                }
             }
-        }
+	}
     }
 
     /**
      * Factory method to create a user.
      */
     public static User createUser() {
-        User user = new User();
-        _allUsers.add(user);
-        return user; 
+	synchronized (_allUsers) {
+            User user = new User();
+            _allUsers.add(user);
+            return user; 
+	}
     }
 
 
     /** NON-STATIC DEFINITIONS **/
 
-    private ConnectionHandler<StringMessage> _ch;
+    private ConnectionHandler _ch;
     private boolean _isRegistered;
     private String _nick;
     private String _name;
@@ -107,12 +115,14 @@ public class User {
      * Remove a channel from the user's current channels list.
      */
     public void removeChannel(Channel channel) {
-        for (int ii = 0; ii < _channels.size(); ++ii) {
-            if (_channels.get(ii).equals(channel)) {
-                _channels.remove(ii);
-                return;
+	synchronized (_channels) {
+            for (int ii = 0; ii < _channels.size(); ++ii) {
+                if (_channels.get(ii).equals(channel)) {
+                   _channels.remove(ii);
+                   return;
+                }
             }
-        }
+	}
     }
 
     /**
@@ -147,7 +157,12 @@ public class User {
      * Send a message to the user socket.
      */
     public void send(String data) {
-        _ch.send(data);
+	try {
+        	_ch.send(data);
+	} catch (CharacterCodingException e) {
+		System.out.println("Character Coding Exception!");
+		System.exit(1);
+	}
     }
 
     /**
@@ -161,10 +176,11 @@ public class User {
      * Notify the user's channels that he quit the server.
      */
     public void notifyQuit(String data) {
-        List<Channel> channels = getChannels();
-        for (int ii = 0; ii < channels.size(); ++ii) {
-            channels.get(ii).notifyQuit(this, data);
-        }
+	synchronized (_channels) {
+            for (int ii = 0; ii < _channels.size(); ++ii) {
+                _channels.get(ii).notifyQuit(this, data);
+            }
+	}
     }
 
     /**
@@ -199,10 +215,11 @@ public class User {
      * Notify the user's channels that he changed nickname.
      */
     public void notifyNick(String oldNick) {
-        List<Channel> channels = getChannels();
-        for (int ii = 0; ii < channels.size(); ++ii) {
-            channels.get(ii).notifyNick(this, oldNick);
-        }
+	synchronized (_channels) {
+            for (int ii = 0; ii < _channels.size(); ++ii) {
+                _channels.get(ii).notifyNick(this, oldNick);
+            }
+	}
     }
 
     /**

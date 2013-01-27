@@ -27,6 +27,10 @@ class Window {
             this->refreshWindow();
         };
 
+	Window(const Window& other);
+
+	Window& operator=(const Window& other);
+
         virtual void setup() {
             // draw window borders
             wborder(_win, '|', '|', '-', '-', '+', '+', '+', '+');

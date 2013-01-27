@@ -23,6 +23,31 @@ class Window {
             this->refreshWindow();
         };
 
+	Window::Window (const Window& other) :
+            _win(newwin(other.height, other.width, other.starty, other.startx)),
+            _name(other.name),
+            _height(other.height),
+            _width(other.width),
+            _starty(other.starty),
+            _startx(other.startx),
+            _refreshAfter()
+	{
+	}
+
+	Window& Window::operator=(const Window& other) {
+	    if (this == &other) {
+	        return *this;
+	    }
+
+	    this->_win = other._win;
+	    this->_name = other._name;
+	    this->_height = other._height;
+	    this->_width = other._width;
+            this->_starty = other._starty;
+	    this->_startx = other._startx;
+	    return *this;
+	}
+
         virtual void setup() {
             // draw window borders
             wborder(_win, '|', '|', '-', '-', '+', '+', '+', '+');

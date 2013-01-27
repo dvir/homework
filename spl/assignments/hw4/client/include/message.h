@@ -23,7 +23,7 @@ class Message {
         static Message_ptr createMessage(std::string text, Message::Type type);
         static Message_ptr createMessage(std::string text, User_ptr user, Message::Type type);
 
-        Message operator=(const Message& other);
+        Message& operator=(const Message& other);
 
         /**
          * Returns the user object associated with the message.

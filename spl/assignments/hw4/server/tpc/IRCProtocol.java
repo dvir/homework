@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class IRCProtocol<T> implements ServerProtocol<T> {
+public class IRCProtocol implements MessagingProtocol {
     /**
      * IRC ERR numeric replies.
      */
@@ -168,9 +168,7 @@ public class IRCProtocol<T> implements ServerProtocol<T> {
      *
      * @return the answer to send back.
      */
-    public T processMessage(T msgRaw) {
-        String msg = msgRaw.toString();
-
+    public String processMessage(String msg) {
         if (!_user.hasConnectionHandler()) {
             throw new RuntimeException("Must set ConnectionHandler before processing messages through IRCProtocol.");
         }
@@ -270,13 +268,15 @@ public class IRCProtocol<T> implements ServerProtocol<T> {
     private String list() {
         List<Channel> channels = Channel.getChannels();
 
-        _user.send(reply(IRCProtocol.RPL.LISTSTART, _user));
-        for (int ii = 0; ii < channels.size(); ++ii) {
-            _user.send(reply(IRCProtocol.RPL.LIST, _user, channels.get(ii).getName()));
-        }
-        _user.send(reply(IRCProtocol.RPL.LISTEND, _user));
-
-        return null;
+	synchronized(channels) {
+        	_user.send(reply(IRCProtocol.RPL.LISTSTART, _user));
+        	for (int ii = 0; ii < channels.size(); ++ii) {
+	            _user.send(reply(IRCProtocol.RPL.LIST, _user, channels.get(ii).getName()));
+        	}
+	        _user.send(reply(IRCProtocol.RPL.LISTEND, _user));
+	
+        	return null;
+	}
     }
 
     /*
@@ -421,12 +421,14 @@ public class IRCProtocol<T> implements ServerProtocol<T> {
     public static String sendNames(User user, String data) {
         if (data.length() == 0) {
             List<Channel> channels = Channel.getChannels();
-            for (int ii = 0; ii < channels.size(); ++ii) {
-                Channel channel = channels.get(ii); 
-                user.send(reply(IRCProtocol.RPL.NAMEREPLY, user, channel.getName() + " " + channel.getNames())); 
-            }
+	    synchronized(channels) {
+            	for (int ii = 0; ii < channels.size(); ++ii) {
+                	Channel channel = channels.get(ii); 
+                	user.send(reply(IRCProtocol.RPL.NAMEREPLY, user, channel.getName() + " " + channel.getNames())); 
+            	}
 
-            user.send(reply(IRCProtocol.RPL.ENDOFNAMES, user, ":End of /NAMES list.")); 
+            	user.send(reply(IRCProtocol.RPL.ENDOFNAMES, user, ":End of /NAMES list.")); 
+	    }
         } else {
             Channel channel = Channel.getChannel(data);
             if (null == channel) {
@@ -447,3 +449,4 @@ public class IRCProtocol<T> implements ServerProtocol<T> {
         return msg.equalsIgnoreCase("QUIT");
     }
 }
+

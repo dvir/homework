@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project basedir="." default="build" name="Server">
+<project basedir="." default="tpc" name="Server">
 	<presetdef name="javac">
 		<javac includeantruntime="false" />
 	</presetdef>    
@@ -20,20 +20,55 @@
     
     <target name="clean">
         <delete>
-            <fileset dir="." includes="**/*.class"/>
+            <fileset dir="./tpc/classes" includes="**/*.class"/>
+        </delete>
+        <delete>
+            <fileset dir="./reactor/classes" includes="**/*.class"/>
+        </delete>
+        <delete>
+            <fileset dir="./tpc/" includes="*.jar"/>
+        </delete>
+        <delete>
+            <fileset dir="./reactor/" includes="*.jar"/>
         </delete>
     </target>
     
     <target depends="clean" name="cleanall"/>
+
+    <target name="reactor" depends="compilereactor">
+        <jar destfile="./reactor/Server.jar" basedir="./reactor/classes">
+            <manifest>
+                <attribute name="Main-Class" value="reactor/Reactor"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="tpc" depends="compiletpc">
+        <jar destfile="./tpc/Server.jar" basedir="./tpc/classes">
+            <manifest>
+                <attribute name="Main-Class" value="Server"/>
+            </manifest>
+        </jar>
+    </target>
     
-    <target depends="init" name="build">
+    <target depends="init" name="compiletpc">
+        <mkdir dir="./tpc/classes"/>
         <echo message="${ant.project.name}: ${ant.file}"/>
-        <javac destdir=".">
-            <src path="."/>
+        <javac destdir="./tpc/classes">
+            <src path="./tpc/"/>
             <classpath refid="Server.classpath"/>
         </javac>
     </target>
     
+    <target depends="init" name="compilereactor">
+        <mkdir dir="./reactor/classes"/>
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac destdir="./reactor/classes">
+            <src path="./reactor/"/>
+            <classpath refid="Server.classpath"/>
+        </javac>
+    </target>
+
     <target name="run">
         <java classname="Server" failonerror="true" fork="yes">
             <arg line="6667"/>

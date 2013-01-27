@@ -17,6 +17,10 @@ class UI {
            ListWindow<User_ptr>* wNames, 
            InputWindow* wInput);
 
+	UI(const UI& other);
+
+	UI& operator=(const UI& other);
+
         ~UI();
 
         /**
