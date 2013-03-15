@@ -13,7 +13,7 @@ do_str:                          	; functions are defined as labels
 ;;;;;;;;;;;;;;;; FUNCTION EFFECTIVE CODE STARTS HERE ;;;;;;;;;;;;;;;; 
 
 	mov	dword [an], 0		; initialize answer
-label_here:
+loop:
 
     ; if ecx == '('
     cmp byte [ecx], '('
@@ -84,7 +84,7 @@ label_here:
     next:
     	inc	ecx      		; increment pointer
     	cmp	byte [ecx], 0    		; check if byte pointed to is zero
-    	jnz	label_here       		; keep looping until it is null terminated
+    	jnz	loop       		; keep looping until it is null terminated
 
 ;;;;;;;;;;;;;;;; FUNCTION EFFECTIVE CODE ENDS HERE ;;;;;;;;;;;;;;;; 
          popad                    ; restore all previously used registers
