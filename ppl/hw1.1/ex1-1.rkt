@@ -20,13 +20,13 @@
 ; Purpose: compute (simple) sum of digit of a number.
 ; Pre-conditions: n >= 0, integer
 ; Tests: (sum-digit 12) => 3
-(define sum-digit (lambda(y)
+(define sum-digit (lambda(n)
               (
-               if (< y 10) 
-                  y 
+               if (< n 10) 
+                  n 
                   (+
-                     (sum-digit (floor (/ y 10))) 
-                     (modulo y 10)
+                     (sum-digit (floor (/ n 10))) 
+                     (modulo n 10)
                   )
               )
             )
