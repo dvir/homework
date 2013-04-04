@@ -25,3 +25,6 @@ bin/
 
 # ignore swap files
 .*.swp
+
+# ignore tmp files
+*~
