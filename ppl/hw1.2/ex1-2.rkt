@@ -143,7 +143,7 @@
 ;   Question 2   ;
 ;----------------;
 ; Signature: con-func(f, a, flag)
-; Type: [Number -> Number] * Number * (Number Union Type) -> [Number -> Number]
+; Type: [Number -> T] * Number * Number -> [Number -> T]
 ; Purpose: Produce g(x) according to f(x), number a and a flag. flag == 0 - g(x) = f(x + a), flag == 1 - g(x) = f(x - a), flag == 2 - g(x) = f(x * a), flag == 3 - g(x) = f(x / a), else - g(x) = f(x).
 ; Example: (con-func (lambda(x) (x)) 2 0)
 ; Pre-conditions: (flag != 3) OR (flag == 3 AND a != 0)
