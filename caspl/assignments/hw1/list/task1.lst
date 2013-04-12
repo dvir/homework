@@ -1,0 +1,106 @@
+     1                                  section	.rodata
+     2                                  LC0:
+     3 00000000 54686520726573756C-     	DB	"The result is:  %u", 10, 0	; Format string
+     4 00000009 742069733A20202575-
+     5 00000012 0A00               
+     6                                  
+     7                                  section .bss
+     8                                  LC1:
+     9 00000000 <res 00000004>          	RESD	1
+    10                                  tmp:
+    11 00000004 <res 00000004>              RESD    1
+    12                                  
+    13                                  section .text
+    14                                  	align 16
+    15                                  	global my_func
+    16                                  	extern printf
+    17                                  
+    18                                  my_func:
+    19 00000000 55                      	push	ebp
+    20 00000001 89E5                    	mov	ebp, esp	; Entry code - set up ebp and esp
+    21 00000003 60                      	pusha			; Save registers
+    22                                  
+    23 00000004 8B4D08                  	mov ecx, dword [ebp+8]	; Get argument (pointer to string)
+    24                                  
+    25                                  ;       Your code should be here...
+    26 00000007 C705[00000000]0000-     	mov	dword [LC1], 0		; initialize answer
+    27 0000000F 0000               
+    28                                  
+    29                                  loop:
+    30 00000011 8A01                        mov al, byte [ecx]
+    31                                  
+    32                                      ; if al == \n, skip it
+    33 00000013 3C0A                        cmp al, 10
+    34 00000015 7449                            je next
+    35                                  
+    36 00000017 C125[00000000]04            shl dword[LC1], 4 ; multiply by 16 each digit we add
+    37                                  
+    38                                      ; if al >= 'a'
+    39 0000001E 3C61                        cmp al, 'a'
+    40 00000020 7D0A                            jge ge_a
+    41                                  
+    42                                      ; if al >= 'A'
+    43 00000022 3C41                        cmp al, 'A'
+    44 00000024 7D0C                            jge ge_A
+    45                                  
+    46                                      ; if al >= '0'
+    47 00000026 3C30                        cmp al, '0'
+    48 00000028 7D0E                            jge ge_0
+    49                                  
+    50                                      ; default
+    51                                      ; do nothing
+    52 0000002A EB34                        jmp next
+    53                                  
+    54                                      ge_a: ; a <= al
+    55                                          ; if al <= 'f'
+    56 0000002C 3C66                            cmp al, 'f'
+    57 0000002E 7E0E                                jle a_f
+    58                                          ; else
+    59 00000030 EB2E                                jmp next
+    60                                  
+    61                                      ge_A: ; A <= al
+    62                                          ; if al <= 'F'
+    63 00000032 3C46                            cmp al, 'F'
+    64 00000034 7E14                                jle A_F
+    65                                          ; else
+    66 00000036 EB28                                jmp next
+    67                                  
+    68                                      ge_0: ; 0 <= al
+    69                                          ; if al <= '9'
+    70 00000038 3C39                            cmp al, '9'
+    71 0000003A 7E1A                                jle n0_9
+    72                                          ; else
+    73 0000003C EB22                                jmp next
+    74                                  
+    75                                      a_f: ; [a, f]
+    76 0000003E 2C61                            sub al, 'a'
+    77 00000040 040A                            add al, 10
+    78 00000042 0005[00000000]                  add byte[LC1], al
+    79 00000048 EB16                            jmp next
+    80                                  
+    81                                      A_F: ; [A, F]
+    82 0000004A 2C41                            sub al, 'A'
+    83 0000004C 040A                            add al, 10
+    84 0000004E 0005[00000000]                  add byte[LC1], al
+    85 00000054 EB0A                            jmp next
+    86                                  
+    87                                      n0_9: ; [0, 9]
+    88 00000056 2C30                            sub al, '0'
+    89 00000058 0005[00000000]                  add byte[LC1], al
+    90 0000005E EB00                            jmp next
+    91                                  
+    92                                      next:
+    93 00000060 41                          	inc	ecx      		; increment pointer
+    94 00000061 803900                      	cmp	byte [ecx], 0   ; check if byte pointed to is zero
+    95 00000064 75AB                        	jnz	loop       		; keep looping until it is null terminated
+    96                                  
+    97 00000066 FF35[00000000]          	push	dword[LC1]		; Call printf with 2 arguments: pointer to str
+    98 0000006C 68[00000000]            	push	LC0		; and pointer to format string.
+    99 00000071 E8(00000000)            	call	printf
+   100 00000076 83C408                  	add 	esp, 8		; Clean up stack after call
+   101                                  
+   102 00000079 61                      	popa			; Restore registers
+   103 0000007A 89EC                    	mov	esp, ebp	; Function exit code
+   104 0000007C 5D                      	pop	ebp
+   105 0000007D C3                      	ret
+   106                                  
