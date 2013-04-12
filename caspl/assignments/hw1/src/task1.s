@@ -5,8 +5,6 @@ LC0:
 section .bss
 LC1:
 	RESD	1
-tmp:
-    RESD    1
 
 section .text
 	align 16
