@@ -1139,3 +1139,63 @@ hex2octal:
     pop ebp
     ret
 
+func_cmp:
+    push ebp
+    mov ebp, esp
+    pushad
+
+    ; ebp+8 - first number
+    ; ebp+12 - second number
+
+    sub esp, 8 ; local variables
+               ; ebp-4 - first number pointer
+               ; ebp-8 - second number pointer
+
+    ; set first number ptr
+    mov edx, dword [ebp+8]
+    mov dword [ebp-4], edx
+
+    ; set second number ptr
+    mov edx, dword [ebp+12]
+    mov dword [ebp-8], edx
+
+.loop:
+    cmp dword [ebp-4], 0
+    je .end_first
+
+    cmp dword [ebp-8], 0
+    je .end_second
+
+    ; none of the numbers ended yet. call recursively with pointers advanced
+    mov edx, dword [ebp-8]
+    push dword [edx + next] ; push second number
+
+    mov edx, dword [ebp-4]
+    push dword [edx + next] ; push first number
+
+    call func_cmp ; recursively call func_cmp
+    add esp, 8
+
+    jmp .end
+
+.end_first:
+    cmp dword [ebp-8], 0
+    je .end_both
+
+    mov eax, -1
+    jmp .end
+
+.end_second:
+    mov eax, 1
+    jmp .end
+
+.end_both:
+    mov eax, 0
+    jmp .end
+    
+.end:
+    mov dword [result], eax
+    popad
+    mov eax, dword [result]
+    mov esp, ebp
+    pop ebp
