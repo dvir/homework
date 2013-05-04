@@ -19,6 +19,9 @@ PRINT_NUM_MESSAGE:
     DB  "%d", 10, 0
 
 PRINT_DIGIT_MESSAGE:
+    DB  "%d", 0
+
+PRINT_HEX_DIGIT_MESSAGE:
     DB  "%x", 0
 
 PRINT_NEWLINE:
@@ -29,7 +32,7 @@ DEBUG:
 
 section .bss
 INPUT:
-    RESB    8
+    RESB    80
 result:
     RESD    1
 
@@ -61,7 +64,7 @@ calc:
     %define op_counter ebp-4 ; 1. operation counter
     %define stack_size ebp-8 ; 2. current stack size
     %define stack_base ebp-12; 3. current stack
-    %define calc_mode  ebp-16; 3. calc mode
+    %define calc_mode  ebp-16; 4. calc mode
 
     mov dword [op_counter], 0 ; reset operation counter
     mov dword [stack_size], 0 ; reset current stack size
@@ -113,10 +116,6 @@ loop:
     ; we should iterate on it and create a number linked list for it, and
     ; push it into the the operands stack.
 
-    ; first, check if we have room for it in the stack.
-    cmp dword [stack_size], MAX_STACK_SIZE
-    je stackoverflow
-
     mov edx, 0 ; holds the head of the linked list
     mov ecx, INPUT
     .foreach_digit:
@@ -124,10 +123,21 @@ loop:
         cmp eax, 0
         je .end_foreach_digit
 
+        cmp byte [calc_mode], 'h'
+        je .hex
+
+    ; octal
+        push eax
+        call char2octal
+        add esp, 4
+        jmp .got_digit
+
+    .hex:
         push eax
         call char2hex 
         add esp, 4
 
+    .got_digit:
         ; got a valid hexa digit in al.
         ; create a new digit link for it and append the previous list to it
         push edx
@@ -141,11 +151,29 @@ loop:
     .skip:
         inc ecx
         jmp .foreach_digit
+
     .end_foreach_digit:
         ; if an empty string / invalid number given, ignore it
         cmp edx, 0
         je loop
         
+        ; check if we have room for it in the stack.
+        cmp dword [stack_size], MAX_STACK_SIZE
+        je stackoverflow
+
+        cmp byte [calc_mode], 'o'
+        je .octal
+        ; else
+        jmp .push
+
+    .octal: ; convert from octal to hex
+        push edx
+        call octal2hex
+        add esp, 4
+
+        mov edx, eax
+        
+    .push:
         ; push the new created number to the operands stack
         mov ebx, dword [stack_base]
         mov ecx, dword [stack_size]
@@ -166,9 +194,21 @@ loop:
         mov ecx, dword [stack_size]
         mov edx, dword [ebx + 4*ecx + (-4)]
 
+        cmp byte [calc_mode], 'h'
+        je .print
+   
+        ; octal mode
+        ; convert from hex to octal before printing
+        push edx
+        call hex2octal
+        add esp, 4
+        mov edx, eax
+
+    .print:
+        push dword [calc_mode]
         push edx
         call print_num
-        add esp, 4
+        add esp, 8
 
         dec dword [stack_size] 
         jmp .foreach_stack
@@ -222,8 +262,8 @@ addition:
     call func_addition
     add esp, 8
 
-    dec dword [stack_size]
-    dec dword [stack_size]
+    dec dword [stack_size] ; pop first operand
+    dec dword [stack_size] ; pop second operand
 
     ; push the new created number to the operands stack
     mov ebx, dword [stack_base]
@@ -243,45 +283,45 @@ func_addition:
 
     ; local variables
     sub esp, 16
-    ; ebp-8  - new number pointer
-    ; ebp-12 - carry
-    ; ebp-16 - n1
-    ; ebp-20 - n2
+    ; ebp-4  - new number pointer
+    ; ebp-8 - carry
+    ; ebp-12 - n1
+    ; ebp-16 - n2
 
-    mov dword [ebp-8], 0
-    mov dword [ebp-12], 0 ; reset carry
+    mov dword [ebp-4], 0
+    mov dword [ebp-8], 0 ; reset carry
 
     mov edx, dword [ebp+8]
-    mov dword [ebp-16], edx
+    mov dword [ebp-12], edx
     mov edx, dword [ebp+12]
-    mov dword [ebp-20], edx
+    mov dword [ebp-16], edx
    
 .loop:
     mov ebx, 0
 
 .add_first:
     ; avoid messing with null pointers
-    cmp dword [ebp-16], 0
+    cmp dword [ebp-12], 0
     je .add_second
 
-    mov edx, dword [ebp-16] ; load first number digit address
+    mov edx, dword [ebp-12] ; load first number digit address
     add ebx, dword [edx + data] ; add first number
 
 .add_second:
     ; avoid messing with null pointers
-    cmp dword [ebp-20], 0
+    cmp dword [ebp-16], 0
     je .add_carry
 
-    mov edx, dword [ebp-20] ; load second number digit address
+    mov edx, dword [ebp-16] ; load second number digit address
     add ebx, dword [edx + data] ; add second number
 
 .add_carry:
-    add ebx, dword [ebp-12] ; add carry
+    add ebx, dword [ebp-8] ; add carry
 
-    mov dword [ebp-12], ebx
-    shr dword [ebp-12], 4
+    mov dword [ebp-8], ebx
+    shr dword [ebp-8], 4
 
-    cmp dword [ebp-12], 0
+    cmp dword [ebp-8], 0
     jg .has_carry
     jmp .continue
 
@@ -290,45 +330,45 @@ func_addition:
     and ebx, 15 ; 1111 in binary
     
 .continue:
-    push dword [ebp-8]
+    push dword [ebp-4]
     push ebx 
     call create_num
     add esp, 8
 
-    mov dword [ebp-8], eax
+    mov dword [ebp-4], eax
 
     ; advance numbers pointers
 
 .advance_first:
     ; avoid messing with null pointers
-    cmp dword [ebp-16], 0
+    cmp dword [ebp-12], 0
     je .advance_second
+
+    mov edx, dword [ebp-12]
+    mov ebx, [edx + next]
+    mov dword [ebp-12], ebx 
+
+.advance_second:
+    ; avoid messing with null pointers
+    cmp dword [ebp-16], 0
+    je .check_conditions
 
     mov edx, dword [ebp-16]
     mov ebx, [edx + next]
     mov dword [ebp-16], ebx 
 
-.advance_second:
-    ; avoid messing with null pointers
-    cmp dword [ebp-20], 0
-    je .check_conditions
-
-    mov edx, dword [ebp-20]
-    mov ebx, [edx + next]
-    mov dword [ebp-20], ebx 
-
 .check_conditions:
     ; if either numbers or carry is not zero, continue
-    cmp dword [ebp-16], 0
-    jne .loop
-
-    cmp dword [ebp-20], 0
-    jne .loop
-
     cmp dword [ebp-12], 0
     jne .loop
 
-    mov edx, dword [ebp-8]
+    cmp dword [ebp-16], 0
+    jne .loop
+
+    cmp dword [ebp-8], 0
+    jne .loop
+
+    mov edx, dword [ebp-4]
     mov dword [result], edx
 
     add esp, 16
@@ -342,7 +382,42 @@ pop_and_print:
     cmp dword [stack_size], 1
     jl error_missing_args
 
+    mov ebx, dword [stack_base]
+    mov ecx, dword [stack_size]
+    mov edx, dword [ebx + 4*ecx + (-4)]
+
+    cmp byte [calc_mode], 'h'
+    je .print
+
+    ; octal mode
+    ; convert from hex to octal before printing
+    push edx
+    call hex2octal
+    add esp, 4
+    mov edx, eax
+
+.print:
+    push dword [calc_mode]
+    push edx
+    call print_num
+    add esp, 8
+
+    dec dword [stack_size] ; pop from operands stack
+
+    ;push dword [stack_base]
+    ;call func_pop_and_print
+    ;add esp, 4
+
     jmp loop
+
+func_pop_and_print:
+    push ebp
+    mov ebp, esp
+    pushad
+
+    popad
+    mov esp, ebp
+    pop ebp
 
 duplicate:
     cmp dword [stack_size], 1
@@ -351,19 +426,278 @@ duplicate:
     cmp dword [stack_size], MAX_STACK_SIZE
     je stackoverflow
 
+    mov ebx, dword [stack_base]
+    mov ecx, dword [stack_size]
+
+    mov eax, dword [ebx + 4*ecx + (-4)] ; get stack head value
+
+    mov dword [ebx + 4*ecx], eax ; push to operands stack
+    inc dword [stack_size]
+
     jmp loop
 
 exponent:
     cmp dword [stack_size], 1
     jl error_missing_args
 
+    mov ebx, dword [stack_base]
+    mov ecx, dword [stack_size]
+    push dword [ebx + 4*ecx + (-4)]
+    call func_exponent
+    add esp, 4
+    dec dword [stack_size] ; pop from operands stack
+
+    mov dword [ebx + 4*ecx], eax ; push to operands stack
+    inc dword [stack_size]
+
     jmp loop
 
+func_shl:
+    push ebp
+    mov ebp, esp
+    pushad
+    
+    ; function parameters
+    ; ebp+8 - number to shift
+
+    ; local variables
+    sub esp, 12
+    ; ebp-4 - new number pointer
+    ; ebp-8 - num pointer
+    ; ebp-12 - carry
+
+    mov dword [ebp-4], 0 ; reset new num pointer
+
+    mov edx, dword [ebp+8] ; set num pointer
+    mov dword [ebp-8], edx
+
+    mov dword [ebp-12], 0 ; reset carry
+
+.loop:
+    cmp dword [ebp-12], 0
+    je .end
+
+    jmp loop
+
+.end:
+    mov edx, dword [ebp-4]
+    mov dword [result], edx
+
+    add esp, 12
+    popad
+    mov eax, dword [result]
+    mov esp, ebp
+    pop ebp
+    ret
+
+func_exponent:
+    push ebp
+    mov ebp, esp
+    pushad
+    
+    ; function parameters
+    ; ebp+8 - exp
+
+    ; local variables
+    sub esp, 8
+    ; ebp-4  - new number pointer
+    ; ebp-8  - exp
+
+    mov dword [ebp-4], 0
+
+    mov edx, dword [ebp+8]
+    mov dword [ebp-8], edx
+   
+.loop:
+    mov ebx, 0
+
+.add_first:
+    ; avoid messing with null pointers
+    cmp dword [ebp-12], 0
+    je .add_second
+
+    mov edx, dword [ebp-12] ; load first number digit address
+    add ebx, dword [edx + data] ; add first number
+
+.add_second:
+    ; avoid messing with null pointers
+    cmp dword [ebp-16], 0
+    je .add_carry
+
+    mov edx, dword [ebp-16] ; load second number digit address
+    add ebx, dword [edx + data] ; add second number
+
+.add_carry:
+    add ebx, dword [ebp-8] ; add carry
+
+    mov dword [ebp-8], ebx
+    shr dword [ebp-8], 4
+
+    cmp dword [ebp-8], 0
+    jg .has_carry
+    jmp .continue
+
+.has_carry:
+    ; remove bits higher than 4
+    and ebx, 15 ; 1111 in binary
+    
+.continue:
+    push dword [ebp-4]
+    push ebx 
+    call create_num
+    add esp, 8
+
+    mov dword [ebp-4], eax
+
+    ; advance numbers pointers
+
+.advance_first:
+    ; avoid messing with null pointers
+    cmp dword [ebp-12], 0
+    je .advance_second
+
+    mov edx, dword [ebp-12]
+    mov ebx, [edx + next]
+    mov dword [ebp-12], ebx 
+
+.advance_second:
+    ; avoid messing with null pointers
+    cmp dword [ebp-16], 0
+    je .check_conditions
+
+    mov edx, dword [ebp-16]
+    mov ebx, [edx + next]
+    mov dword [ebp-16], ebx 
+
+.check_conditions:
+    ; if either numbers or carry is not zero, continue
+    cmp dword [ebp-12], 0
+    jne .loop
+
+    cmp dword [ebp-16], 0
+    jne .loop
+
+    cmp dword [ebp-8], 0
+    jne .loop
+
+    mov edx, dword [ebp-4]
+    mov dword [result], edx
+
+    add esp, 16
+    popad
+    mov eax, dword [result]
+    mov esp, ebp
+    pop ebp
+    ret
 bitwise_xor:
     cmp dword [stack_size], 2
     jl error_missing_args
 
+    mov ebx, dword [stack_base]
+    mov ecx, dword [stack_size]
+    push dword [ebx + 4*ecx + (-4)]
+    push dword [ebx + 4*ecx + (-8)] 
+    call func_bitwise_xor
+    add esp, 8
+
+    dec dword [stack_size] ; pop first operand
+    dec dword [stack_size] ; pop second operand
+
+    ; push the new created number to the operands stack
+    mov ebx, dword [stack_base]
+    mov ecx, dword [stack_size]
+    mov dword [ebx + 4*ecx], eax
+    inc dword [stack_size]
+
     jmp loop
+
+func_bitwise_xor:
+    push ebp
+    mov ebp, esp
+    pushad
+    
+    ; function parameters
+    ; ebp+8 - first number
+    ; ebp+12 - second number
+
+    ; local variables
+    sub esp, 12
+    ; ebp-4  - new number pointer
+    ; ebp-8 - n1
+    ; ebp-12 - n2
+
+    mov dword [ebp-4], 0
+
+    mov edx, dword [ebp+8]
+    mov dword [ebp-8], edx
+    mov edx, dword [ebp+12]
+    mov dword [ebp-12], edx
+   
+.loop:
+    mov ebx, 0
+
+.get_first:
+    ; avoid messing with null pointers
+    cmp dword [ebp-8], 0
+    je .get_second
+
+    mov edx, dword [ebp-8] ; load first number digit address
+    mov eax, dword [edx + data] ; add first number
+
+.get_second:
+    ; avoid messing with null pointers
+    cmp dword [ebp-12], 0
+    je .do_xor
+
+    mov edx, dword [ebp-12] ; load second number digit address
+    mov ebx, dword [edx + data] ; add second number
+
+.do_xor:
+    xor eax, ebx ; xor between the digits
+    push dword [ebp-4]
+    push eax 
+    call create_num
+    add esp, 8
+
+    mov dword [ebp-4], eax
+
+    ; advance numbers pointers
+
+.advance_first:
+    ; avoid messing with null pointers
+    cmp dword [ebp-8], 0
+    je .advance_second
+
+    mov edx, dword [ebp-8]
+    mov ebx, [edx + next]
+    mov dword [ebp-8], ebx 
+
+.advance_second:
+    ; avoid messing with null pointers
+    cmp dword [ebp-12], 0
+    je .check_conditions
+
+    mov edx, dword [ebp-12]
+    mov ebx, [edx + next]
+    mov dword [ebp-12], ebx 
+
+.check_conditions:
+    ; if either numbers or carry is not zero, continue
+    cmp dword [ebp-8], 0
+    jne .loop
+
+    cmp dword [ebp-12], 0
+    jne .loop
+
+    mov edx, dword [ebp-4]
+    mov dword [result], edx
+
+    add esp, 12
+    popad
+    mov eax, dword [result]
+    mov esp, ebp
+    pop ebp
+    ret
 
 octal:
     mov byte [calc_mode], 'o'
@@ -391,7 +725,10 @@ print_num:
     pushad
 
     ; ebp+8 - pointer to first num digit
-    mov ebx, [ebp+8]
+    mov ebx, dword [ebp+8]
+
+    ; ebp+12 - print mode ('h' - hexa, 'o' - octal)
+    mov ecx, dword [ebp+12]
    
 .loop:
     cmp ebx, 0
@@ -399,7 +736,17 @@ print_num:
 
     movzx eax, byte [ebx + data]
     push eax
+
+    cmp byte [ebp+12], 'h'
+    je .hexa
+
     push PRINT_DIGIT_MESSAGE
+    jmp .call_printf
+
+.hexa:
+    push PRINT_HEX_DIGIT_MESSAGE
+
+.call_printf:
     call printf
     add esp, 8
 
@@ -468,9 +815,10 @@ char2hex:
     push ebp
     mov ebp, esp
 
-    %define char ebp+8 ; character to convert to hexa
+    ; function aguments
+    ; ebp+8 - character to convert to hexa
 
-    mov eax, [char]
+    mov eax, [ebp+8]
 
     ; if al >= 'a'
     cmp al, 'a'
@@ -529,3 +877,265 @@ char2hex:
     mov esp, ebp
     pop ebp
     ret
+
+char2octal:
+    push ebp
+    mov ebp, esp
+    pushad
+
+    ; function aguments
+    ; ebp+8 - character to convert to octal
+
+    mov eax, [ebp+8]
+
+    ; if al >= '0'
+    cmp al, '0'
+        jge .ge_0
+
+    ; invalid character
+    jmp .invalid
+
+    .ge_0: ; 0 <= al
+        ; if al <= '7'
+        cmp al, '7'
+            jle .n0_7
+        ; else
+            jmp .invalid 
+
+    .n0_7: ; [0, 9]
+        sub al, '0'
+        jmp .end 
+
+.invalid:
+    mov eax, -1
+
+.end:
+    mov dword [result], eax
+    popad
+    mov eax, dword [result]
+    mov esp, ebp
+    pop ebp
+    ret
+
+octal2hex:
+    push ebp
+    mov ebp, esp
+    pushad
+
+    ; function aguments
+    ; ebp+8 - num pointer to convert to hex
+
+    sub esp, 16
+    ; local variables
+    ; ebp-4 - num pointer
+    ; ebp-8 - new num pointer
+    ; ebp-12 - count of bits in buffer
+    ; ebp-16 - new num LSB pointer
+    mov edx, dword [ebp+8]
+    mov dword [ebp-4], edx
+
+    mov dword [ebp-8], 0
+
+    mov dword [ebp-12], 0 ; reset count of bits in buffer
+
+    mov dword [ebp-16], 0 ; reset new num LSB pointer
+
+    mov ebx, 0 ; octal buffer
+
+.loop:
+    cmp dword [ebp-4], 0 ; are we done going through the number?
+    je .finish
+
+    mov edx, dword [ebp-4]
+    mov eax, dword [edx + data] ; get current octal digit
+    mov ecx, dword [ebp-12]
+    shl eax, cl
+    add ebx, eax
+
+    add dword [ebp-12], 3
+
+    cmp dword [ebp-12], 4
+    jl .skip ; don't handle octal if the buffer is under 4 bits
+
+    mov eax, ebx ; place octal buffer in eax
+    and eax, 15  ; keep only the first 4 bits in the octal buffer
+    shr ebx, 4   ; remove first 4 bits in the octal buffer
+
+    sub dword [ebp-12], 4
+
+    push 0
+    push eax
+    call create_num
+    add esp, 8
+
+    cmp dword [ebp-8], 0
+    je .set_head
+
+    mov edx, dword [ebp-8]
+    mov dword [edx + next], eax
+
+.set_head:
+    mov dword [ebp-8], eax
+
+    cmp dword [ebp-16], 0
+    jne .skip
+
+    ; new num LSB pointer is unset, set it
+    mov dword [ebp-16], eax
+
+.skip:
+    ; advance number linked list
+    mov edx, dword [ebp-4]
+    mov edx, dword [edx + next]
+    mov dword [ebp-4], edx
+    jmp .loop
+
+.finish:
+    ; check if octal buffer still has anything in it
+    cmp ebx, 0
+    je .end
+
+    ; octal buffer still has one more number
+    push 0 
+    push ebx 
+    call create_num
+    add esp, 8
+
+    cmp dword [ebp-8], 0
+    je .set_head2
+
+    mov edx, dword [ebp-8]
+    mov dword [edx + next], eax
+
+.set_head2:
+    mov dword [ebp-8], eax
+
+    cmp dword [ebp-16], 0
+    jne .end
+
+    ; new num LSB pointer is unset, set it
+    mov dword [ebp-16], eax
+
+.end:
+    mov edx, dword [ebp-16]
+    mov dword [result], edx
+    add esp, 16 ; account for local variables
+
+    popad
+    mov eax, dword [result]
+    mov esp, ebp
+    pop ebp
+    ret
+
+hex2octal:
+    push ebp
+    mov ebp, esp
+    pushad
+
+    ; function aguments
+    ; ebp+8 - num pointer to convert to octal
+
+    sub esp, 16
+    ; local variables
+    ; ebp-4 - num pointer
+    ; ebp-8 - new num pointer
+    ; ebp-12 - count of bits in buffer
+    ; ebp-16 - new num LSB pointer
+    mov edx, dword [ebp+8]
+    mov dword [ebp-4], edx
+
+    mov dword [ebp-8], 0
+
+    mov dword [ebp-12], 0 ; reset count of bits in buffer
+    
+    mov dword [ebp-16], 0 ; reset new num LSB pointer
+
+    mov ebx, 0 ; hex buffer
+
+.loop:
+    cmp dword [ebp-4], 0 ; are we done going through the number?
+    je .finish
+
+    mov edx, dword [ebp-4]
+    mov eax, dword [edx + data] ; get current hexa digit
+    mov ecx, dword [ebp-12]
+    shl eax, cl
+    add ebx, eax
+    add dword [ebp-12], 4
+
+.pull_from_buffer:
+    mov eax, ebx ; place hexa buffer in eax
+    and eax, 7  ; keep only the first 3 bits in the hexa buffer
+    shr ebx, 3   ; remove first 3 bits in the hexa buffer
+
+    sub dword [ebp-12], 3
+
+    push 0
+    push eax
+    call create_num
+    add esp, 8
+
+    cmp dword [ebp-8], 0
+    je .set_head
+
+    mov edx, dword [ebp-8]
+    mov dword [edx + next], eax
+
+.set_head:
+    mov dword [ebp-8], eax
+
+    cmp dword [ebp-16], 0
+    jne .skip_set_ptr
+
+    ; new num LSB pointer is unset, set it
+    mov dword [ebp-16], eax
+
+.skip_set_ptr:
+    cmp dword [ebp-12], 3
+    jge .pull_from_buffer
+
+.skip:
+    ; advance number linked list
+    mov edx, dword [ebp-4]
+    mov edx, dword [edx + next]
+    mov dword [ebp-4], edx
+    
+    jmp .loop
+
+.finish:
+    ; check if hexa buffer still has anything in it
+    cmp ebx, 0
+    je .end
+
+    ; hexa buffer still has one more number
+    push 0 
+    push ebx 
+    call create_num
+    add esp, 8
+
+    cmp dword [ebp-8], 0
+    je .set_head2
+
+    mov edx, dword [ebp-8]
+    mov dword [edx + next], eax
+
+.set_head2:
+    mov dword [ebp-8], eax
+
+    cmp dword [ebp-16], 0
+    jne .end
+
+    ; new num LSB pointer is unset, set it
+    mov dword [ebp-16], eax
+
+.end:
+    mov edx, dword [ebp-16]
+    mov dword [result], edx
+    add esp, 16 ; account for local variables
+
+    popad
+    mov eax, dword [result]
+    mov esp, ebp
+    pop ebp
+    ret
+

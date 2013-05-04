@@ -27,515 +27,1125 @@
     27 0000005E 25640A00                    DB  "%d", 10, 0
     28                                  
     29                                  PRINT_DIGIT_MESSAGE:
-    30 00000062 257800                      DB  "%x", 0
+    30 00000062 256400                      DB  "%d", 0
     31                                  
-    32                                  PRINT_NEWLINE:
-    33 00000065 0A00                        DB  10, 0
+    32                                  PRINT_HEX_DIGIT_MESSAGE:
+    33 00000065 257800                      DB  "%x", 0
     34                                  
-    35                                  DEBUG:
-    36 00000067 6C696E6B3A20256420-         DB  "link: %d , next: %d", 10, 0
-    37 00000070 2C206E6578743A2025-
-    38 00000079 640A00             
-    39                                  
-    40                                  section .bss
-    41                                  INPUT:
-    42 00000000 <res 00000008>              RESB    8
-    43                                  result:
-    44 00000008 <res 00000004>              RESD    1
-    45                                  
-    46                                  section .text
-    47                                  	align 16
-    48                                  	global main
-    49                                  	extern printf
-    50                                      extern malloc
-    51                                      extern gets
-    52                                  
-    53                                  main:
-    54 00000000 E81A000000                  call calc ; stores operation counter in eax
-    55                                      
-    56 00000005 50                          push eax ; push ops counter
-    57 00000006 68[44000000]                push OP_COUNTER_MESSAGE
-    58 0000000B E8(00000000)                call printf
-    59 00000010 83C408                      add esp, 8
-    60                                  
-    61 00000013 BB00000000                  mov ebx, 0
-    62 00000018 B801000000                  mov eax, 1
-    63 0000001D CD80                        int 80h
-    64                                  
-    65                                  calc:
-    66 0000001F 55                      	push ebp
-    67 00000020 89E5                    	mov	ebp, esp	; Entry code - set up ebp and esp
-    68 00000022 60                      	pushad			; Save registers
-    69                                  
-    70 00000023 83EC10                      sub esp, 16 ; save room for local variables:
-    71                                      %define op_counter ebp-4 ; 1. operation counter
-    72                                      %define stack_size ebp-8 ; 2. current stack size
-    73                                      %define stack_base ebp-12; 3. current stack
-    74                                      %define calc_mode  ebp-16; 3. calc mode
-    75                                  
-    76 00000026 C745FC00000000              mov dword [op_counter], 0 ; reset operation counter
-    77 0000002D C745F800000000              mov dword [stack_size], 0 ; reset current stack size
-    78 00000034 C645F068                    mov byte  [calc_mode], 'h'
-    79                                  
-    80                                      ; allocate memory for operands stack
-    81 00000038 6A14                        push 4*MAX_STACK_SIZE
-    82 0000003A E8(00000000)                call malloc
-    83 0000003F 83C404                      add esp, 4
-    84 00000042 8945F4                      mov dword [stack_base], eax
-    85                                  
-    86                                  loop:
-    87 00000045 68[00000000]                push    PROMPT_MESSAGE
-    88 0000004A E8(00000000)                call    printf
-    89 0000004F 83C404                      add     esp, 4
-    90                                  
-    91 00000052 68[00000000]                push    INPUT
-    92 00000057 E8(00000000)                call    gets
-    93 0000005C 83C404                      add     esp, 4
-    94                                  
-    95 0000005F FF45FC                      inc dword [op_counter]
-    96                                  
-    97                                      ; choose operation
-    98 00000062 803D[00000000]2B            cmp byte [INPUT], '+'
-    99 00000069 0F8405010000                je addition
-   100                                  
-   101 0000006F 803D[00000000]70            cmp byte [INPUT], 'p'
-   102 00000076 0F84D5010000                je pop_and_print
+    35                                  PRINT_NEWLINE:
+    36 00000068 0A00                        DB  10, 0
+    37                                  
+    38                                  DEBUG:
+    39 0000006A 6C696E6B3A20256420-         DB  "link: %d , next: %d", 10, 0
+    40 00000073 2C206E6578743A2025-
+    41 0000007C 640A00             
+    42                                  
+    43                                  section .bss
+    44                                  INPUT:
+    45 00000000 <res 00000050>              RESB    80
+    46                                  result:
+    47 00000050 <res 00000004>              RESD    1
+    48                                  
+    49                                  section .text
+    50                                  	align 16
+    51                                  	global main
+    52                                  	extern printf
+    53                                      extern malloc
+    54                                      extern gets
+    55                                  
+    56                                  main:
+    57 00000000 E81A000000                  call calc ; stores operation counter in eax
+    58                                      
+    59 00000005 50                          push eax ; push ops counter
+    60 00000006 68[44000000]                push OP_COUNTER_MESSAGE
+    61 0000000B E8(00000000)                call printf
+    62 00000010 83C408                      add esp, 8
+    63                                  
+    64 00000013 BB00000000                  mov ebx, 0
+    65 00000018 B801000000                  mov eax, 1
+    66 0000001D CD80                        int 80h
+    67                                  
+    68                                  calc:
+    69 0000001F 55                      	push ebp
+    70 00000020 89E5                    	mov	ebp, esp	; Entry code - set up ebp and esp
+    71 00000022 60                      	pushad			; Save registers
+    72                                  
+    73 00000023 83EC10                      sub esp, 16 ; save room for local variables:
+    74                                      %define op_counter ebp-4 ; 1. operation counter
+    75                                      %define stack_size ebp-8 ; 2. current stack size
+    76                                      %define stack_base ebp-12; 3. current stack
+    77                                      %define calc_mode  ebp-16; 4. calc mode
+    78                                  
+    79 00000026 C745FC00000000              mov dword [op_counter], 0 ; reset operation counter
+    80 0000002D C745F800000000              mov dword [stack_size], 0 ; reset current stack size
+    81 00000034 C645F068                    mov byte  [calc_mode], 'h'
+    82                                  
+    83                                      ; allocate memory for operands stack
+    84 00000038 6A14                        push 4*MAX_STACK_SIZE
+    85 0000003A E8(00000000)                call malloc
+    86 0000003F 83C404                      add esp, 4
+    87 00000042 8945F4                      mov dword [stack_base], eax
+    88                                  
+    89                                  loop:
+    90 00000045 68[00000000]                push    PROMPT_MESSAGE
+    91 0000004A E8(00000000)                call    printf
+    92 0000004F 83C404                      add     esp, 4
+    93                                  
+    94 00000052 68[00000000]                push    INPUT
+    95 00000057 E8(00000000)                call    gets
+    96 0000005C 83C404                      add     esp, 4
+    97                                  
+    98 0000005F FF45FC                      inc dword [op_counter]
+    99                                  
+   100                                      ; choose operation
+   101 00000062 803D[00000000]2B            cmp byte [INPUT], '+'
+   102 00000069 0F843D010000                je addition
    103                                  
-   104 0000007C 803D[00000000]64            cmp byte [INPUT], 'd'
-   105 00000083 0F84D3010000                je duplicate
+   104 0000006F 803D[00000000]70            cmp byte [INPUT], 'p'
+   105 00000076 0F840D020000                je pop_and_print
    106                                  
-   107 00000089 803D[00000000]5E            cmp byte [INPUT], '^'
-   108 00000090 0F84D7010000                je exponent
+   107 0000007C 803D[00000000]64            cmp byte [INPUT], 'd'
+   108 00000083 0F8441020000                je duplicate
    109                                  
-   110 00000096 803D[00000000]78            cmp byte [INPUT], 'x'
-   111 0000009D 0F84D5010000                je bitwise_xor
+   110 00000089 803D[00000000]5E            cmp byte [INPUT], '^'
+   111 00000090 0F845D020000                je exponent
    112                                  
-   113 000000A3 803D[00000000]6F            cmp byte [INPUT], 'o'
-   114 000000AA 0F84D3010000                je octal
+   113 00000096 803D[00000000]78            cmp byte [INPUT], 'x'
+   114 0000009D 0F844F030000                je bitwise_xor
    115                                  
-   116 000000B0 803D[00000000]68            cmp byte [INPUT], 'h'
-   117 000000B7 0F84CF010000                je hexa 
+   116 000000A3 803D[00000000]6F            cmp byte [INPUT], 'o'
+   117 000000AA 0F84FF030000                je octal
    118                                  
-   119 000000BD 803D[00000000]71            cmp byte [INPUT], 'q'
-   120 000000C4 744E                        je .exit
+   119 000000B0 803D[00000000]68            cmp byte [INPUT], 'h'
+   120 000000B7 0F84FB030000                je hexa 
    121                                  
-   122                                      ; it's not an operation - it's a number.
-   123                                      ; we should iterate on it and create a number linked list for it, and
-   124                                      ; push it into the the operands stack.
-   125                                  
-   126                                      ; first, check if we have room for it in the stack.
-   127 000000C6 837DF805                    cmp dword [stack_size], MAX_STACK_SIZE
-   128 000000CA 0F84D7010000                je stackoverflow
-   129                                  
-   130 000000D0 BA00000000                  mov edx, 0 ; holds the head of the linked list
-   131 000000D5 B9[00000000]                mov ecx, INPUT
-   132                                      .foreach_digit:
-   133 000000DA 0FB601                          movzx eax, byte [ecx]
-   134 000000DD 83F800                          cmp eax, 0
-   135 000000E0 7418                            je .end_foreach_digit
-   136                                  
-   137 000000E2 50                              push eax
-   138 000000E3 E844020000                      call char2hex 
-   139 000000E8 83C404                          add esp, 4
-   140                                  
-   141                                          ; got a valid hexa digit in al.
-   142                                          ; create a new digit link for it and append the previous list to it
-   143 000000EB 52                              push edx
-   144 000000EC 50                              push eax
-   145 000000ED E85A000000                      call create_num
-   146 000000F2 83C408                          add esp, 8
-   147                                  
-   148                                          ; eax holds the address to the new link created
-   149 000000F5 89C2                            mov edx, eax ; set the current number linked list ptr to the new link
-   150                                  
-   151                                      .skip:
-   152 000000F7 41                              inc ecx
-   153 000000F8 EBE0                            jmp .foreach_digit
-   154                                      .end_foreach_digit:
-   155                                          ; if an empty string / invalid number given, ignore it
-   156 000000FA 83FA00                          cmp edx, 0
-   157 000000FD 0F8442FFFFFF                    je loop
-   158                                          
-   159                                          ; push the new created number to the operands stack
-   160 00000103 8B5DF4                          mov ebx, dword [stack_base]
-   161 00000106 8B4DF8                          mov ecx, dword [stack_size]
-   162 00000109 89148B                          mov dword [ebx + 4*ecx], edx
-   163 0000010C FF45F8                          inc dword [stack_size]
+   122 000000BD 803D[00000000]71            cmp byte [INPUT], 'q'
+   123 000000C4 7472                        je .exit
+   124                                  
+   125                                      ; it's not an operation - it's a number.
+   126                                      ; we should iterate on it and create a number linked list for it, and
+   127                                      ; push it into the the operands stack.
+   128                                  
+   129 000000C6 BA00000000                  mov edx, 0 ; holds the head of the linked list
+   130 000000CB B9[00000000]                mov ecx, INPUT
+   131                                      .foreach_digit:
+   132 000000D0 0FB601                          movzx eax, byte [ecx]
+   133 000000D3 83F800                          cmp eax, 0
+   134 000000D6 7429                            je .end_foreach_digit
+   135                                  
+   136 000000D8 807DF068                        cmp byte [calc_mode], 'h'
+   137 000000DC 740B                            je .hex
+   138                                  
+   139                                      ; octal
+   140 000000DE 50                              push eax
+   141 000000DF E8C3040000                      call char2octal
+   142 000000E4 83C404                          add esp, 4
+   143 000000E7 EB09                            jmp .got_digit
+   144                                  
+   145                                      .hex:
+   146 000000E9 50                              push eax
+   147 000000EA E879040000                      call char2hex 
+   148 000000EF 83C404                          add esp, 4
+   149                                  
+   150                                      .got_digit:
+   151                                          ; got a valid hexa digit in al.
+   152                                          ; create a new digit link for it and append the previous list to it
+   153 000000F2 52                              push edx
+   154 000000F3 50                              push eax
+   155 000000F4 E88B000000                      call create_num
+   156 000000F9 83C408                          add esp, 8
+   157                                  
+   158                                          ; eax holds the address to the new link created
+   159 000000FC 89C2                            mov edx, eax ; set the current number linked list ptr to the new link
+   160                                  
+   161                                      .skip:
+   162 000000FE 41                              inc ecx
+   163 000000FF EBCF                            jmp .foreach_digit
    164                                  
-   165 0000010F E931FFFFFF                  jmp loop 
-   166                                  
-   167                                  .exit:
-   168                                      ; print all numbers in the operands stack
-   169 00000114 B800000000                  mov eax, 0
-   170 00000119 8B5DF4                      mov ebx, dword [stack_base]
-   171                                      .foreach_stack:
-   172 0000011C 837DF800                        cmp dword [stack_size], 0
-   173 00000120 7415                            je .end_foreach_stack
-   174                                  
-   175                                          ; print the top of the stack and pop it
-   176 00000122 8B4DF8                          mov ecx, dword [stack_size]
-   177 00000125 8B548BFC                        mov edx, dword [ebx + 4*ecx + (-4)]
+   165                                      .end_foreach_digit:
+   166                                          ; if an empty string / invalid number given, ignore it
+   167 00000101 83FA00                          cmp edx, 0
+   168 00000104 0F843BFFFFFF                    je loop
+   169                                          
+   170                                          ; check if we have room for it in the stack.
+   171 0000010A 837DF805                        cmp dword [stack_size], MAX_STACK_SIZE
+   172 0000010E 0F84BF030000                    je stackoverflow
+   173                                  
+   174 00000114 807DF06F                        cmp byte [calc_mode], 'o'
+   175 00000118 7402                            je .octal
+   176                                          ; else
+   177 0000011A EB0B                            jmp .push
    178                                  
-   179 00000129 52                              push edx
-   180 0000012A E88A010000                      call print_num
-   181 0000012F 83C404                          add esp, 4
-   182                                  
-   183 00000132 FF4DF8                          dec dword [stack_size] 
-   184 00000135 EBE5                            jmp .foreach_stack
-   185                                      .end_foreach_stack:
-   186                                  
-   187 00000137 8B45FC                      mov eax, dword [op_counter]
-   188 0000013A A3[08000000]                mov dword [result], eax
-   189                                  
-   190 0000013F 83C410                      add esp, 16 ; remove local variables
-   191 00000142 61                      	popad			; Restore registers
-   192 00000143 A1[08000000]                mov eax, dword [result] ; return operation counter
-   193 00000148 89EC                        mov	esp, ebp	; Function exit code
-   194 0000014A 5D                          pop	ebp
-   195 0000014B C3                      	ret
-   196                                  
-   197                                  create_num:
-   198 0000014C 55                          push ebp
-   199 0000014D 89E5                        mov ebp, esp
-   200 0000014F 60                          pushad
-   201                                  
-   202                                      ; function parameters
-   203                                      ; ebp+8 - num byte to create
-   204                                      ; ebp+12 - next address
-   205                                  
-   206 00000150 6A05                        push 5
-   207 00000152 E8(00000000)                call malloc
-   208 00000157 83C404                      add esp, 4
-   209                                  
-   210                                      ; eax holds the address to the 5 bytes we allocated
-   211 0000015A 8B550C                      mov edx, dword [ebp+12]
-   212 0000015D 8910                        mov dword [eax + next], edx
-   213 0000015F 8A5D08                      mov bl, byte [ebp+8]
-   214 00000162 885804                      mov byte [eax + data], bl
-   215                                  
-   216 00000165 A3[08000000]                mov dword [result], eax
-   217                                      
-   218 0000016A 61                          popad
-   219 0000016B A1[08000000]                mov eax, dword [result]
-   220 00000170 89EC                        mov esp, ebp
-   221 00000172 5D                          pop ebp
-   222 00000173 C3                          ret
-   223                                  
-   224                                  addition:
-   225 00000174 837DF802                    cmp dword [stack_size], 2
-   226 00000178 0F8C17010000                jl error_missing_args
-   227                                  
-   228 0000017E 8B5DF4                      mov ebx, dword [stack_base]
-   229 00000181 8B4DF8                      mov ecx, dword [stack_size]
-   230 00000184 FF748BFC                    push dword [ebx + 4*ecx + (-4)]
-   231 00000188 FF748BF8                    push dword [ebx + 4*ecx + (-8)] 
-   232 0000018C E81A000000                  call func_addition
-   233 00000191 83C408                      add esp, 8
-   234                                  
-   235 00000194 FF4DF8                      dec dword [stack_size]
-   236 00000197 FF4DF8                      dec dword [stack_size]
-   237                                  
-   238                                      ; push the new created number to the operands stack
-   239 0000019A 8B5DF4                      mov ebx, dword [stack_base]
-   240 0000019D 8B4DF8                      mov ecx, dword [stack_size]
-   241 000001A0 89048B                      mov dword [ebx + 4*ecx], eax
-   242 000001A3 FF45F8                      inc dword [stack_size]
-   243 000001A6 E99AFEFFFF                  jmp loop
-   244                                  
-   245                                  func_addition:
-   246 000001AB 55                          push ebp
-   247 000001AC 89E5                        mov ebp, esp
-   248 000001AE 60                          pushad
-   249                                      
-   250                                      ; function parameters
-   251                                      %define n1 ebp+8 ; first number
-   252                                      %define n2 ebp+12 ; second number
-   253                                  
-   254                                      ; local variables
-   255 000001AF 83EC10                      sub esp, 16
-   256                                      ; ebp-8  - new number pointer
-   257                                      ; ebp-12 - carry
-   258                                      ; ebp-16 - n1
-   259                                      ; ebp-20 - n2
-   260                                  
-   261 000001B2 C745F800000000              mov dword [ebp-8], 0
-   262 000001B9 C745F400000000              mov dword [ebp-12], 0 ; reset carry
+   179                                      .octal: ; convert from octal to hex
+   180 0000011C 52                              push edx
+   181 0000011D E8B0040000                      call octal2hex
+   182 00000122 83C404                          add esp, 4
+   183                                  
+   184 00000125 89C2                            mov edx, eax
+   185                                          
+   186                                      .push:
+   187                                          ; push the new created number to the operands stack
+   188 00000127 8B5DF4                          mov ebx, dword [stack_base]
+   189 0000012A 8B4DF8                          mov ecx, dword [stack_size]
+   190 0000012D 89148B                          mov dword [ebx + 4*ecx], edx
+   191 00000130 FF45F8                          inc dword [stack_size]
+   192                                  
+   193 00000133 E90DFFFFFF                  jmp loop 
+   194                                  
+   195                                  .exit:
+   196                                      ; print all numbers in the operands stack
+   197 00000138 B800000000                  mov eax, 0
+   198 0000013D 8B5DF4                      mov ebx, dword [stack_base]
+   199                                      .foreach_stack:
+   200 00000140 837DF800                        cmp dword [stack_size], 0
+   201 00000144 7429                            je .end_foreach_stack
+   202                                  
+   203                                          ; print the top of the stack and pop it
+   204 00000146 8B4DF8                          mov ecx, dword [stack_size]
+   205 00000149 8B548BFC                        mov edx, dword [ebx + 4*ecx + (-4)]
+   206                                  
+   207 0000014D 807DF068                        cmp byte [calc_mode], 'h'
+   208 00000151 740B                            je .print
+   209                                     
+   210                                          ; octal mode
+   211                                          ; convert from hex to octal before printing
+   212 00000153 52                              push edx
+   213 00000154 E832050000                      call hex2octal
+   214 00000159 83C404                          add esp, 4
+   215 0000015C 89C2                            mov edx, eax
+   216                                  
+   217                                      .print:
+   218 0000015E FF75F0                          push dword [calc_mode]
+   219 00000161 52                              push edx
+   220 00000162 E87E030000                      call print_num
+   221 00000167 83C408                          add esp, 8
+   222                                  
+   223 0000016A FF4DF8                          dec dword [stack_size] 
+   224 0000016D EBD1                            jmp .foreach_stack
+   225                                      .end_foreach_stack:
+   226                                  
+   227 0000016F 8B45FC                      mov eax, dword [op_counter]
+   228 00000172 A3[50000000]                mov dword [result], eax
+   229                                  
+   230 00000177 83C410                      add esp, 16 ; remove local variables
+   231 0000017A 61                      	popad			; Restore registers
+   232 0000017B A1[50000000]                mov eax, dword [result] ; return operation counter
+   233 00000180 89EC                        mov	esp, ebp	; Function exit code
+   234 00000182 5D                          pop	ebp
+   235 00000183 C3                      	ret
+   236                                  
+   237                                  create_num:
+   238 00000184 55                          push ebp
+   239 00000185 89E5                        mov ebp, esp
+   240 00000187 60                          pushad
+   241                                  
+   242                                      ; function parameters
+   243                                      ; ebp+8 - num byte to create
+   244                                      ; ebp+12 - next address
+   245                                  
+   246 00000188 6A05                        push 5
+   247 0000018A E8(00000000)                call malloc
+   248 0000018F 83C404                      add esp, 4
+   249                                  
+   250                                      ; eax holds the address to the 5 bytes we allocated
+   251 00000192 8B550C                      mov edx, dword [ebp+12]
+   252 00000195 8910                        mov dword [eax + next], edx
+   253 00000197 8A5D08                      mov bl, byte [ebp+8]
+   254 0000019A 885804                      mov byte [eax + data], bl
+   255                                  
+   256 0000019D A3[50000000]                mov dword [result], eax
+   257                                      
+   258 000001A2 61                          popad
+   259 000001A3 A1[50000000]                mov eax, dword [result]
+   260 000001A8 89EC                        mov esp, ebp
+   261 000001AA 5D                          pop ebp
+   262 000001AB C3                          ret
    263                                  
-   264 000001C0 8B5508                      mov edx, dword [ebp+8]
-   265 000001C3 8955F0                      mov dword [ebp-16], edx
-   266 000001C6 8B550C                      mov edx, dword [ebp+12]
-   267 000001C9 8955EC                      mov dword [ebp-20], edx
-   268                                     
-   269                                  .loop:
-   270 000001CC BB00000000                  mov ebx, 0
-   271                                  
-   272                                  .add_first:
-   273                                      ; avoid messing with null pointers
-   274 000001D1 837DF000                    cmp dword [ebp-16], 0
-   275 000001D5 7406                        je .add_second
-   276                                  
-   277 000001D7 8B55F0                      mov edx, dword [ebp-16] ; load first number digit address
-   278 000001DA 035A04                      add ebx, dword [edx + data] ; add first number
-   279                                  
-   280                                  .add_second:
-   281                                      ; avoid messing with null pointers
-   282 000001DD 837DEC00                    cmp dword [ebp-20], 0
-   283 000001E1 7406                        je .add_carry
+   264                                  addition:
+   265 000001AC 837DF802                    cmp dword [stack_size], 2
+   266 000001B0 0F8C0B030000                jl error_missing_args
+   267                                  
+   268 000001B6 8B5DF4                      mov ebx, dword [stack_base]
+   269 000001B9 8B4DF8                      mov ecx, dword [stack_size]
+   270 000001BC FF748BFC                    push dword [ebx + 4*ecx + (-4)]
+   271 000001C0 FF748BF8                    push dword [ebx + 4*ecx + (-8)] 
+   272 000001C4 E81A000000                  call func_addition
+   273 000001C9 83C408                      add esp, 8
+   274                                  
+   275 000001CC FF4DF8                      dec dword [stack_size] ; pop first operand
+   276 000001CF FF4DF8                      dec dword [stack_size] ; pop second operand
+   277                                  
+   278                                      ; push the new created number to the operands stack
+   279 000001D2 8B5DF4                      mov ebx, dword [stack_base]
+   280 000001D5 8B4DF8                      mov ecx, dword [stack_size]
+   281 000001D8 89048B                      mov dword [ebx + 4*ecx], eax
+   282 000001DB FF45F8                      inc dword [stack_size]
+   283 000001DE E962FEFFFF                  jmp loop
    284                                  
-   285 000001E3 8B55EC                      mov edx, dword [ebp-20] ; load second number digit address
-   286 000001E6 035A04                      add ebx, dword [edx + data] ; add second number
-   287                                  
-   288                                  .add_carry:
-   289 000001E9 035DF4                      add ebx, dword [ebp-12] ; add carry
-   290                                  
-   291 000001EC 895DF4                      mov dword [ebp-12], ebx
-   292 000001EF C16DF404                    shr dword [ebp-12], 4
+   285                                  func_addition:
+   286 000001E3 55                          push ebp
+   287 000001E4 89E5                        mov ebp, esp
+   288 000001E6 60                          pushad
+   289                                      
+   290                                      ; function parameters
+   291                                      %define n1 ebp+8 ; first number
+   292                                      %define n2 ebp+12 ; second number
    293                                  
-   294 000001F3 837DF400                    cmp dword [ebp-12], 0
-   295 000001F7 7F02                        jg .has_carry
-   296 000001F9 EB03                        jmp .continue
-   297                                  
-   298                                  .has_carry:
-   299                                      ; remove bits higher than 4
-   300 000001FB 83E30F                      and ebx, 15 ; 1111 in binary
-   301                                      
-   302                                  .continue:
-   303 000001FE FF75F8                      push dword [ebp-8]
-   304 00000201 53                          push ebx 
-   305 00000202 E845FFFFFF                  call create_num
-   306 00000207 83C408                      add esp, 8
-   307                                  
-   308 0000020A 8945F8                      mov dword [ebp-8], eax
-   309                                  
-   310                                      ; advance numbers pointers
+   294                                      ; local variables
+   295 000001E7 83EC10                      sub esp, 16
+   296                                      ; ebp-4  - new number pointer
+   297                                      ; ebp-8 - carry
+   298                                      ; ebp-12 - n1
+   299                                      ; ebp-16 - n2
+   300                                  
+   301 000001EA C745FC00000000              mov dword [ebp-4], 0
+   302 000001F1 C745F800000000              mov dword [ebp-8], 0 ; reset carry
+   303                                  
+   304 000001F8 8B5508                      mov edx, dword [ebp+8]
+   305 000001FB 8955F4                      mov dword [ebp-12], edx
+   306 000001FE 8B550C                      mov edx, dword [ebp+12]
+   307 00000201 8955F0                      mov dword [ebp-16], edx
+   308                                     
+   309                                  .loop:
+   310 00000204 BB00000000                  mov ebx, 0
    311                                  
-   312                                  .advance_first:
+   312                                  .add_first:
    313                                      ; avoid messing with null pointers
-   314 0000020D 837DF000                    cmp dword [ebp-16], 0
-   315 00000211 7408                        je .advance_second
+   314 00000209 837DF400                    cmp dword [ebp-12], 0
+   315 0000020D 7406                        je .add_second
    316                                  
-   317 00000213 8B55F0                      mov edx, dword [ebp-16]
-   318 00000216 8B1A                        mov ebx, [edx + next]
-   319 00000218 895DF0                      mov dword [ebp-16], ebx 
-   320                                  
-   321                                  .advance_second:
-   322                                      ; avoid messing with null pointers
-   323 0000021B 837DEC00                    cmp dword [ebp-20], 0
-   324 0000021F 7408                        je .check_conditions
-   325                                  
-   326 00000221 8B55EC                      mov edx, dword [ebp-20]
-   327 00000224 8B1A                        mov ebx, [edx + next]
-   328 00000226 895DEC                      mov dword [ebp-20], ebx 
-   329                                  
-   330                                  .check_conditions:
-   331                                      ; if either numbers or carry is not zero, continue
-   332 00000229 837DF000                    cmp dword [ebp-16], 0
-   333 0000022D 759D                        jne .loop
-   334                                  
-   335 0000022F 837DEC00                    cmp dword [ebp-20], 0
-   336 00000233 7597                        jne .loop
+   317 0000020F 8B55F4                      mov edx, dword [ebp-12] ; load first number digit address
+   318 00000212 035A04                      add ebx, dword [edx + data] ; add first number
+   319                                  
+   320                                  .add_second:
+   321                                      ; avoid messing with null pointers
+   322 00000215 837DF000                    cmp dword [ebp-16], 0
+   323 00000219 7406                        je .add_carry
+   324                                  
+   325 0000021B 8B55F0                      mov edx, dword [ebp-16] ; load second number digit address
+   326 0000021E 035A04                      add ebx, dword [edx + data] ; add second number
+   327                                  
+   328                                  .add_carry:
+   329 00000221 035DF8                      add ebx, dword [ebp-8] ; add carry
+   330                                  
+   331 00000224 895DF8                      mov dword [ebp-8], ebx
+   332 00000227 C16DF804                    shr dword [ebp-8], 4
+   333                                  
+   334 0000022B 837DF800                    cmp dword [ebp-8], 0
+   335 0000022F 7F02                        jg .has_carry
+   336 00000231 EB03                        jmp .continue
    337                                  
-   338 00000235 837DF400                    cmp dword [ebp-12], 0
-   339 00000239 7591                        jne .loop
-   340                                  
-   341 0000023B 8B55F8                      mov edx, dword [ebp-8]
-   342 0000023E 8915[08000000]              mov dword [result], edx
-   343                                  
-   344 00000244 83C410                      add esp, 16
-   345 00000247 61                          popad
-   346 00000248 A1[08000000]                mov eax, dword [result]
-   347 0000024D 89EC                        mov esp, ebp
-   348 0000024F 5D                          pop ebp
-   349 00000250 C3                          ret
-   350                                  
-   351                                  pop_and_print:
-   352 00000251 837DF801                    cmp dword [stack_size], 1
-   353 00000255 7C3E                        jl error_missing_args
-   354                                  
-   355 00000257 E9E9FDFFFF                  jmp loop
+   338                                  .has_carry:
+   339                                      ; remove bits higher than 4
+   340 00000233 83E30F                      and ebx, 15 ; 1111 in binary
+   341                                      
+   342                                  .continue:
+   343 00000236 FF75FC                      push dword [ebp-4]
+   344 00000239 53                          push ebx 
+   345 0000023A E845FFFFFF                  call create_num
+   346 0000023F 83C408                      add esp, 8
+   347                                  
+   348 00000242 8945FC                      mov dword [ebp-4], eax
+   349                                  
+   350                                      ; advance numbers pointers
+   351                                  
+   352                                  .advance_first:
+   353                                      ; avoid messing with null pointers
+   354 00000245 837DF400                    cmp dword [ebp-12], 0
+   355 00000249 7408                        je .advance_second
    356                                  
-   357                                  duplicate:
-   358 0000025C 837DF801                    cmp dword [stack_size], 1
-   359 00000260 7C33                        jl error_missing_args
+   357 0000024B 8B55F4                      mov edx, dword [ebp-12]
+   358 0000024E 8B1A                        mov ebx, [edx + next]
+   359 00000250 895DF4                      mov dword [ebp-12], ebx 
    360                                  
-   361 00000262 837DF805                    cmp dword [stack_size], MAX_STACK_SIZE
-   362 00000266 743F                        je stackoverflow
-   363                                  
-   364 00000268 E9D8FDFFFF                  jmp loop
+   361                                  .advance_second:
+   362                                      ; avoid messing with null pointers
+   363 00000253 837DF000                    cmp dword [ebp-16], 0
+   364 00000257 7408                        je .check_conditions
    365                                  
-   366                                  exponent:
-   367 0000026D 837DF801                    cmp dword [stack_size], 1
-   368 00000271 7C22                        jl error_missing_args
+   366 00000259 8B55F0                      mov edx, dword [ebp-16]
+   367 0000025C 8B1A                        mov ebx, [edx + next]
+   368 0000025E 895DF0                      mov dword [ebp-16], ebx 
    369                                  
-   370 00000273 E9CDFDFFFF                  jmp loop
-   371                                  
-   372                                  bitwise_xor:
-   373 00000278 837DF802                    cmp dword [stack_size], 2
-   374 0000027C 7C17                        jl error_missing_args
-   375                                  
-   376 0000027E E9C2FDFFFF                  jmp loop
+   370                                  .check_conditions:
+   371                                      ; if either numbers or carry is not zero, continue
+   372 00000261 837DF400                    cmp dword [ebp-12], 0
+   373 00000265 759D                        jne .loop
+   374                                  
+   375 00000267 837DF000                    cmp dword [ebp-16], 0
+   376 0000026B 7597                        jne .loop
    377                                  
-   378                                  octal:
-   379 00000283 C645F06F                    mov byte [calc_mode], 'o'
-   380 00000287 E9B9FDFFFF                  jmp loop
-   381                                  
-   382                                  hexa:
-   383 0000028C C645F068                    mov byte [calc_mode], 'h'
-   384 00000290 E9B0FDFFFF                  jmp loop
-   385                                  
-   386                                  error_missing_args:
-   387 00000295 68[1E000000]                push NOT_ENOUGH_ARGUMENTS
-   388 0000029A E8(00000000)                call printf
-   389 0000029F 83C404                      add esp, 4
-   390 000002A2 E99EFDFFFF                  jmp loop
-   391                                  
-   392                                  stackoverflow:
-   393 000002A7 68[07000000]                push STACKOVERFLOW 
-   394 000002AC E8(00000000)                call printf
-   395 000002B1 83C404                      add esp, 4
-   396 000002B4 E98CFDFFFF                  jmp loop
-   397                                  
-   398                                  print_num:
-   399 000002B9 55                          push ebp
-   400 000002BA 89E5                        mov ebp, esp
-   401 000002BC 60                          pushad
-   402                                  
-   403                                      ; ebp+8 - pointer to first num digit
-   404 000002BD 8B5D08                      mov ebx, [ebp+8]
-   405                                     
-   406                                  .loop:
-   407 000002C0 83FB00                      cmp ebx, 0
-   408 000002C3 7416                        je .end 
-   409                                  
-   410 000002C5 0FB64304                    movzx eax, byte [ebx + data]
-   411 000002C9 50                          push eax
-   412 000002CA 68[62000000]                push PRINT_DIGIT_MESSAGE
-   413 000002CF E8(00000000)                call printf
-   414 000002D4 83C408                      add esp, 8
-   415                                  
-   416 000002D7 8B1B                        mov ebx, [ebx + next]
-   417 000002D9 EBE5                        jmp .loop
-   418                                  
-   419                                  .end:
-   420 000002DB E805000000                  call print_newline
-   421                                  
-   422 000002E0 61                          popad
-   423 000002E1 89EC                        mov esp, ebp
-   424 000002E3 5D                          pop ebp
-   425 000002E4 C3                          ret
-   426                                  
-   427                                  print_newline:
-   428 000002E5 68[65000000]                push PRINT_NEWLINE
-   429 000002EA E8(00000000)                call printf
-   430 000002EF 83C404                      add esp, 4
-   431 000002F2 C3                          ret
-   432                                  
-   433                                  dec2hex_char:
-   434 000002F3 55                          push ebp
-   435 000002F4 89E5                        mov ebp, esp
-   436 000002F6 60                          pushad
-   437                                  
-   438                                      ; ebp+8 - dec number to convert to hex char ([0-15])
-   439                                  
-   440 000002F7 8B4508                      mov eax, dword [ebp+8]
+   378 0000026D 837DF800                    cmp dword [ebp-8], 0
+   379 00000271 7591                        jne .loop
+   380                                  
+   381 00000273 8B55FC                      mov edx, dword [ebp-4]
+   382 00000276 8915[50000000]              mov dword [result], edx
+   383                                  
+   384 0000027C 83C410                      add esp, 16
+   385 0000027F 61                          popad
+   386 00000280 A1[50000000]                mov eax, dword [result]
+   387 00000285 89EC                        mov esp, ebp
+   388 00000287 5D                          pop ebp
+   389 00000288 C3                          ret
+   390                                  
+   391                                  pop_and_print:
+   392 00000289 837DF801                    cmp dword [stack_size], 1
+   393 0000028D 0F8C2E020000                jl error_missing_args
+   394                                  
+   395 00000293 8B5DF4                      mov ebx, dword [stack_base]
+   396 00000296 8B4DF8                      mov ecx, dword [stack_size]
+   397 00000299 8B548BFC                    mov edx, dword [ebx + 4*ecx + (-4)]
+   398                                  
+   399 0000029D 807DF068                    cmp byte [calc_mode], 'h'
+   400 000002A1 740B                        je .print
+   401                                  
+   402                                      ; octal mode
+   403                                      ; convert from hex to octal before printing
+   404 000002A3 52                          push edx
+   405 000002A4 E8E2030000                  call hex2octal
+   406 000002A9 83C404                      add esp, 4
+   407 000002AC 89C2                        mov edx, eax
+   408                                  
+   409                                  .print:
+   410 000002AE FF75F0                      push dword [calc_mode]
+   411 000002B1 52                          push edx
+   412 000002B2 E82E020000                  call print_num
+   413 000002B7 83C408                      add esp, 8
+   414                                  
+   415 000002BA FF4DF8                      dec dword [stack_size] ; pop from operands stack
+   416                                  
+   417                                      ;push dword [stack_base]
+   418                                      ;call func_pop_and_print
+   419                                      ;add esp, 4
+   420                                  
+   421 000002BD E983FDFFFF                  jmp loop
+   422                                  
+   423                                  func_pop_and_print:
+   424 000002C2 55                          push ebp
+   425 000002C3 89E5                        mov ebp, esp
+   426 000002C5 60                          pushad
+   427                                  
+   428 000002C6 61                          popad
+   429 000002C7 89EC                        mov esp, ebp
+   430 000002C9 5D                          pop ebp
+   431                                  
+   432                                  duplicate:
+   433 000002CA 837DF801                    cmp dword [stack_size], 1
+   434 000002CE 0F8CED010000                jl error_missing_args
+   435                                  
+   436 000002D4 837DF805                    cmp dword [stack_size], MAX_STACK_SIZE
+   437 000002D8 0F84F5010000                je stackoverflow
+   438                                  
+   439 000002DE 8B5DF4                      mov ebx, dword [stack_base]
+   440 000002E1 8B4DF8                      mov ecx, dword [stack_size]
    441                                  
-   442                                      ; if eax > 15
-   443 000002FA 83F80F                      cmp eax, 15
-   444 000002FD 7F19                            jg .invalid
-   445                                  
-   446                                      ; if eax < 0
-   447 000002FF 83F800                      cmp eax, 0
-   448 00000302 7C14                            jl .invalid
-   449                                  
-   450                                      ; if eax >= 10
-   451 00000304 83F80A                      cmp eax, 10
-   452 00000307 7D05                            jge .n10_15
-   453                                  
-   454                                      ; if eax >= 0
-   455 00000309 83F800                      cmp eax, 0
-   456 0000030C 7D05                            jge .n0_9
-   457                                  
-   458                                      .n10_15: ; [10-15]
-   459 0000030E 83C037                          add eax, 55
-   460 00000311 EB0A                            jmp .end
-   461                                  
-   462                                      .n0_9: ; [0-9]
-   463 00000313 83C030                          add eax, 48
-   464 00000316 EB05                            jmp .end 
-   465                                  
-   466                                  .invalid:
-   467 00000318 B8FFFFFFFF                  mov eax, -1
-   468                                  
-   469                                  .end:
-   470 0000031D A3[08000000]                mov dword [result], eax
-   471 00000322 61                          popad
-   472 00000323 A1[08000000]                mov eax, dword [result]
-   473 00000328 89EC                        mov esp, ebp
-   474 0000032A 5D                          pop ebp
-   475 0000032B C3                          ret
-   476                                  
-   477                                  char2hex:
-   478 0000032C 55                          push ebp
-   479 0000032D 89E5                        mov ebp, esp
+   442 000002E4 8B448BFC                    mov eax, dword [ebx + 4*ecx + (-4)] ; get stack head value
+   443                                  
+   444 000002E8 89048B                      mov dword [ebx + 4*ecx], eax ; push to operands stack
+   445 000002EB FF45F8                      inc dword [stack_size]
+   446                                  
+   447 000002EE E952FDFFFF                  jmp loop
+   448                                  
+   449                                  exponent:
+   450 000002F3 837DF801                    cmp dword [stack_size], 1
+   451 000002F7 0F8CC4010000                jl error_missing_args
+   452                                  
+   453 000002FD 8B5DF4                      mov ebx, dword [stack_base]
+   454 00000300 8B4DF8                      mov ecx, dword [stack_size]
+   455 00000303 FF748BFC                    push dword [ebx + 4*ecx + (-4)]
+   456 00000307 E84D000000                  call func_exponent
+   457 0000030C 83C404                      add esp, 4
+   458 0000030F FF4DF8                      dec dword [stack_size] ; pop from operands stack
+   459                                  
+   460 00000312 89048B                      mov dword [ebx + 4*ecx], eax ; push to operands stack
+   461 00000315 FF45F8                      inc dword [stack_size]
+   462                                  
+   463 00000318 E928FDFFFF                  jmp loop
+   464                                  
+   465                                  func_shl:
+   466 0000031D 55                          push ebp
+   467 0000031E 89E5                        mov ebp, esp
+   468 00000320 60                          pushad
+   469                                      
+   470                                      ; function parameters
+   471                                      ; ebp+8 - number to shift
+   472                                  
+   473                                      ; local variables
+   474 00000321 83EC0C                      sub esp, 12
+   475                                      ; ebp-4 - new number pointer
+   476                                      ; ebp-8 - num pointer
+   477                                      ; ebp-12 - carry
+   478                                  
+   479 00000324 C745FC00000000              mov dword [ebp-4], 0 ; reset new num pointer
    480                                  
-   481                                      %define char ebp+8 ; character to convert to hexa
-   482                                  
-   483 0000032F 8B4508                      mov eax, [char]
-   484                                  
-   485                                      ; if al >= 'a'
-   486 00000332 3C61                        cmp al, 'a'
-   487 00000334 7D0A                            jge .ge_a
-   488                                  
-   489                                      ; if al >= 'A'
-   490 00000336 3C41                        cmp al, 'A'
-   491 00000338 7D0C                            jge .ge_A
-   492                                  
-   493                                      ; if al >= '0'
-   494 0000033A 3C30                        cmp al, '0'
-   495 0000033C 7D0E                            jge .ge_0
-   496                                  
-   497                                      ; invalid character
-   498 0000033E EB22                        jmp .invalid
-   499                                  
-   500                                      .ge_a: ; a <= al
-   501                                          ; if al <= 'f'
-   502 00000340 3C66                            cmp al, 'f'
-   503 00000342 7E0E                                jle .a_f
-   504                                          ; else
-   505 00000344 EB1C                                jmp .invalid 
-   506                                  
-   507                                      .ge_A: ; A <= al
-   508                                          ; if al <= 'F'
-   509 00000346 3C46                            cmp al, 'F'
-   510 00000348 7E0E                                jle .A_F
-   511                                          ; else
-   512 0000034A EB16                                jmp .invalid 
-   513                                  
-   514                                      .ge_0: ; 0 <= al
-   515                                          ; if al <= '9'
-   516 0000034C 3C39                            cmp al, '9'
-   517 0000034E 7E0E                                jle .n0_9
-   518                                          ; else
-   519 00000350 EB10                                jmp .invalid 
-   520                                  
-   521                                      .a_f: ; [a, f]
-   522 00000352 2C61                            sub al, 'a'
-   523 00000354 040A                            add al, 10
-   524 00000356 EB0F                            jmp .end 
-   525                                  
-   526                                      .A_F: ; [A, F]
-   527 00000358 2C41                            sub al, 'A'
-   528 0000035A 040A                            add al, 10
-   529 0000035C EB09                            jmp .end 
-   530                                  
-   531                                      .n0_9: ; [0, 9]
-   532 0000035E 2C30                            sub al, '0'
-   533 00000360 EB05                            jmp .end 
-   534                                  
-   535                                  .invalid:
-   536 00000362 B8FFFFFFFF                  mov eax, -1
-   537                                  
-   538                                  .end:
-   539 00000367 89EC                        mov esp, ebp
-   540 00000369 5D                          pop ebp
-   541 0000036A C3                          ret
+   481 0000032B 8B5508                      mov edx, dword [ebp+8] ; set num pointer
+   482 0000032E 8955F8                      mov dword [ebp-8], edx
+   483                                  
+   484 00000331 C745F400000000              mov dword [ebp-12], 0 ; reset carry
+   485                                  
+   486                                  .loop:
+   487 00000338 837DF400                    cmp dword [ebp-12], 0
+   488 0000033C 7405                        je .end
+   489                                  
+   490 0000033E E902FDFFFF                  jmp loop
+   491                                  
+   492                                  .end:
+   493 00000343 8B55FC                      mov edx, dword [ebp-4]
+   494 00000346 8915[50000000]              mov dword [result], edx
+   495                                  
+   496 0000034C 83C40C                      add esp, 12
+   497 0000034F 61                          popad
+   498 00000350 A1[50000000]                mov eax, dword [result]
+   499 00000355 89EC                        mov esp, ebp
+   500 00000357 5D                          pop ebp
+   501 00000358 C3                          ret
+   502                                  
+   503                                  func_exponent:
+   504 00000359 55                          push ebp
+   505 0000035A 89E5                        mov ebp, esp
+   506 0000035C 60                          pushad
+   507                                      
+   508                                      ; function parameters
+   509                                      ; ebp+8 - exp
+   510                                  
+   511                                      ; local variables
+   512 0000035D 83EC08                      sub esp, 8
+   513                                      ; ebp-4  - new number pointer
+   514                                      ; ebp-8  - exp
+   515                                  
+   516 00000360 C745FC00000000              mov dword [ebp-4], 0
+   517                                  
+   518 00000367 8B5508                      mov edx, dword [ebp+8]
+   519 0000036A 8955F8                      mov dword [ebp-8], edx
+   520                                     
+   521                                  .loop:
+   522 0000036D BB00000000                  mov ebx, 0
+   523                                  
+   524                                  .add_first:
+   525                                      ; avoid messing with null pointers
+   526 00000372 837DF400                    cmp dword [ebp-12], 0
+   527 00000376 7406                        je .add_second
+   528                                  
+   529 00000378 8B55F4                      mov edx, dword [ebp-12] ; load first number digit address
+   530 0000037B 035A04                      add ebx, dword [edx + data] ; add first number
+   531                                  
+   532                                  .add_second:
+   533                                      ; avoid messing with null pointers
+   534 0000037E 837DF000                    cmp dword [ebp-16], 0
+   535 00000382 7406                        je .add_carry
+   536                                  
+   537 00000384 8B55F0                      mov edx, dword [ebp-16] ; load second number digit address
+   538 00000387 035A04                      add ebx, dword [edx + data] ; add second number
+   539                                  
+   540                                  .add_carry:
+   541 0000038A 035DF8                      add ebx, dword [ebp-8] ; add carry
+   542                                  
+   543 0000038D 895DF8                      mov dword [ebp-8], ebx
+   544 00000390 C16DF804                    shr dword [ebp-8], 4
+   545                                  
+   546 00000394 837DF800                    cmp dword [ebp-8], 0
+   547 00000398 7F02                        jg .has_carry
+   548 0000039A EB03                        jmp .continue
+   549                                  
+   550                                  .has_carry:
+   551                                      ; remove bits higher than 4
+   552 0000039C 83E30F                      and ebx, 15 ; 1111 in binary
+   553                                      
+   554                                  .continue:
+   555 0000039F FF75FC                      push dword [ebp-4]
+   556 000003A2 53                          push ebx 
+   557 000003A3 E8DCFDFFFF                  call create_num
+   558 000003A8 83C408                      add esp, 8
+   559                                  
+   560 000003AB 8945FC                      mov dword [ebp-4], eax
+   561                                  
+   562                                      ; advance numbers pointers
+   563                                  
+   564                                  .advance_first:
+   565                                      ; avoid messing with null pointers
+   566 000003AE 837DF400                    cmp dword [ebp-12], 0
+   567 000003B2 7408                        je .advance_second
+   568                                  
+   569 000003B4 8B55F4                      mov edx, dword [ebp-12]
+   570 000003B7 8B1A                        mov ebx, [edx + next]
+   571 000003B9 895DF4                      mov dword [ebp-12], ebx 
+   572                                  
+   573                                  .advance_second:
+   574                                      ; avoid messing with null pointers
+   575 000003BC 837DF000                    cmp dword [ebp-16], 0
+   576 000003C0 7408                        je .check_conditions
+   577                                  
+   578 000003C2 8B55F0                      mov edx, dword [ebp-16]
+   579 000003C5 8B1A                        mov ebx, [edx + next]
+   580 000003C7 895DF0                      mov dword [ebp-16], ebx 
+   581                                  
+   582                                  .check_conditions:
+   583                                      ; if either numbers or carry is not zero, continue
+   584 000003CA 837DF400                    cmp dword [ebp-12], 0
+   585 000003CE 759D                        jne .loop
+   586                                  
+   587 000003D0 837DF000                    cmp dword [ebp-16], 0
+   588 000003D4 7597                        jne .loop
+   589                                  
+   590 000003D6 837DF800                    cmp dword [ebp-8], 0
+   591 000003DA 7591                        jne .loop
+   592                                  
+   593 000003DC 8B55FC                      mov edx, dword [ebp-4]
+   594 000003DF 8915[50000000]              mov dword [result], edx
+   595                                  
+   596 000003E5 83C410                      add esp, 16
+   597 000003E8 61                          popad
+   598 000003E9 A1[50000000]                mov eax, dword [result]
+   599 000003EE 89EC                        mov esp, ebp
+   600 000003F0 5D                          pop ebp
+   601 000003F1 C3                          ret
+   602                                  bitwise_xor:
+   603 000003F2 837DF802                    cmp dword [stack_size], 2
+   604 000003F6 0F8CC5000000                jl error_missing_args
+   605                                  
+   606 000003FC 8B5DF4                      mov ebx, dword [stack_base]
+   607 000003FF 8B4DF8                      mov ecx, dword [stack_size]
+   608 00000402 FF748BFC                    push dword [ebx + 4*ecx + (-4)]
+   609 00000406 FF748BF8                    push dword [ebx + 4*ecx + (-8)] 
+   610 0000040A E81A000000                  call func_bitwise_xor
+   611 0000040F 83C408                      add esp, 8
+   612                                  
+   613 00000412 FF4DF8                      dec dword [stack_size] ; pop first operand
+   614 00000415 FF4DF8                      dec dword [stack_size] ; pop second operand
+   615                                  
+   616                                      ; push the new created number to the operands stack
+   617 00000418 8B5DF4                      mov ebx, dword [stack_base]
+   618 0000041B 8B4DF8                      mov ecx, dword [stack_size]
+   619 0000041E 89048B                      mov dword [ebx + 4*ecx], eax
+   620 00000421 FF45F8                      inc dword [stack_size]
+   621                                  
+   622 00000424 E91CFCFFFF                  jmp loop
+   623                                  
+   624                                  func_bitwise_xor:
+   625 00000429 55                          push ebp
+   626 0000042A 89E5                        mov ebp, esp
+   627 0000042C 60                          pushad
+   628                                      
+   629                                      ; function parameters
+   630                                      ; ebp+8 - first number
+   631                                      ; ebp+12 - second number
+   632                                  
+   633                                      ; local variables
+   634 0000042D 83EC0C                      sub esp, 12
+   635                                      ; ebp-4  - new number pointer
+   636                                      ; ebp-8 - n1
+   637                                      ; ebp-12 - n2
+   638                                  
+   639 00000430 C745FC00000000              mov dword [ebp-4], 0
+   640                                  
+   641 00000437 8B5508                      mov edx, dword [ebp+8]
+   642 0000043A 8955F8                      mov dword [ebp-8], edx
+   643 0000043D 8B550C                      mov edx, dword [ebp+12]
+   644 00000440 8955F4                      mov dword [ebp-12], edx
+   645                                     
+   646                                  .loop:
+   647 00000443 BB00000000                  mov ebx, 0
+   648                                  
+   649                                  .get_first:
+   650                                      ; avoid messing with null pointers
+   651 00000448 837DF800                    cmp dword [ebp-8], 0
+   652 0000044C 7406                        je .get_second
+   653                                  
+   654 0000044E 8B55F8                      mov edx, dword [ebp-8] ; load first number digit address
+   655 00000451 8B4204                      mov eax, dword [edx + data] ; add first number
+   656                                  
+   657                                  .get_second:
+   658                                      ; avoid messing with null pointers
+   659 00000454 837DF400                    cmp dword [ebp-12], 0
+   660 00000458 7406                        je .do_xor
+   661                                  
+   662 0000045A 8B55F4                      mov edx, dword [ebp-12] ; load second number digit address
+   663 0000045D 8B5A04                      mov ebx, dword [edx + data] ; add second number
+   664                                  
+   665                                  .do_xor:
+   666 00000460 31D8                        xor eax, ebx ; xor between the digits
+   667 00000462 FF75FC                      push dword [ebp-4]
+   668 00000465 50                          push eax 
+   669 00000466 E819FDFFFF                  call create_num
+   670 0000046B 83C408                      add esp, 8
+   671                                  
+   672 0000046E 8945FC                      mov dword [ebp-4], eax
+   673                                  
+   674                                      ; advance numbers pointers
+   675                                  
+   676                                  .advance_first:
+   677                                      ; avoid messing with null pointers
+   678 00000471 837DF800                    cmp dword [ebp-8], 0
+   679 00000475 7408                        je .advance_second
+   680                                  
+   681 00000477 8B55F8                      mov edx, dword [ebp-8]
+   682 0000047A 8B1A                        mov ebx, [edx + next]
+   683 0000047C 895DF8                      mov dword [ebp-8], ebx 
+   684                                  
+   685                                  .advance_second:
+   686                                      ; avoid messing with null pointers
+   687 0000047F 837DF400                    cmp dword [ebp-12], 0
+   688 00000483 7408                        je .check_conditions
+   689                                  
+   690 00000485 8B55F4                      mov edx, dword [ebp-12]
+   691 00000488 8B1A                        mov ebx, [edx + next]
+   692 0000048A 895DF4                      mov dword [ebp-12], ebx 
+   693                                  
+   694                                  .check_conditions:
+   695                                      ; if either numbers or carry is not zero, continue
+   696 0000048D 837DF800                    cmp dword [ebp-8], 0
+   697 00000491 75B0                        jne .loop
+   698                                  
+   699 00000493 837DF400                    cmp dword [ebp-12], 0
+   700 00000497 75AA                        jne .loop
+   701                                  
+   702 00000499 8B55FC                      mov edx, dword [ebp-4]
+   703 0000049C 8915[50000000]              mov dword [result], edx
+   704                                  
+   705 000004A2 83C40C                      add esp, 12
+   706 000004A5 61                          popad
+   707 000004A6 A1[50000000]                mov eax, dword [result]
+   708 000004AB 89EC                        mov esp, ebp
+   709 000004AD 5D                          pop ebp
+   710 000004AE C3                          ret
+   711                                  
+   712                                  octal:
+   713 000004AF C645F06F                    mov byte [calc_mode], 'o'
+   714 000004B3 E98DFBFFFF                  jmp loop
+   715                                  
+   716                                  hexa:
+   717 000004B8 C645F068                    mov byte [calc_mode], 'h'
+   718 000004BC E984FBFFFF                  jmp loop
+   719                                  
+   720                                  error_missing_args:
+   721 000004C1 68[1E000000]                push NOT_ENOUGH_ARGUMENTS
+   722 000004C6 E8(00000000)                call printf
+   723 000004CB 83C404                      add esp, 4
+   724 000004CE E972FBFFFF                  jmp loop
+   725                                  
+   726                                  stackoverflow:
+   727 000004D3 68[07000000]                push STACKOVERFLOW 
+   728 000004D8 E8(00000000)                call printf
+   729 000004DD 83C404                      add esp, 4
+   730 000004E0 E960FBFFFF                  jmp loop
+   731                                  
+   732                                  print_num:
+   733 000004E5 55                          push ebp
+   734 000004E6 89E5                        mov ebp, esp
+   735 000004E8 60                          pushad
+   736                                  
+   737                                      ; ebp+8 - pointer to first num digit
+   738 000004E9 8B5D08                      mov ebx, dword [ebp+8]
+   739                                  
+   740                                      ; ebp+12 - print mode ('h' - hexa, 'o' - octal)
+   741 000004EC 8B4D0C                      mov ecx, dword [ebp+12]
+   742                                     
+   743                                  .loop:
+   744 000004EF 83FB00                      cmp ebx, 0
+   745 000004F2 7423                        je .end 
+   746                                  
+   747 000004F4 0FB64304                    movzx eax, byte [ebx + data]
+   748 000004F8 50                          push eax
+   749                                  
+   750 000004F9 807D0C68                    cmp byte [ebp+12], 'h'
+   751 000004FD 7407                        je .hexa
+   752                                  
+   753 000004FF 68[62000000]                push PRINT_DIGIT_MESSAGE
+   754 00000504 EB05                        jmp .call_printf
+   755                                  
+   756                                  .hexa:
+   757 00000506 68[65000000]                push PRINT_HEX_DIGIT_MESSAGE
+   758                                  
+   759                                  .call_printf:
+   760 0000050B E8(00000000)                call printf
+   761 00000510 83C408                      add esp, 8
+   762                                  
+   763 00000513 8B1B                        mov ebx, [ebx + next]
+   764 00000515 EBD8                        jmp .loop
+   765                                  
+   766                                  .end:
+   767 00000517 E805000000                  call print_newline
+   768                                  
+   769 0000051C 61                          popad
+   770 0000051D 89EC                        mov esp, ebp
+   771 0000051F 5D                          pop ebp
+   772 00000520 C3                          ret
+   773                                  
+   774                                  print_newline:
+   775 00000521 68[68000000]                push PRINT_NEWLINE
+   776 00000526 E8(00000000)                call printf
+   777 0000052B 83C404                      add esp, 4
+   778 0000052E C3                          ret
+   779                                  
+   780                                  dec2hex_char:
+   781 0000052F 55                          push ebp
+   782 00000530 89E5                        mov ebp, esp
+   783 00000532 60                          pushad
+   784                                  
+   785                                      ; ebp+8 - dec number to convert to hex char ([0-15])
+   786                                  
+   787 00000533 8B4508                      mov eax, dword [ebp+8]
+   788                                  
+   789                                      ; if eax > 15
+   790 00000536 83F80F                      cmp eax, 15
+   791 00000539 7F19                            jg .invalid
+   792                                  
+   793                                      ; if eax < 0
+   794 0000053B 83F800                      cmp eax, 0
+   795 0000053E 7C14                            jl .invalid
+   796                                  
+   797                                      ; if eax >= 10
+   798 00000540 83F80A                      cmp eax, 10
+   799 00000543 7D05                            jge .n10_15
+   800                                  
+   801                                      ; if eax >= 0
+   802 00000545 83F800                      cmp eax, 0
+   803 00000548 7D05                            jge .n0_9
+   804                                  
+   805                                      .n10_15: ; [10-15]
+   806 0000054A 83C037                          add eax, 55
+   807 0000054D EB0A                            jmp .end
+   808                                  
+   809                                      .n0_9: ; [0-9]
+   810 0000054F 83C030                          add eax, 48
+   811 00000552 EB05                            jmp .end 
+   812                                  
+   813                                  .invalid:
+   814 00000554 B8FFFFFFFF                  mov eax, -1
+   815                                  
+   816                                  .end:
+   817 00000559 A3[50000000]                mov dword [result], eax
+   818 0000055E 61                          popad
+   819 0000055F A1[50000000]                mov eax, dword [result]
+   820 00000564 89EC                        mov esp, ebp
+   821 00000566 5D                          pop ebp
+   822 00000567 C3                          ret
+   823                                  
+   824                                  char2hex:
+   825 00000568 55                          push ebp
+   826 00000569 89E5                        mov ebp, esp
+   827                                  
+   828                                      ; function aguments
+   829                                      ; ebp+8 - character to convert to hexa
+   830                                  
+   831 0000056B 8B4508                      mov eax, [ebp+8]
+   832                                  
+   833                                      ; if al >= 'a'
+   834 0000056E 3C61                        cmp al, 'a'
+   835 00000570 7D0A                            jge .ge_a
+   836                                  
+   837                                      ; if al >= 'A'
+   838 00000572 3C41                        cmp al, 'A'
+   839 00000574 7D0C                            jge .ge_A
+   840                                  
+   841                                      ; if al >= '0'
+   842 00000576 3C30                        cmp al, '0'
+   843 00000578 7D0E                            jge .ge_0
+   844                                  
+   845                                      ; invalid character
+   846 0000057A EB22                        jmp .invalid
+   847                                  
+   848                                      .ge_a: ; a <= al
+   849                                          ; if al <= 'f'
+   850 0000057C 3C66                            cmp al, 'f'
+   851 0000057E 7E0E                                jle .a_f
+   852                                          ; else
+   853 00000580 EB1C                                jmp .invalid 
+   854                                  
+   855                                      .ge_A: ; A <= al
+   856                                          ; if al <= 'F'
+   857 00000582 3C46                            cmp al, 'F'
+   858 00000584 7E0E                                jle .A_F
+   859                                          ; else
+   860 00000586 EB16                                jmp .invalid 
+   861                                  
+   862                                      .ge_0: ; 0 <= al
+   863                                          ; if al <= '9'
+   864 00000588 3C39                            cmp al, '9'
+   865 0000058A 7E0E                                jle .n0_9
+   866                                          ; else
+   867 0000058C EB10                                jmp .invalid 
+   868                                  
+   869                                      .a_f: ; [a, f]
+   870 0000058E 2C61                            sub al, 'a'
+   871 00000590 040A                            add al, 10
+   872 00000592 EB0F                            jmp .end 
+   873                                  
+   874                                      .A_F: ; [A, F]
+   875 00000594 2C41                            sub al, 'A'
+   876 00000596 040A                            add al, 10
+   877 00000598 EB09                            jmp .end 
+   878                                  
+   879                                      .n0_9: ; [0, 9]
+   880 0000059A 2C30                            sub al, '0'
+   881 0000059C EB05                            jmp .end 
+   882                                  
+   883                                  .invalid:
+   884 0000059E B8FFFFFFFF                  mov eax, -1
+   885                                  
+   886                                  .end:
+   887 000005A3 89EC                        mov esp, ebp
+   888 000005A5 5D                          pop ebp
+   889 000005A6 C3                          ret
+   890                                  
+   891                                  char2octal:
+   892 000005A7 55                          push ebp
+   893 000005A8 89E5                        mov ebp, esp
+   894 000005AA 60                          pushad
+   895                                  
+   896                                      ; function aguments
+   897                                      ; ebp+8 - character to convert to octal
+   898                                  
+   899 000005AB 8B4508                      mov eax, [ebp+8]
+   900                                  
+   901                                      ; if al >= '0'
+   902 000005AE 3C30                        cmp al, '0'
+   903 000005B0 7D02                            jge .ge_0
+   904                                  
+   905                                      ; invalid character
+   906 000005B2 EB0A                        jmp .invalid
+   907                                  
+   908                                      .ge_0: ; 0 <= al
+   909                                          ; if al <= '7'
+   910 000005B4 3C37                            cmp al, '7'
+   911 000005B6 7E02                                jle .n0_7
+   912                                          ; else
+   913 000005B8 EB04                                jmp .invalid 
+   914                                  
+   915                                      .n0_7: ; [0, 9]
+   916 000005BA 2C30                            sub al, '0'
+   917 000005BC EB05                            jmp .end 
+   918                                  
+   919                                  .invalid:
+   920 000005BE B8FFFFFFFF                  mov eax, -1
+   921                                  
+   922                                  .end:
+   923 000005C3 A3[50000000]                mov dword [result], eax
+   924 000005C8 61                          popad
+   925 000005C9 A1[50000000]                mov eax, dword [result]
+   926 000005CE 89EC                        mov esp, ebp
+   927 000005D0 5D                          pop ebp
+   928 000005D1 C3                          ret
+   929                                  
+   930                                  octal2hex:
+   931 000005D2 55                          push ebp
+   932 000005D3 89E5                        mov ebp, esp
+   933 000005D5 60                          pushad
+   934                                  
+   935                                      ; function aguments
+   936                                      ; ebp+8 - num pointer to convert to hex
+   937                                  
+   938 000005D6 83EC10                      sub esp, 16
+   939                                      ; local variables
+   940                                      ; ebp-4 - num pointer
+   941                                      ; ebp-8 - new num pointer
+   942                                      ; ebp-12 - count of bits in buffer
+   943                                      ; ebp-16 - new num LSB pointer
+   944 000005D9 8B5508                      mov edx, dword [ebp+8]
+   945 000005DC 8955FC                      mov dword [ebp-4], edx
+   946                                  
+   947 000005DF C745F800000000              mov dword [ebp-8], 0
+   948                                  
+   949 000005E6 C745F400000000              mov dword [ebp-12], 0 ; reset count of bits in buffer
+   950                                  
+   951 000005ED C745F000000000              mov dword [ebp-16], 0 ; reset new num LSB pointer
+   952                                  
+   953 000005F4 BB00000000                  mov ebx, 0 ; octal buffer
+   954                                  
+   955                                  .loop:
+   956 000005F9 837DFC00                    cmp dword [ebp-4], 0 ; are we done going through the number?
+   957 000005FD 744F                        je .finish
+   958                                  
+   959 000005FF 8B55FC                      mov edx, dword [ebp-4]
+   960 00000602 8B4204                      mov eax, dword [edx + data] ; get current octal digit
+   961 00000605 8B4DF4                      mov ecx, dword [ebp-12]
+   962 00000608 D3E0                        shl eax, cl
+   963 0000060A 01C3                        add ebx, eax
+   964                                  
+   965 0000060C 8345F403                    add dword [ebp-12], 3
+   966                                  
+   967 00000610 837DF404                    cmp dword [ebp-12], 4
+   968 00000614 7C2E                        jl .skip ; don't handle octal if the buffer is under 4 bits
+   969                                  
+   970 00000616 89D8                        mov eax, ebx ; place octal buffer in eax
+   971 00000618 83E00F                      and eax, 15  ; keep only the first 4 bits in the octal buffer
+   972 0000061B C1EB04                      shr ebx, 4   ; remove first 4 bits in the octal buffer
+   973                                  
+   974 0000061E 836DF404                    sub dword [ebp-12], 4
+   975                                  
+   976 00000622 6A00                        push 0
+   977 00000624 50                          push eax
+   978 00000625 E85AFBFFFF                  call create_num
+   979 0000062A 83C408                      add esp, 8
+   980                                  
+   981 0000062D 837DF800                    cmp dword [ebp-8], 0
+   982 00000631 7405                        je .set_head
+   983                                  
+   984 00000633 8B55F8                      mov edx, dword [ebp-8]
+   985 00000636 8902                        mov dword [edx + next], eax
+   986                                  
+   987                                  .set_head:
+   988 00000638 8945F8                      mov dword [ebp-8], eax
+   989                                  
+   990 0000063B 837DF000                    cmp dword [ebp-16], 0
+   991 0000063F 7503                        jne .skip
+   992                                  
+   993                                      ; new num LSB pointer is unset, set it
+   994 00000641 8945F0                      mov dword [ebp-16], eax
+   995                                  
+   996                                  .skip:
+   997                                      ; advance number linked list
+   998 00000644 8B55FC                      mov edx, dword [ebp-4]
+   999 00000647 8B12                        mov edx, dword [edx + next]
+  1000 00000649 8955FC                      mov dword [ebp-4], edx
+  1001 0000064C EBAB                        jmp .loop
+  1002                                  
+  1003                                  .finish:
+  1004                                      ; check if octal buffer still has anything in it
+  1005 0000064E 83FB00                      cmp ebx, 0
+  1006 00000651 7422                        je .end
+  1007                                  
+  1008                                      ; octal buffer still has one more number
+  1009 00000653 6A00                        push 0 
+  1010 00000655 53                          push ebx 
+  1011 00000656 E829FBFFFF                  call create_num
+  1012 0000065B 83C408                      add esp, 8
+  1013                                  
+  1014 0000065E 837DF800                    cmp dword [ebp-8], 0
+  1015 00000662 7405                        je .set_head2
+  1016                                  
+  1017 00000664 8B55F8                      mov edx, dword [ebp-8]
+  1018 00000667 8902                        mov dword [edx + next], eax
+  1019                                  
+  1020                                  .set_head2:
+  1021 00000669 8945F8                      mov dword [ebp-8], eax
+  1022                                  
+  1023 0000066C 837DF000                    cmp dword [ebp-16], 0
+  1024 00000670 7503                        jne .end
+  1025                                  
+  1026                                      ; new num LSB pointer is unset, set it
+  1027 00000672 8945F0                      mov dword [ebp-16], eax
+  1028                                  
+  1029                                  .end:
+  1030 00000675 8B55F0                      mov edx, dword [ebp-16]
+  1031 00000678 8915[50000000]              mov dword [result], edx
+  1032 0000067E 83C410                      add esp, 16 ; account for local variables
+  1033                                  
+  1034 00000681 61                          popad
+  1035 00000682 A1[50000000]                mov eax, dword [result]
+  1036 00000687 89EC                        mov esp, ebp
+  1037 00000689 5D                          pop ebp
+  1038 0000068A C3                          ret
+  1039                                  
+  1040                                  hex2octal:
+  1041 0000068B 55                          push ebp
+  1042 0000068C 89E5                        mov ebp, esp
+  1043 0000068E 60                          pushad
+  1044                                  
+  1045                                      ; function aguments
+  1046                                      ; ebp+8 - num pointer to convert to octal
+  1047                                  
+  1048 0000068F 83EC10                      sub esp, 16
+  1049                                      ; local variables
+  1050                                      ; ebp-4 - num pointer
+  1051                                      ; ebp-8 - new num pointer
+  1052                                      ; ebp-12 - count of bits in buffer
+  1053                                      ; ebp-16 - new num LSB pointer
+  1054 00000692 8B5508                      mov edx, dword [ebp+8]
+  1055 00000695 8955FC                      mov dword [ebp-4], edx
+  1056                                  
+  1057 00000698 C745F800000000              mov dword [ebp-8], 0
+  1058                                  
+  1059 0000069F C745F400000000              mov dword [ebp-12], 0 ; reset count of bits in buffer
+  1060                                      
+  1061 000006A6 C745F000000000              mov dword [ebp-16], 0 ; reset new num LSB pointer
+  1062                                  
+  1063 000006AD BB00000000                  mov ebx, 0 ; hex buffer
+  1064                                  
+  1065                                  .loop:
+  1066 000006B2 837DFC00                    cmp dword [ebp-4], 0 ; are we done going through the number?
+  1067 000006B6 744F                        je .finish
+  1068                                  
+  1069 000006B8 8B55FC                      mov edx, dword [ebp-4]
+  1070 000006BB 8B4204                      mov eax, dword [edx + data] ; get current hexa digit
+  1071 000006BE 8B4DF4                      mov ecx, dword [ebp-12]
+  1072 000006C1 D3E0                        shl eax, cl
+  1073 000006C3 01C3                        add ebx, eax
+  1074 000006C5 8345F404                    add dword [ebp-12], 4
+  1075                                  
+  1076                                  .pull_from_buffer:
+  1077 000006C9 89D8                        mov eax, ebx ; place hexa buffer in eax
+  1078 000006CB 83E007                      and eax, 7  ; keep only the first 3 bits in the hexa buffer
+  1079 000006CE C1EB03                      shr ebx, 3   ; remove first 3 bits in the hexa buffer
+  1080                                  
+  1081 000006D1 836DF403                    sub dword [ebp-12], 3
+  1082                                  
+  1083 000006D5 6A00                        push 0
+  1084 000006D7 50                          push eax
+  1085 000006D8 E8A7FAFFFF                  call create_num
+  1086 000006DD 83C408                      add esp, 8
+  1087                                  
+  1088 000006E0 837DF800                    cmp dword [ebp-8], 0
+  1089 000006E4 7405                        je .set_head
+  1090                                  
+  1091 000006E6 8B55F8                      mov edx, dword [ebp-8]
+  1092 000006E9 8902                        mov dword [edx + next], eax
+  1093                                  
+  1094                                  .set_head:
+  1095 000006EB 8945F8                      mov dword [ebp-8], eax
+  1096                                  
+  1097 000006EE 837DF000                    cmp dword [ebp-16], 0
+  1098 000006F2 7503                        jne .skip_set_ptr
+  1099                                  
+  1100                                      ; new num LSB pointer is unset, set it
+  1101 000006F4 8945F0                      mov dword [ebp-16], eax
+  1102                                  
+  1103                                  .skip_set_ptr:
+  1104 000006F7 837DF403                    cmp dword [ebp-12], 3
+  1105 000006FB 7DCC                        jge .pull_from_buffer
+  1106                                  
+  1107                                  .skip:
+  1108                                      ; advance number linked list
+  1109 000006FD 8B55FC                      mov edx, dword [ebp-4]
+  1110 00000700 8B12                        mov edx, dword [edx + next]
+  1111 00000702 8955FC                      mov dword [ebp-4], edx
+  1112                                      
+  1113 00000705 EBAB                        jmp .loop
+  1114                                  
+  1115                                  .finish:
+  1116                                      ; check if hexa buffer still has anything in it
+  1117 00000707 83FB00                      cmp ebx, 0
+  1118 0000070A 7422                        je .end
+  1119                                  
+  1120                                      ; hexa buffer still has one more number
+  1121 0000070C 6A00                        push 0 
+  1122 0000070E 53                          push ebx 
+  1123 0000070F E870FAFFFF                  call create_num
+  1124 00000714 83C408                      add esp, 8
+  1125                                  
+  1126 00000717 837DF800                    cmp dword [ebp-8], 0
+  1127 0000071B 7405                        je .set_head2
+  1128                                  
+  1129 0000071D 8B55F8                      mov edx, dword [ebp-8]
+  1130 00000720 8902                        mov dword [edx + next], eax
+  1131                                  
+  1132                                  .set_head2:
+  1133 00000722 8945F8                      mov dword [ebp-8], eax
+  1134                                  
+  1135 00000725 837DF000                    cmp dword [ebp-16], 0
+  1136 00000729 7503                        jne .end
+  1137                                  
+  1138                                      ; new num LSB pointer is unset, set it
+  1139 0000072B 8945F0                      mov dword [ebp-16], eax
+  1140                                  
+  1141                                  .end:
+  1142 0000072E 8B55F0                      mov edx, dword [ebp-16]
+  1143 00000731 8915[50000000]              mov dword [result], edx
+  1144 00000737 83C410                      add esp, 16 ; account for local variables
+  1145                                  
+  1146 0000073A 61                          popad
+  1147 0000073B A1[50000000]                mov eax, dword [result]
+  1148 00000740 89EC                        mov esp, ebp
+  1149 00000742 5D                          pop ebp
+  1150 00000743 C3                          ret
+  1151                                  
