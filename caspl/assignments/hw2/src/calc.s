@@ -68,9 +68,11 @@ calc:
 	pushad			; Save registers
 
     sub esp, 4 ; save room for local variables:
-    %define op_counter ebp-4 ; 1. operation counter
+    %define op_counter ebp-4 ; operation counter
+    %define leading_zero ebp-8 ; is the current char a leading zero?
 
     mov dword [op_counter], 0 ; reset operation counter
+    mov dword [leading_zero], 1 ; first zeros are leading zeros
     mov dword [STACK_SIZE], 0 ; reset current stack size
     mov byte  [CALC_MODE], 'h'
 
@@ -171,6 +173,16 @@ calc:
 
     .got_digit:
         ; got a valid hexa digit in al.
+        ; if it's a leading zero, ignore it
+        cmp eax, 0
+        jne .not_zero
+        ; zero
+        ; if it's a zero and we didn't receive any other number yet, skip it
+        cmp dword [leading_zero], 1
+        je .skip
+        ; else, just process it normally (it's a zero in the middle of a number)
+    .not_zero:
+        mov dword [leading_zero], 0
         ; create a new digit link for it and append the previous list to it
         push edx
         push eax
@@ -293,11 +305,12 @@ func_addition:
     %define n2 ebp+12 ; second number
 
     ; local variables
-    sub esp, 16
-    ; ebp-4  - new number pointer
+    sub esp, 20
+    ; ebp-4  - new number pointer iterator
     ; ebp-8 - carry
     ; ebp-12 - n1
     ; ebp-16 - n2
+    ; ebp-20 - new number
 
     mov dword [ebp-4], 0
     mov dword [ebp-8], 0 ; reset carry
@@ -306,6 +319,8 @@ func_addition:
     mov dword [ebp-12], edx
     mov edx, dword [ebp+12]
     mov dword [ebp-16], edx
+    
+    mov dword [ebp-20], 0
    
 .loop:
     mov ebx, 0
@@ -341,15 +356,27 @@ func_addition:
     and ebx, 15 ; 1111 in binary
     
 .continue:
-    push dword [ebp-4]
+    push 0
     push ebx 
     call create_num
     add esp, 8
 
+    ; if it's the first digit, just set it.
+    ; we do this to avoid setting the next element of a null pointer.
+    cmp dword [ebp-4], 0
+    je .first_digit
+    
+    mov edx, dword [ebp-4]
+    mov dword [edx + next], eax
+    jmp .not_first_digit
+
+.first_digit:
+    mov dword [ebp-20], eax
+
+.not_first_digit:
     mov dword [ebp-4], eax
 
     ; advance numbers pointers
-
 .advance_first:
     ; avoid messing with null pointers
     cmp dword [ebp-12], 0
@@ -379,10 +406,9 @@ func_addition:
     cmp dword [ebp-8], 0
     jne .loop
 
-    mov edx, dword [ebp-4]
+    mov edx, dword [ebp-20]
     mov dword [result], edx
-
-    add esp, 16
+    add esp, 20
     popad
     mov eax, dword [result]
     mov esp, ebp
