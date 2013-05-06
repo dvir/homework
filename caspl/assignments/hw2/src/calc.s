@@ -36,6 +36,13 @@ INPUT:
 result:
     RESD    1
 
+STACK_BASE:
+    RESD    1 
+STACK_SIZE:
+    RESD    1
+CALC_MODE:
+    RESB    1
+
 section .text
 	align 16
 	global main
@@ -60,23 +67,20 @@ calc:
 	mov	ebp, esp	; Entry code - set up ebp and esp
 	pushad			; Save registers
 
-    sub esp, 16 ; save room for local variables:
+    sub esp, 4 ; save room for local variables:
     %define op_counter ebp-4 ; 1. operation counter
-    %define stack_size ebp-8 ; 2. current stack size
-    %define stack_base ebp-12; 3. current stack
-    %define calc_mode  ebp-16; 4. calc mode
 
     mov dword [op_counter], 0 ; reset operation counter
-    mov dword [stack_size], 0 ; reset current stack size
-    mov byte  [calc_mode], 'h'
+    mov dword [STACK_SIZE], 0 ; reset current stack size
+    mov byte  [CALC_MODE], 'h'
 
     ; allocate memory for operands stack
     push 4*MAX_STACK_SIZE
     call malloc
     add esp, 4
-    mov dword [stack_base], eax
+    mov dword [STACK_BASE], eax
 
-loop:
+.loop:
     push    PROMPT_MESSAGE
     call    printf
     add     esp, 4
@@ -89,25 +93,53 @@ loop:
 
     ; choose operation
     cmp byte [INPUT], '+'
-    je addition
+    jne .not_addition
+    ; addition
+        call addition
+        jmp .loop
+.not_addition:
 
     cmp byte [INPUT], 'p'
-    je pop_and_print
+    jne .not_pop_and_print
+    ; pop and print
+        call pop_and_print
+        jmp .loop
+.not_pop_and_print:
 
     cmp byte [INPUT], 'd'
-    je duplicate
+    jne .not_duplicate
+    ; duplicate
+        call duplicate
+        jmp .loop
+.not_duplicate:
 
     cmp byte [INPUT], '^'
-    je exponent
+    jne .not_exponent
+    ; exponent
+        call exponent
+        jmp .loop
+.not_exponent:
 
     cmp byte [INPUT], 'x'
-    je bitwise_xor
+    jne .not_bitwise_xor
+    ; bitwise_xor
+        call bitwise_xor
+        jmp .loop
+.not_bitwise_xor:
 
     cmp byte [INPUT], 'o'
-    je octal
+    jne .not_octal
+    ; octal
+        call octal
+        jmp .loop
+.not_octal:
 
     cmp byte [INPUT], 'h'
-    je hexa 
+    jne .not_hexa
+    ; hexa
+        call hexa
+        jmp .loop
+.not_hexa:
 
     cmp byte [INPUT], 'q'
     je .exit
@@ -123,7 +155,7 @@ loop:
         cmp eax, 0
         je .end_foreach_digit
 
-        cmp byte [calc_mode], 'h'
+        cmp byte [CALC_MODE], 'h'
         je .hex
 
     ; octal
@@ -155,13 +187,16 @@ loop:
     .end_foreach_digit:
         ; if an empty string / invalid number given, ignore it
         cmp edx, 0
-        je loop
+        je .loop
         
         ; check if we have room for it in the stack.
-        cmp dword [stack_size], MAX_STACK_SIZE
-        je stackoverflow
-
-        cmp byte [calc_mode], 'o'
+        cmp dword [STACK_SIZE], MAX_STACK_SIZE
+        jne .not_stackoverflow
+        ; stack overflow
+            call stackoverflow
+            jmp .loop
+    .not_stackoverflow:
+        cmp byte [CALC_MODE], 'o'
         je .octal
         ; else
         jmp .push
@@ -175,49 +210,17 @@ loop:
         
     .push:
         ; push the new created number to the operands stack
-        mov ebx, dword [stack_base]
-        mov ecx, dword [stack_size]
-        mov dword [ebx + 4*ecx], edx
-        inc dword [stack_size]
+        push edx
+        call func_push
+        add esp, 4
 
-    jmp loop 
+    jmp .loop 
 
 .exit:
-    ; print all numbers in the operands stack
-    mov eax, 0
-    mov ebx, dword [stack_base]
-    .foreach_stack:
-        cmp dword [stack_size], 0
-        je .end_foreach_stack
-
-        ; print the top of the stack and pop it
-        mov ecx, dword [stack_size]
-        mov edx, dword [ebx + 4*ecx + (-4)]
-
-        cmp byte [calc_mode], 'h'
-        je .print
-   
-        ; octal mode
-        ; convert from hex to octal before printing
-        push edx
-        call hex2octal
-        add esp, 4
-        mov edx, eax
-
-    .print:
-        push dword [calc_mode]
-        push edx
-        call print_num
-        add esp, 8
-
-        dec dword [stack_size] 
-        jmp .foreach_stack
-    .end_foreach_stack:
-
     mov eax, dword [op_counter]
     mov dword [result], eax
 
-    add esp, 16 ; remove local variables
+    add esp, 4 ; remove local variables
 	popad			; Restore registers
     mov eax, dword [result] ; return operation counter
     mov	esp, ebp	; Function exit code
@@ -244,7 +247,6 @@ create_num:
     mov byte [eax + data], bl
 
     mov dword [result], eax
-    
     popad
     mov eax, dword [result]
     mov esp, ebp
@@ -252,25 +254,34 @@ create_num:
     ret
 
 addition:
-    cmp dword [stack_size], 2
-    jl error_missing_args
+    push ebp
+    mov ebp, esp
+    pushad
+    
+    cmp dword [STACK_SIZE], 2
+    jge .not_missing_args
+    ; missing args
+        call error_missing_args
+        jmp .end
+.not_missing_args:
 
-    mov ebx, dword [stack_base]
-    mov ecx, dword [stack_size]
-    push dword [ebx + 4*ecx + (-4)]
-    push dword [ebx + 4*ecx + (-8)] 
+    call func_pop ; pop first operand
+    mov ebx, eax
+    call func_pop ; pop second operand
+    push eax
+    push ebx
     call func_addition
     add esp, 8
 
-    dec dword [stack_size] ; pop first operand
-    dec dword [stack_size] ; pop second operand
-
     ; push the new created number to the operands stack
-    mov ebx, dword [stack_base]
-    mov ecx, dword [stack_size]
-    mov dword [ebx + 4*ecx], eax
-    inc dword [stack_size]
-    jmp loop
+    push eax
+    call func_push
+    add esp, 4
+.end:
+    popad
+    mov esp, ebp
+    pop ebp
+    ret
 
 func_addition:
     push ebp
@@ -379,14 +390,21 @@ func_addition:
     ret
 
 pop_and_print:
-    cmp dword [stack_size], 1
-    jl error_missing_args
+    push ebp
+    mov ebp, esp
+    pushad
 
-    mov ebx, dword [stack_base]
-    mov ecx, dword [stack_size]
-    mov edx, dword [ebx + 4*ecx + (-4)]
+    cmp dword [STACK_SIZE], 1
+    jge .not_missing_args
+    ; missing args
+        call error_missing_args
+        jmp .end
+.not_missing_args:
 
-    cmp byte [calc_mode], 'h'
+    call func_pop
+    mov edx, eax
+
+    cmp byte [CALC_MODE], 'h'
     je .print
 
     ; octal mode
@@ -397,60 +415,77 @@ pop_and_print:
     mov edx, eax
 
 .print:
-    push dword [calc_mode]
+    push dword [CALC_MODE]
     push edx
     call print_num
     add esp, 8
 
-    dec dword [stack_size] ; pop from operands stack
+    call print_newline
 
-    ;push dword [stack_base]
-    ;call func_pop_and_print
-    ;add esp, 4
+.end:
+    popad
+    mov esp, ebp
+    pop ebp
+    ret
 
-    jmp loop
-
-func_pop_and_print:
+duplicate:
     push ebp
     mov ebp, esp
     pushad
 
+    cmp dword [STACK_SIZE], 1
+    jge .not_missing_args
+    ; missing args
+        call error_missing_args
+        jmp .end
+.not_missing_args:
+
+    cmp dword [STACK_SIZE], MAX_STACK_SIZE
+    jne .not_stackoverflow
+    ; stack overflow
+        call stackoverflow
+        jmp .end
+.not_stackoverflow:
+
+    call func_pop ; get stack head value
+    
+    push eax
+    call func_push ; push to operands stack
+    call func_push ; twice!
+    add esp, 4 
+
+.end:
     popad
     mov esp, ebp
     pop ebp
-
-duplicate:
-    cmp dword [stack_size], 1
-    jl error_missing_args
-
-    cmp dword [stack_size], MAX_STACK_SIZE
-    je stackoverflow
-
-    mov ebx, dword [stack_base]
-    mov ecx, dword [stack_size]
-
-    mov eax, dword [ebx + 4*ecx + (-4)] ; get stack head value
-
-    mov dword [ebx + 4*ecx], eax ; push to operands stack
-    inc dword [stack_size]
-
-    jmp loop
+    ret
 
 exponent:
-    cmp dword [stack_size], 1
-    jl error_missing_args
+    push ebp
+    mov ebp, esp
+    pushad
 
-    mov ebx, dword [stack_base]
-    mov ecx, dword [stack_size]
-    push dword [ebx + 4*ecx + (-4)]
+    cmp dword [STACK_SIZE], 1
+    jge .not_missing_args
+    ; missing args
+        call error_missing_args
+        jmp .end
+.not_missing_args:
+
+    call func_pop ; pop from operands stack
+    push eax
     call func_exponent
     add esp, 4
-    dec dword [stack_size] ; pop from operands stack
 
-    mov dword [ebx + 4*ecx], eax ; push to operands stack
-    inc dword [stack_size]
+    push eax
+    call func_push ; push to operands stack
+    add esp, 4
 
-    jmp loop
+.end:
+    popad
+    mov esp, ebp
+    pop ebp
+    ret
 
 func_shl:
     push ebp
@@ -461,10 +496,11 @@ func_shl:
     ; ebp+8 - number to shift
 
     ; local variables
-    sub esp, 12
-    ; ebp-4 - new number pointer
+    sub esp, 16
+    ; ebp-4 - new number pointer iterator
     ; ebp-8 - num pointer
     ; ebp-12 - carry
+    ; ebp-16 - return num pointer
 
     mov dword [ebp-4], 0 ; reset new num pointer
 
@@ -472,18 +508,79 @@ func_shl:
     mov dword [ebp-8], edx
 
     mov dword [ebp-12], 0 ; reset carry
+    mov dword [ebp-16], 0 ; reset return num pointer
 
 .loop:
-    cmp dword [ebp-12], 0
-    je .end
+    cmp dword [ebp-8], 0
+    je .finish
 
-    jmp loop
+    mov edx, dword [ebp-8]
+    movzx ebx, byte [edx + data]
+    mov ecx, ebx
 
-.end:
+    ; shift current digit by 1 
+    shl ecx, 1
+    ; add carry from previous shift
+    add ecx, dword [ebp-12]
+    ; trim to only the first 4 bits
+    and ecx, 15
+    ; create a digit for the new number with this value
+    push 0
+    push ecx
+    call create_num
+    add esp, 8
+    
+    ; if it's the first digit, we should just set it
+    cmp dword [ebp-4], 0
+    je .first_digit
+
+    ; else, set the next of the previous to be the new digit
     mov edx, dword [ebp-4]
+    mov dword [edx + next], eax
+    jmp .calc_carry
+
+.first_digit:
+    mov dword [ebp-16], eax ; set return num pointer
+
+.calc_carry:
+    mov dword [ebp-4], eax ; set num pointer
+
+    ; calculate the new carry - extract the 4th bit
+    shr ebx, 3
+    ; trim to only the first bit, just in case
+    and ebx, 1
+    ; store the carry for the next operation
+    mov dword [ebp-12], ebx
+
+    ; advance num pointer
+    mov edx, dword [ebp-8]
+    mov ebx, dword [edx + next]
+    mov dword [ebp-8], ebx
+    jmp .loop
+
+.finish:
+    ; if carry != 0
+    cmp dword [ebp-12], 0
+        jne .has_carry
+    ; else
+        jmp .end
+
+.has_carry:
+    ; number has ended but there's still a carry to push.
+    ; create a new number and place it as the MSB
+    push 0
+    push 1 ; carry must be 1 if we got here
+    call create_num
+    add esp, 8
+
+    mov edx, dword [ebp-4] ; last actual num pointer
+    mov dword [edx + next], eax ; make it point to the newly created MSB
+    
+.end:
+    mov edx, dword [ebp-16]
     mov dword [result], edx
 
-    add esp, 12
+    add esp, 16
     popad
     mov eax, dword [result]
     mov esp, ebp
@@ -499,117 +596,97 @@ func_exponent:
     ; ebp+8 - exp
 
     ; local variables
-    sub esp, 8
+    sub esp, 12
     ; ebp-4  - new number pointer
-    ; ebp-8  - exp
+    ; ebp-8  - counter
+    ; ebp-12 - number representing the jumps in counter we should do
 
     mov dword [ebp-4], 0
-
-    mov edx, dword [ebp+8]
-    mov dword [ebp-8], edx
-   
-.loop:
-    mov ebx, 0
-
-.add_first:
-    ; avoid messing with null pointers
-    cmp dword [ebp-12], 0
-    je .add_second
-
-    mov edx, dword [ebp-12] ; load first number digit address
-    add ebx, dword [edx + data] ; add first number
-
-.add_second:
-    ; avoid messing with null pointers
-    cmp dword [ebp-16], 0
-    je .add_carry
-
-    mov edx, dword [ebp-16] ; load second number digit address
-    add ebx, dword [edx + data] ; add second number
-
-.add_carry:
-    add ebx, dword [ebp-8] ; add carry
-
-    mov dword [ebp-8], ebx
-    shr dword [ebp-8], 4
-
-    cmp dword [ebp-8], 0
-    jg .has_carry
-    jmp .continue
-
-.has_carry:
-    ; remove bits higher than 4
-    and ebx, 15 ; 1111 in binary
     
-.continue:
-    push dword [ebp-4]
-    push ebx 
+    push 0
+    push 1
     call create_num
     add esp, 8
-
     mov dword [ebp-4], eax
 
-    ; advance numbers pointers
+    push 0
+    push 0
+    call create_num
+    add esp, 8
+    mov dword [ebp-8], eax
 
-.advance_first:
-    ; avoid messing with null pointers
-    cmp dword [ebp-12], 0
-    je .advance_second
+    ; create the 'jump' number - counter should increase by 1 every iteration
+    push 0
+    push 1
+    call create_num
+    add esp, 8
+    mov dword [ebp-12], eax
+   
+.loop:
+    push dword [ebp+8]
+    push dword [ebp-8]
+    call func_cmp
+    add esp, 8
 
-    mov edx, dword [ebp-12]
-    mov ebx, [edx + next]
-    mov dword [ebp-12], ebx 
+    ; if counter >= exp, stop
+    cmp eax, 0 
+    jge .end
 
-.advance_second:
-    ; avoid messing with null pointers
-    cmp dword [ebp-16], 0
-    je .check_conditions
+    ; shift number by 1
+    push dword [ebp-4]
+    call func_shl
+    add esp, 4
+    mov dword [ebp-4], eax
 
-    mov edx, dword [ebp-16]
-    mov ebx, [edx + next]
-    mov dword [ebp-16], ebx 
+    ; increase counter by 1
+    push dword [ebp-12] ; counter increase value
+    push dword [ebp-8] ; counter number
+    call func_addition
+    add esp, 8
+    mov dword [ebp-8], eax
+    
+    jmp .loop
 
-.check_conditions:
-    ; if either numbers or carry is not zero, continue
-    cmp dword [ebp-12], 0
-    jne .loop
-
-    cmp dword [ebp-16], 0
-    jne .loop
-
-    cmp dword [ebp-8], 0
-    jne .loop
-
+.end:
     mov edx, dword [ebp-4]
     mov dword [result], edx
-
-    add esp, 16
+    add esp, 12
     popad
     mov eax, dword [result]
     mov esp, ebp
     pop ebp
     ret
-bitwise_xor:
-    cmp dword [stack_size], 2
-    jl error_missing_args
 
-    mov ebx, dword [stack_base]
-    mov ecx, dword [stack_size]
-    push dword [ebx + 4*ecx + (-4)]
-    push dword [ebx + 4*ecx + (-8)] 
+bitwise_xor:
+    push ebp
+    mov ebp, esp
+    pushad
+    
+    cmp dword [STACK_SIZE], 2
+    jge .not_missing_args
+    ; missing args
+        call error_missing_args
+        jmp .end
+.not_missing_args:
+
+    call func_pop ; pop first operand
+    mov ebx, eax
+    call func_pop ; pop second operand
+    push eax
+    push ebx
     call func_bitwise_xor
     add esp, 8
 
-    dec dword [stack_size] ; pop first operand
-    dec dword [stack_size] ; pop second operand
-
     ; push the new created number to the operands stack
-    mov ebx, dword [stack_base]
-    mov ecx, dword [stack_size]
-    mov dword [ebx + 4*ecx], eax
-    inc dword [stack_size]
+    push eax
+    call func_push
+    add esp, 4
 
-    jmp loop
+.end:
+    popad
+    mov esp, ebp
+    pop ebp
+    ret
 
 func_bitwise_xor:
     push ebp
@@ -700,24 +777,56 @@ func_bitwise_xor:
     ret
 
 octal:
-    mov byte [calc_mode], 'o'
-    jmp loop
+    push ebp
+    mov ebp, esp
+    pushad
+
+    mov byte [CALC_MODE], 'o'
+    
+    popad
+    mov esp, ebp
+    pop ebp
+    ret
 
 hexa:
-    mov byte [calc_mode], 'h'
-    jmp loop
+    push ebp
+    mov ebp, esp
+    pushad
+
+    mov byte [CALC_MODE], 'h'
+    
+    popad
+    mov esp, ebp
+    pop ebp
+    ret
 
 error_missing_args:
+    push ebp
+    mov ebp, esp
+    pushad
+
     push NOT_ENOUGH_ARGUMENTS
     call printf
     add esp, 4
-    jmp loop
+    
+    popad
+    mov esp, ebp
+    pop ebp
+    ret
 
 stackoverflow:
+    push ebp
+    mov ebp, esp
+    pushad
+
     push STACKOVERFLOW 
     call printf
     add esp, 4
-    jmp loop
+    
+    popad
+    mov esp, ebp
+    pop ebp
+    ret
 
 print_num:
     push ebp
@@ -730,9 +839,13 @@ print_num:
     ; ebp+12 - print mode ('h' - hexa, 'o' - octal)
     mov ecx, dword [ebp+12]
    
-.loop:
     cmp ebx, 0
     je .end 
+
+    push dword [ebp+12]
+    push dword [ebx + next]
+    call print_num
+    add esp, 8
 
     movzx eax, byte [ebx + data]
     push eax
@@ -750,12 +863,7 @@ print_num:
     call printf
     add esp, 8
 
-    mov ebx, [ebx + next]
-    jmp .loop
-
 .end:
-    call print_newline
-
     popad
     mov esp, ebp
     pop ebp
@@ -1176,26 +1284,79 @@ func_cmp:
     call func_cmp ; recursively call func_cmp
     add esp, 8
 
-    jmp .end
+    ; if the numbers aren't equal, just return the result, 
+    ; as the result won't change while inspecting the lower bits of significance.
+    cmp eax, 0
+    jne .end
+
+    ; the higher bits of significance are equal, check the current ones
+    mov edx, dword [ebp-4]
+    mov ebx, dword [edx + data] ; load current first number digit
+    mov edx, dword [ebp-8]
+    mov ecx, dword [edx + data] ; load current second number digit
+
+    cmp ebx, ecx
+    je .equal
+    jg .second_less
+    jl .first_less
 
 .end_first:
     cmp dword [ebp-8], 0
     je .end_both
 
+.first_less:
     mov eax, -1
     jmp .end
 
+.second_less:
 .end_second:
     mov eax, 1
     jmp .end
 
+.equal:
 .end_both:
     mov eax, 0
     jmp .end
     
 .end:
+    add esp, 8
     mov dword [result], eax
     popad
     mov eax, dword [result]
     mov esp, ebp
     pop ebp
+    ret
+
+func_pop:
+    push ebp
+    mov ebp, esp
+    pushad
+
+    mov ebx, dword [STACK_BASE]
+    mov ecx, dword [STACK_SIZE]
+    mov eax, dword [ebx + 4*ecx + (-4)]
+
+    dec dword [STACK_SIZE] ; actually pop from the stack
+
+    mov dword [result], eax
+    popad
+    mov eax, dword [result]
+    mov esp, ebp
+    pop ebp
+    ret
+
+func_push:
+    push ebp
+    mov ebp, esp
+    pushad
+
+    mov ebx, dword [STACK_BASE]
+    mov ecx, dword [STACK_SIZE]
+    mov edx, dword [ebp+8]
+    mov dword [ebx + 4*ecx], edx
+    inc dword [STACK_SIZE]
+
+    popad
+    mov esp, ebp
+    pop ebp
+    ret
