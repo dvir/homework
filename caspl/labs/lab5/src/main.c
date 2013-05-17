@@ -36,9 +36,10 @@ int main (int argc, char** argv) {
     cmdLine* line;
     int ret, i;
     int invokeHistoryIndex;
+    char quit = 0;
 
     getcwd(cwd, PATH_MAX);
-    while (1) {
+    while (!quit) {
         printf("\n%s$ ", cwd);
         fgets(input, 2048, stdin);
         line = parseCmdLines(input);
@@ -57,10 +58,16 @@ int main (int argc, char** argv) {
                 strcpy(var_name, line->arguments[i]+1);
                 var_value = env_get(env, var_name);
                 if (strlen(var_value) > 0) {
+                    /* free the previous argument in the array */
+                    free(line->arguments[i]);
+
+                    /* replace it with the new value */
                     ((char**)line->arguments)[i] = str_clone(var_value);
                 } else {
                     printf("Couldn't find variable '%s' in the env.", var_name);
                 }
+
+                free(var_name);
             }
         }
 
@@ -100,8 +107,7 @@ int main (int argc, char** argv) {
         strcpy(history[historyHead], command);
 
         if (strcmp(line->arguments[0], "quit") == 0) {
-            freeCmdLines(line);
-            return 0;
+            quit = 1;
         } else if (strcmp(line->arguments[0], "history") == 0) {
             printHead = historyHead+1;
             if (historyCount < 10) {
@@ -150,6 +156,7 @@ int main (int argc, char** argv) {
     }
 
     env_free(env);
+    return 0;
 }
 
 char* str_clone(const char* source) {
