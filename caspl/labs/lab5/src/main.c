@@ -22,6 +22,7 @@ env_variable* env_remove(env_variable* env, char* name);
 void env_print(env_variable* env);
 void env_free(env_variable* env);
 char* env_get(env_variable* env, char* name);
+char* str_clone(const char* source);
 
 int main (int argc, char** argv) {
     env_variable* env;
@@ -35,7 +36,6 @@ int main (int argc, char** argv) {
     cmdLine* line;
     int ret, i;
     int invokeHistoryIndex;
-    char* arguments[MAX_ARGUMENTS];
 
     getcwd(cwd, PATH_MAX);
     while (1) {
@@ -50,32 +50,19 @@ int main (int argc, char** argv) {
 
         /* go over the arguments looking for an argument that starts with
          * a dollar sign, and replace it if found. */
-        arguments[0] = line->arguments[0];
         for (i = 1; i < line->argCount; ++i) {
-            arguments[i] = line->arguments[i];
             if (line->arguments[i][0] == '$') {
                 /* a variable given! search for it in env list */
                 var_name = malloc(sizeof(char)*(strlen(line->arguments[i])));
                 strcpy(var_name, line->arguments[i]+1);
                 var_value = env_get(env, var_name);
                 if (strlen(var_value) > 0) {
-                    arguments[i] = var_value;
+                    ((char**)line->arguments)[i] = str_clone(var_value);
                 } else {
                     printf("Couldn't find variable '%s' in the env.", var_name);
                 }
             }
         }
-
-        cmdLine* pCmdLine = (cmdLine*)malloc( sizeof(line) ) ;
-        memset(pCmdLine, 0, sizeof(line));
-        pCmdLine->arguments = arguments;
-        pCmdLine->argCount = line->argCount;
-        pCmdLine->inputRedirect = line->inputRedirect;
-        pCmdLine->outputRedirect = line->outputRedirect;
-        pCmdLine->blocking = line->blocking;
-        pCmdLine->next = line->next;
-        freeCmdLines(line);
-        line = pCmdLine;
 
         if (line->arguments[0][0] == '!') {
             /* invoke history command */
@@ -163,6 +150,12 @@ int main (int argc, char** argv) {
     }
 
     env_free(env);
+}
+
+char* str_clone(const char* source) {
+    char* clone = (char*)malloc(strlen(source) + 1);
+    strcpy(clone, source);
+    return clone;
 }
 
 void execute(cmdLine *pCmdLine) {
