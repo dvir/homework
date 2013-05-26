@@ -58,11 +58,8 @@ int main (int argc, char** argv) {
                 strcpy(var_name, line->arguments[i]+1);
                 var_value = env_get(env, var_name);
                 if (strlen(var_value) > 0) {
-                    /* free the previous argument in the array */
-                    free(line->arguments[i]);
-
                     /* replace it with the new value */
-                    ((char**)line->arguments)[i] = str_clone(var_value);
+                    replaceCmdArg(line, i, var_value);
                 } else {
                     printf("Couldn't find variable '%s' in the env.", var_name);
                 }
@@ -159,12 +156,6 @@ int main (int argc, char** argv) {
     return 0;
 }
 
-char* str_clone(const char* source) {
-    char* clone = (char*)malloc(strlen(source) + 1);
-    strcpy(clone, source);
-    return clone;
-}
-
 void execute(cmdLine *pCmdLine) {
     int ret, status, cpid;
 
@@ -180,6 +171,12 @@ void execute(cmdLine *pCmdLine) {
     if (pCmdLine->blocking == 1) {
         waitpid(cpid, &status, 0);
     }
+}
+
+char* str_clone(const char* source) {
+    char* clone = (char*)malloc(strlen(source) + 1);
+    strcpy(clone, source);
+    return clone;
 }
 
 env_variable* env_insert(env_variable* env, char* name, char* value) {
