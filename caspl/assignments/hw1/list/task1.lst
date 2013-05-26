@@ -29,7 +29,7 @@
     29                                  
     30                                      ; if al == \n, skip it
     31 00000013 3C0A                        cmp al, 10
-    32 00000015 7437                            je next
+    32 00000015 7449                            je next
     33                                  
     34 00000017 C125[00000000]04            shl dword[LC1], 4 ; multiply by 16 each digit we add
     35                                  
@@ -47,61 +47,58 @@
     47                                  
     48                                      ; default
     49                                      ; do nothing
-    50 0000002A EB22                        jmp next
+    50 0000002A EB34                        jmp next
     51                                  
     52                                      ge_a: ; a <= al
     53                                          ; if al <= 'f'
     54 0000002C 3C66                            cmp al, 'f'
     55 0000002E 7E0E                                jle a_f
     56                                          ; else
-    57 00000030 EB1C                                jmp next
+    57 00000030 EB2E                                jmp next
     58                                  
     59                                      ge_A: ; A <= al
     60                                          ; if al <= 'F'
     61 00000032 3C46                            cmp al, 'F'
-    62 00000034 7E0E                                jle A_F
+    62 00000034 7E14                                jle A_F
     63                                          ; else
-    64 00000036 EB16                                jmp next
+    64 00000036 EB28                                jmp next
     65                                  
     66                                      ge_0: ; 0 <= al
     67                                          ; if al <= '9'
     68 00000038 3C39                            cmp al, '9'
-    69 0000003A 7E0E                                jle n0_9
+    69 0000003A 7E1A                                jle n0_9
     70                                          ; else
-    71 0000003C EB10                                jmp next
+    71 0000003C EB22                                jmp next
     72                                  
     73                                      a_f: ; [a, f]
     74 0000003E 2C61                            sub al, 'a'
     75 00000040 040A                            add al, 10
-    76                                          add dword[LC1], al
-    77          ******************       error: mismatch in operand sizes
-    78 00000042 EB0A                            jmp next
-    79                                  
-    80                                      A_F: ; [A, F]
-    81 00000044 2C41                            sub al, 'A'
-    82 00000046 040A                            add al, 10
-    83                                          add dword[LC1], al
-    84          ******************       error: mismatch in operand sizes
-    85 00000048 EB04                            jmp next
-    86                                  
-    87                                      n0_9: ; [0, 9]
-    88 0000004A 2C30                            sub al, '0'
-    89                                          add dword[LC1], al
-    90          ******************       error: mismatch in operand sizes
-    91 0000004C EB00                            jmp next
-    92                                  
-    93                                      next:
-    94 0000004E 41                          	inc	ecx      		; increment pointer
-    95 0000004F 803900                      	cmp	byte [ecx], 0   ; check if byte pointed to is zero
-    96 00000052 75BD                        	jnz	loop       		; keep looping until it is null terminated
-    97                                  
-    98 00000054 FF35[00000000]          	push	dword[LC1]		; Call printf with 2 arguments: pointer to str
-    99 0000005A 68[00000000]            	push	LC0		; and pointer to format string.
-   100 0000005F E8(00000000)            	call	printf
-   101 00000064 83C408                  	add 	esp, 8		; Clean up stack after call
-   102                                  
-   103 00000067 61                      	popa			; Restore registers
-   104 00000068 89EC                    	mov	esp, ebp	; Function exit code
-   105 0000006A 5D                      	pop	ebp
-   106 0000006B C3                      	ret
-   107                                  
+    76 00000042 0005[00000000]                  add byte[LC1], al
+    77 00000048 EB16                            jmp next
+    78                                  
+    79                                      A_F: ; [A, F]
+    80 0000004A 2C41                            sub al, 'A'
+    81 0000004C 040A                            add al, 10
+    82 0000004E 0005[00000000]                  add byte[LC1], al
+    83 00000054 EB0A                            jmp next
+    84                                  
+    85                                      n0_9: ; [0, 9]
+    86 00000056 2C30                            sub al, '0'
+    87 00000058 0005[00000000]                  add byte[LC1], al
+    88 0000005E EB00                            jmp next
+    89                                  
+    90                                      next:
+    91 00000060 41                          	inc	ecx      		; increment pointer
+    92 00000061 803900                      	cmp	byte [ecx], 0   ; check if byte pointed to is zero
+    93 00000064 75AB                        	jnz	loop       		; keep looping until it is null terminated
+    94                                  
+    95 00000066 FF35[00000000]          	push	dword[LC1]		; Call printf with 2 arguments: pointer to str
+    96 0000006C 68[00000000]            	push	LC0		; and pointer to format string.
+    97 00000071 E8(00000000)            	call	printf
+    98 00000076 83C408                  	add 	esp, 8		; Clean up stack after call
+    99                                  
+   100 00000079 61                      	popa			; Restore registers
+   101 0000007A 89EC                    	mov	esp, ebp	; Function exit code
+   102 0000007C 5D                      	pop	ebp
+   103 0000007D C3                      	ret
+   104                                  
