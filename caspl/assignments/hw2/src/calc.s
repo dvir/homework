@@ -22,7 +22,7 @@ PRINT_DIGIT_MESSAGE:
     DB  "%d", 0
 
 PRINT_HEX_DIGIT_MESSAGE:
-    DB  "%x", 0
+    DB  "%X", 0
 
 PRINT_NEWLINE:
     DB  10, 0
@@ -48,6 +48,7 @@ section .text
 	global main
 	extern printf
     extern malloc
+    extern free
     extern gets
 
 main:
@@ -146,6 +147,8 @@ calc:
     cmp byte [INPUT], 'q'
     je .exit
 
+    dec dword [op_counter]
+
     ; it's not an operation - it's a number.
     ; we should iterate on it and create a number linked list for it, and
     ; push it into the the operands stack.
@@ -172,6 +175,10 @@ calc:
         add esp, 4
 
     .got_digit:
+        ; if eax is -1, we received an invalid digit. skip the number
+        cmp eax, -1
+        je .loop 
+
         ; got a valid hexa digit in al.
         ; if it's a leading zero, ignore it
         cmp eax, 0
@@ -261,6 +268,35 @@ create_num:
     mov dword [result], eax
     popad
     mov eax, dword [result]
+    mov esp, ebp
+    pop ebp
+    ret
+
+free_num:
+    push ebp
+    mov ebp, esp
+    pushad
+
+    ; function parameters
+    ; ebp+8 - num to free
+   
+    ; check if the pointer is null, and if so don't free it
+    cmp dword [ebp+8], 0
+    je .end
+
+    ; recursively free the next digit in the linked list
+    mov edx, dword [ebp+8]
+    push dword [edx + next]
+    call free_num
+    add esp, 4
+
+    ; actually free the current digit
+    push edx
+    call free
+    add esp, 4
+
+.end:
+    popad
     mov esp, ebp
     pop ebp
     ret
@@ -662,6 +698,15 @@ func_exponent:
     push dword [ebp-4]
     call func_shl
     add esp, 4
+
+    mov dword [result], eax
+
+    ; free pre-shifted number before overwriting the pointer
+    push dword [ebp-4]
+    call free_num
+    add esp, 4
+
+    mov eax, dword [result]
     mov dword [ebp-4], eax
 
     ; increase counter by 1
@@ -724,10 +769,11 @@ func_bitwise_xor:
     ; ebp+12 - second number
 
     ; local variables
-    sub esp, 12
-    ; ebp-4  - new number pointer
+    sub esp, 16
+    ; ebp-4 - new number pointer
     ; ebp-8 - n1
     ; ebp-12 - n2
+    ; ebp-16 - new number return pointer
 
     mov dword [ebp-4], 0
 
@@ -735,6 +781,8 @@ func_bitwise_xor:
     mov dword [ebp-8], edx
     mov edx, dword [ebp+12]
     mov dword [ebp-12], edx
+
+    mov dword [ebp-16], 0
    
 .loop:
     mov ebx, 0
@@ -757,11 +805,23 @@ func_bitwise_xor:
 
 .do_xor:
     xor eax, ebx ; xor between the digits
-    push dword [ebp-4]
+    push 0
     push eax 
     call create_num
     add esp, 8
 
+    ; check if we set the return pointer already
+    cmp dword [ebp-16], 0
+    je .first_set
+
+    mov edx, dword [ebp-4]
+    mov dword [edx + next], eax
+    jmp .advance_num_pointer
+
+.first_set:
+    mov dword [ebp-16], eax
+
+.advance_num_pointer:
     mov dword [ebp-4], eax
 
     ; advance numbers pointers
@@ -792,10 +852,10 @@ func_bitwise_xor:
     cmp dword [ebp-12], 0
     jne .loop
 
-    mov edx, dword [ebp-4]
+    mov edx, dword [ebp-16]
     mov dword [result], edx
 
-    add esp, 12
+    add esp, 16
     popad
     mov eax, dword [result]
     mov esp, ebp
