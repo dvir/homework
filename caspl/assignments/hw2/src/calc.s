@@ -32,7 +32,7 @@ DEBUG:
 
 section .bss
 INPUT:
-    RESB    80
+    RESB    81
 result:
     RESD    1
 
@@ -68,12 +68,14 @@ calc:
 	mov	ebp, esp	; Entry code - set up ebp and esp
 	pushad			; Save registers
 
-    sub esp, 4 ; save room for local variables:
+    sub esp, 12 ; save room for local variables:
     %define op_counter ebp-4 ; operation counter
     %define leading_zero ebp-8 ; is the current char a leading zero?
+    %define got_zero ebp-12 ; did we get any zeros?
 
     mov dword [op_counter], 0 ; reset operation counter
     mov dword [leading_zero], 1 ; first zeros are leading zeros
+    mov dword [got_zero], 0
     mov dword [STACK_SIZE], 0 ; reset current stack size
     mov byte  [CALC_MODE], 'h'
 
@@ -111,6 +113,9 @@ calc:
 
     cmp byte [INPUT], 'd'
     jne .not_duplicate
+    ; make sure the next char is null
+    cmp byte [INPUT+1], 0
+    jne .not_duplicate 
     ; duplicate
         call duplicate
         jmp .loop
@@ -152,6 +157,9 @@ calc:
     ; it's not an operation - it's a number.
     ; we should iterate on it and create a number linked list for it, and
     ; push it into the the operands stack.
+    
+    mov dword [leading_zero], 1 ; first zeros are leading zeros
+    mov dword [got_zero], 0 ; set zero boolean to false
 
     mov edx, 0 ; holds the head of the linked list
     mov ecx, INPUT
@@ -183,7 +191,10 @@ calc:
         ; if it's a leading zero, ignore it
         cmp eax, 0
         jne .not_zero
+
         ; zero
+        mov dword [got_zero], 1
+
         ; if it's a zero and we didn't receive any other number yet, skip it
         cmp dword [leading_zero], 1
         je .skip
@@ -204,6 +215,20 @@ calc:
         jmp .foreach_digit
 
     .end_foreach_digit:
+        ; if all we got are zeroes, create a zero num
+        cmp dword [got_zero], 1
+        jne .skip_only_zero_check
+        cmp dword [leading_zero], 1
+        jne .skip_only_zero_check 
+
+        ; got only zeros. create a zero
+        push 0
+        push 0
+        call create_num 
+        add esp, 8
+        mov edx, eax
+
+    .skip_only_zero_check:
         ; if an empty string / invalid number given, ignore it
         cmp edx, 0
         je .loop
@@ -239,7 +264,7 @@ calc:
     mov eax, dword [op_counter]
     mov dword [result], eax
 
-    add esp, 4 ; remove local variables
+    add esp, 12 ; remove local variables
 	popad			; Restore registers
     mov eax, dword [result] ; return operation counter
     mov	esp, ebp	; Function exit code
