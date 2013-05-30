@@ -123,7 +123,7 @@ static cmdLine* _parseCmdLines(char *line)
 	pCmdLine = parseSingleCmdLine(line);
 	if (!pCmdLine)
 	  return NULL;
-	
+
 	if (nextStrCmd)
 	  pCmdLine->next = _parseCmdLines(nextStrCmd+1);
 

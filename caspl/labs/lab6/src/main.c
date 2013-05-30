@@ -24,8 +24,14 @@ void env_free(env_variable* env);
 char* env_get(env_variable* env, char* name);
 char* str_clone(const char* source);
 
+int* sinkPipe(int** pipes, cmdLine* pCmdLine);
+int* feedPipe(int** pipes, cmdLine* pCmdLine);
+void releasePipes(int** pipes, int nPipes);
+int** createPipes(int nPipes);
+int countCmds(cmdLine* pCmdLine);
+
 int main (int argc, char** argv) {
-    env_variable* env;
+    env_variable* env = 0;
     char history[HISTORY_SIZE][2048];
     int historyHead = -1, historyCount = 0, printHead;
     char input[2048];
@@ -58,7 +64,6 @@ int main (int argc, char** argv) {
                 strcpy(var_name, line->arguments[i]+1);
                 var_value = env_get(env, var_name);
                 if (strlen(var_value) > 0) {
-                    /* replace it with the new value */
                     replaceCmdArg(line, i, var_value);
                 } else {
                     printf("Couldn't find variable '%s' in the env.", var_name);
@@ -157,34 +162,110 @@ int main (int argc, char** argv) {
 }
 
 void execute(cmdLine *pCmdLine) {
-    int ret, status, cpid;
+    int ret, status;
+    int cmdsCount;
+    int** pipes;
+    int* cPipe;
+    int i;
+    cmdLine* cmd = pCmdLine;
 
-    cpid = fork();
-    if (cpid == 0) {
-        /* check for input redirection */
-        if (pCmdLine->inputRedirect) {
-            /* close stdin */
-            close(0);
-            fopen(pCmdLine->inputRedirect, "r");
+    /* calculate amount of pipes needed */
+    cmdsCount = countCmds(pCmdLine);
+    pipes = createPipes(cmdsCount - 1);
+    i = 0;
+    while (i < cmdsCount) {
+        int cpid = fork();
+        if (cpid == 0) {
+            /* check if have any pipes in the command */
+            if (cmdsCount > 1) {
+                if (cmd->idx != 0) {
+                    /* if the command is not the first command in the chain,
+                     * we should redirect its input to the feed pipe.
+                     */
+
+                    /* find the relevant command feed pipe */
+                    cPipe = feedPipe(pipes, cmd);
+                    
+                    /* close stdin */
+                    close(0);
+
+                    /* duplicate the relevant pipe's read fd */
+                    dup2(cPipe[0], 0);
+
+                    /* close the pipe's read fd */
+                    close(cPipe[0]);
+                } 
+                
+                if (cmd->next != NULL) {
+                    /* if the command doesn't have a next command,
+                     * it's the last command in the chain and therefore
+                     * shouldn't redirect its output.
+                     * so for each command that is not the last, we should
+                     * redirect the output to the relevant pipe.
+                     */
+                   
+                    /* find the relevant command sink pipe */
+                    cPipe = sinkPipe(pipes, cmd);
+                    
+                    /* close stdout */
+                    close(1);
+
+                    /* duplicate the relevant pipe's write fd */
+                    dup2(cPipe[1], 1);
+
+                    /* close the pipe's write fd */
+                    close(cPipe[1]);
+                }
+            }
+
+            if (cmd->inputRedirect != NULL) {
+                close(0);
+                fopen(cmd->inputRedirect, "r");
+            }
+
+            if (cmd->outputRedirect != NULL) {
+                close(1);
+                fopen(cmd->outputRedirect, "w");
+            }
+
+            ret = execvp(cmd->arguments[0], cmd->arguments);
+            if (ret != 0) {
+                perror("execute(): failed executing command.");
+            }
+            exit(0);
+            return;
         }
 
-        /* check for output redirection */
-        if (pCmdLine->outputRedirect) {
-            /* close stdout */
-            close(1);
-            fopen(pCmdLine->outputRedirect, "w");
+        cPipe = feedPipe(pipes, cmd);
+        if (cPipe != NULL) {
+            close(cPipe[0]);
         }
 
-        ret = execvp(pCmdLine->arguments[0], pCmdLine->arguments);
-        if (ret != 0) {
-            perror("execute(): failed executing command.");
-            _exit(0);
+        cPipe = sinkPipe(pipes, cmd);
+        if (cPipe != NULL) {
+            close(cPipe[1]);
         }
+
+        if (cmd->blocking == 1) {
+            waitpid(cpid, &status, 0);
+        }
+        cmd = cmd->next;
+        ++i;
     }
 
-    if (pCmdLine->blocking == 1) {
-        waitpid(cpid, &status, 0);
+    releasePipes(pipes, cmdsCount - 1);
+}
+
+int countCmds(cmdLine* pCmdLine) {
+    int count = 0;
+    cmdLine* it = pCmdLine;
+
+    while (it != NULL) {
+        it = it->next;
+        count++;
     }
+
+    return count;
 }
 
 char* str_clone(const char* source) {
@@ -266,4 +347,47 @@ char* env_get(env_variable* env, char* name) {
     }
 
     return env_get(env->next, name);
+}
+
+int** createPipes(int nPipes) {
+    int** pipes = malloc(nPipes * sizeof(int*));
+    int* cPipe;
+    int i;
+
+    for (i = 0; i < nPipes; ++i) {
+        cPipe = malloc(2 * sizeof(int));
+        pipe(cPipe);
+        pipes[i] = cPipe;
+    }
+
+    return pipes;
+}
+
+void releasePipes(int** pipes, int nPipes) {
+    int i;
+    for (i = 0; i < nPipes; ++i) {
+        close(pipes[i][0]);
+        close(pipes[i][1]);
+        free(pipes[i]);
+    }
+
+    free(pipes);
+}
+
+int* feedPipe(int** pipes, cmdLine* pCmdLine) {
+    if (pCmdLine->idx == 0) {
+        /* the first command doesn't have a feed pipe */
+        return NULL;
+    }
+
+    return pipes[pCmdLine->idx - 1];
+}
+
+int* sinkPipe(int** pipes, cmdLine* pCmdLine) {
+    if (pCmdLine->next == NULL) {
+        /* the last command doesn't have a sink pipe */
+        return NULL;
+    }
+
+    return pipes[pCmdLine->idx];
 }
