@@ -84,6 +84,7 @@
     ((get-content p) 'env)
 ))
 
+; Type: [Procedure -> T]
 (define parameter-less?
   (lambda (p)
     ((get-content p) 'parameter-less?)
@@ -110,15 +111,6 @@
 ; a procedure from a Symbol to its binding (a variable-value pair) or to the 'empty' value, 
 ; in case that the frame is not defined on the given variable.
 ; Type: [LIST(Symbol)*LIST -> [Symbol -> (PAIR(Symbol,T) union {empty})]]
-(define make-frame-old
-  (lambda (variables values)
-     (lambda (var)
-            (cond ((empty? variables) empty)
-                  ((eq? var (car variables)) (make-binding (car variables) (car values)))
-                  (else ((make-frame (cdr variables) (cdr values))
-                          var))))
-    ))
-
 (define make-frame
   (lambda (variables values)
   (cond 
@@ -132,6 +124,9 @@
   )
 ))
 
+; Signature: get-all-vars(frame)
+; Type: [Frame -> LIST(Symbol)]
+; Purpose: Get all variables in a frame.
 (define get-all-vars 
   (lambda (frame)
     (cond
@@ -145,6 +140,9 @@
     )
 ))
 
+; Signature: get-all-vals(frame)
+; Type: [Frame -> LIST]
+; Purpose: Get all values in a frame.
 (define get-all-vals 
   (lambda (frame)
     (cond

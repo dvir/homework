@@ -461,7 +461,10 @@
 ;;;;;;;;;;;;;;;;;
 ; Answer to 4.2 ;
 ;;;;;;;;;;;;;;;;;
-
+; Signature: cond-if$(exp cont)
+; Type: (LIST(Symbol)*[T1 -> T2] -> LIST(Symbol))
+; Purpose: Derive cond expression into if expressions, in CPS style.
+; Tests: (cond->if$ '(cond ((> 3 2) 5) (else 1)) (lambda(expanded) expanded)) => '(if (> 3 2) 5 1)
 (define cond->if$ (lambda (exp cont)
     (let* (
            (sequence->exp
