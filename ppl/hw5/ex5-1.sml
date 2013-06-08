@@ -8,7 +8,18 @@
 - get_all_vars(Disj(Conj (Atom ("x1"), Atom ("x2")), Disj (Atom ("x1"), Neg (Atom ("x3")))));
 val it = ["x2","x1","x3"]: string list
 *)
-(*	Write your code here... *)
+val load = fn(file_name) => use("./" ^ file_name ^ ".sml");
+load "ex5-aux";
+
+val rec merge = fn (lst1, []) => lst1
+               | (lst1, h::lst2) => if (List.exists (fn x => x = h) lst1)
+                                      then merge(lst1, lst2)
+                                      else merge(lst1 @ [h], lst2);
+
+val rec get_all_vars = fn Atom(var) => [var]
+                      | Disj(exp1, exp2) => merge(get_all_vars(exp1), get_all_vars(exp2))
+                      | Conj(exp1, exp2) => merge(get_all_vars(exp1), get_all_vars(exp2))
+                      | Neg(exp) => get_all_vars(exp);
 
 (******************* 1.2 *************************)
 (*
@@ -37,4 +48,8 @@ val it = ["x2","x1","x3"]: string list
              [Atom("x1"), Neg(Atom("x3"))]);
  val it = true : bool
 *)
-(*	Write your code here... *)
+
+val rec satisfies = fn (Atom(var), assignment) => (List.exists (fn x => x = Atom(var)) assignment)
+                     | (Neg(formula), assignment) => not(satisfies(formula, assignment))
+                     | (Conj(formula1, formula2), assignment) => satisfies(formula1, assignment) andalso satisfies(formula2, assignment)
+                     | (Disj(formula1, formula2), assignment) => satisfies(formula1, assignment) orelse satisfies(formula2, assignment); 
