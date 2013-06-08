@@ -22,7 +22,28 @@
  - postorder_cps(Node(Node(Empty,0,Empty),4,Node(Node(Empty, 6, Empty),8,Node(Empty, 2, Empty))), is_even, succ, fail);
  val it = [111, 0,6,2,8,4] : int list
 *)
-(*	Write your code here... *)
+val rec postorder_cps = fn (Empty, pred, succ, fail) => succ([])
+                         | (Node(Empty, x, Empty), pred, succ, fail) => 
+                             if pred(x)
+                                  then succ([x])
+                                  else fail([])
+                         | (Node(left, x, right), pred, succ, fail) =>
+                             postorder_cps(
+                               left,
+                               pred,
+                               fn y => postorder_cps(
+                                          right,
+                                          pred,
+                                          fn z => postorder_cps(
+                                                    Node(Empty, x, Empty),
+                                                    pred,
+                                                    fn t => succ(y @ z @ t),
+                                                    fn t => fail(y @ z)
+                                                  ),
+                                          fn z => fail(y)
+                                       ),
+                               fail
+                             );
 
 (******************* 2.2 *************************)
 (*
@@ -37,6 +58,18 @@
  val it = Node (Node (Empty,0,Empty),1, Node (Node (Empty,2,Empty),3,Node (Empty,4,Empty))) : int binary_tree
 *)
 
+val rec reverse = fn ([]) => []
+                   | (h::lst) => reverse(lst) @ [h];
+
+val rec construct = fn [] => Empty
+                     | (h::lst) => if lst = []
+                                    then Node(Empty, h, Empty)
+                                    else Node(
+                                              construct([h]), 
+                                              hd(reverse(lst)),
+                                              construct(reverse(tl(reverse(lst))))
+                                             );
+
 (******************* 2.3 *************************)
 (*
 * Signature: labeled_n_tree_postorder(lnTree)
@@ -50,4 +83,19 @@
  - labeled_n_tree_postorder(Branch(1,[Leaf 2,Branch(4,[Leaf 5,Leaf 3,Leaf 8])]));
  val it = [2,5,3,8,4,1] : int list
 *)
-(*	Write your code here... *)
+
+val rec merge = fn (lst1, []) => lst1
+               | (lst1, h::lst2) => if (List.exists (fn x => x = h) lst1)
+                                      then merge(lst1, lst2)
+                                      else merge(lst1 @ [h], lst2);
+
+val rec fold = fn ([], f, init) => init
+                | (h::lst, f, init) => f(h, fold(lst, f, init));
+
+val rec map = fn (f, []) => []
+                | (f, h::lst) => f(h)::map(f, lst);
+
+val rec labeled_n_tree_postorder = fn 
+                                    Leaf(v) => [v]
+                                    | Branch(v, tree) =>
+                                        fold(map(labeled_n_tree_postorder, tree), merge, []) @ [v];

@@ -8,8 +8,6 @@
 - get_all_vars(Disj(Conj (Atom ("x1"), Atom ("x2")), Disj (Atom ("x1"), Neg (Atom ("x3")))));
 val it = ["x2","x1","x3"]: string list
 *)
-val load = fn(file_name) => use("./" ^ file_name ^ ".sml");
-load "ex5-aux";
 
 val rec merge = fn (lst1, []) => lst1
                | (lst1, h::lst2) => if (List.exists (fn x => x = h) lst1)

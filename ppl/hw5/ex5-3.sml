@@ -1,6 +1,6 @@
 
 (******************* 3.1 *************************)
-(*	Write your datatype definition here... *)
+datatype 'a generic_list = List of 'a list | Seq of 'a seq; 
 
 (******************* 3.2 *************************)
 (*
@@ -13,7 +13,14 @@
  - generic_map(fn(x)=>x+10, Seq(Cons(1, fn()=> Cons(2, fn()=> Cons (3, fn()=>Nil)))));
  val it = Seq (Cons (11,fn)) : int generic_list
 *)
-(*	Write your code here... *)	 
+
+val rec map_seq = fn (proc, Cons(h,tl)) => Cons(proc(h), fn()=>map_seq(proc, tl()))
+                   | (proc, Nil) => Nil;
+
+val rec generic_map = fn (f, List([])) => List([])
+                       | (f, List(lst)) => List(map f lst)
+                       | (f, Seq(Nil)) => Seq(Nil)
+                       | (f, Seq(sequ)) => Seq(map_seq(f, sequ));
 
 (******************* 3.3 *************************)
 (*
@@ -38,3 +45,26 @@
 	val it = Seq (Cons (1,fn)) : int generic_list
 	hint: You can apply the "take" procedure on these lazy lists to see their values.
 *)
+
+val rec interleave_list = fn ([], lst) => lst
+                      | (h::lst1, lst2) => h::interleave_list(lst2, lst1);
+
+val rec interleave_seq = fn (Nil, sequ) => sequ
+                          | (Cons(h, f), sequ) => Cons(h, fn() => interleave_seq(sequ, f()));
+
+val rec interleave_seq_list = fn (Nil, []) => Nil
+                          | (Nil, lst) => interleave_list_seq(lst, Nil)
+                          | (Cons(h, f), lst) => Cons(h, fn() => interleave_list_seq(lst, f()))
+and interleave_list_seq = fn ([], Nil) => Nil
+                          | ([], sequ) => interleave_seq_list(sequ, [])
+                          | (h::lst, sequ) => Cons(h, fn() => interleave_seq_list(sequ, lst));
+
+val rec generic_interleave = fn
+                               (List(lst), Seq(sequ)) => Seq(interleave_list_seq(lst, sequ))
+                              | (Seq(sequ), List(lst)) => Seq(interleave_seq_list(sequ, lst))
+                              | (Seq(sequ1), Seq(sequ2)) => Seq(interleave_seq(sequ1, sequ2))
+                              | (List(lst1), List(lst2)) => List(interleave_list(lst1, lst2));
+
+
+
+
