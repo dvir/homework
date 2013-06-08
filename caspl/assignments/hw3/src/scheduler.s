@@ -31,10 +31,10 @@ scheduler:
         mov dword [curr_cell], 1
         dec dword [cycles_left]
 .not_cycle_end:
+    mov edx, 0
     mov eax, dword [count]
-    mov dl, byte [print_freq]
-    div dl
-    cmp ah, 0
+    div dword [print_freq]
+    cmp edx, 0
     jne .skip_printer
     
     ; resume printer!

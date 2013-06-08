@@ -260,6 +260,9 @@ atoi:
     imul eax, 10
     add eax, ebx 
 
+    ; check for overflow
+    jo .invalid
+
     inc ecx
     jmp .loop
 
