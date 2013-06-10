@@ -40,7 +40,7 @@ val rec postorder_cps = fn (Empty, pred, succ, fail) => succ([])
                                                     fn t => succ(y @ z @ t),
                                                     fn t => fail(y @ z)
                                                   ),
-                                          fn z => fail(y)
+                                          fn z => fail(y @ z)
                                        ),
                                fail
                              );

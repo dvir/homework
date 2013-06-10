@@ -1,0 +1,20 @@
+4.1. 
+	Scheme: Very simple syntax, consisting of basically just procedure definitions and applications, and very few syntactic sugar expressions.
+	ML: Rich syntax - allowing type definitions, operators with special meanings (::, @, andalso, and, etc.), pattern matching.
+
+4.2.
+	Scheme: No information whatsoever about types - doesn't verify type correctness and does not allow definition of new types, which leads to methods of tagging data.
+	ML: Allows definitions of types and aliasing types, allows enforcing types of variables and parameters, allows creation of composite types.
+
+4.3.	Scheme: Since there's no information about types - type checking must be done in run time, and is prone to deep issues that may result from type mismatches.
+	ML: Allows providing specific types and enforces type safety statically, making it a statically typed language.
+
+4.4.	Both pass parameters by value, with a bit different syntax.
+
+4.5.	Both Scheme and ML represent lists by a chain of value and tail list - in the base case, the tail list is the empty list ((list) in Scheme, nil or [] in ML).
+
+4.6.	Scheme: Does not allow definition of user types, but one may use the tags approach to mimic user types. This, of course, isn't optimal and results in unneccesary overhead.
+	ML: Allows definition of user types along with complex value constructors and type parameters. Also allows aliasing of types, giving the possibility of making type expressions much more meaningful.
+
+4.7.	Scheme: Lists can be either homogeneous or heterogeneous, allowing mixing values in lists and defining complex structures with it.
+	ML: Lists can ONLY be homogeneous - consisting of the same type of values. This requirement can be circumvented by defining a new data type that will encapsulate the types we want the list to actually consist of, but this approach has its drawbacks.
