@@ -61,15 +61,17 @@ val rec postorder_cps = fn (Empty, pred, succ, fail) => succ([])
 val rec reverse = fn ([]) => []
                    | (h::lst) => reverse(lst) @ [h];
 
-val rec construct = fn [] => Empty
-                     | (h::lst) => if lst = []
-                                    then Node(Empty, h, Empty)
-                                    else Node(
-                                              construct([h]), 
-                                              hd(reverse(lst)),
-                                              construct(reverse(tl(reverse(lst))))
-                                             );
+val rec filter = fn (f, []) => []
+                  | (f, h::lst) => if f(h)
+                                  then h::filter(f, lst)
+                                  else filter(f, lst);
 
+val rec construct = fn [] => Empty
+                     | (lst) => Node(
+                                  construct(filter(fn x => x <= hd(reverse(lst)), reverse(tl(reverse(lst))))), 
+                                  hd(reverse(lst)),
+                                  construct(filter(fn x => x > hd(reverse(lst)), reverse(tl(reverse(lst)))))
+                                 );
 (******************* 2.3 *************************)
 (*
 * Signature: labeled_n_tree_postorder(lnTree)
