@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+<meta charset="utf-8">
+<title>קאנטרי בית יצחק - אירועים</title>
+<script type="text/javascript" src="js/jquery-1.9.1.js"></script>	
+<script type="text/javascript" src="js/script.js"></script>	
+<link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body dir="rtl">
+
+<header id="header">
+  <h1>קאנטרי בית יצחק</h1>
+
+  <nav>
+    <ul>
+      <li><a href="login.html">התחברות</a></li> 
+      <li><a href="classes.html">חוגים</a></li> 
+      <li><a href="facilities.html">מתקנים</a></li>
+      <li><a href="swimming.html">בית ספר לשחיה</a></li>
+      <li><a href="gym.html">חדר כושר</a></li>
+      <li><a href="articles.html">כתבות</a></li>
+      <li><a href="events.html">ארועים</a></li>
+      <li><a href="gallery.html">גלריה</a></li>
+      <li><a href="about.html">אודות</a></li>
+      <li><a href="contact.html">צור קשר</a></li>
+    </ul>
+  </nav>
+</header>
+
+<section>
+  <a href="javascript:void(0);" onclick="javascript:unhide('events_main');"><h2>ארועים</h2></a>
+  <ul>
+    <li><a href="javascript:void(0);" onclick="javascript:unhide('event-1');">חג המים</a></li>
+    <li><a href="javascript:void(0);" onclick="javascript:unhide('event-2');">מסיבת שבועות</a></li>
+  </ul>
+</section>
+
+<article id="events">
+  <div id="events_main" class="unhidden">
+    <img src="./img/events.jpg" />
+  </div>
+  <div id="event-1" class="hidden">
+    <h3>חג המים</h3>
+
+    <p>חג המים הוא חג מסורתי שחוגגים במושב מאז הקמת המושב.<br />
+    חג המים מצויין ביום שבת הראשון של ספטמבר כל שנה.<br />
+    האירוע עשיר בהפעלות לכל המשפחה, מתקנים מתנפחים, תחרויות שונות כגון שחייה, שש בש ועוד.</p>
+  </div>
+  <div id="event-2" class="hidden">
+    <h3>מסיבת שבועות</h3>
+
+    <p>בכל שנה, ערב חג שבועות, מציין הנוער במושב את חג השבועות במסיבה אשר אליה מגיעים בני נוער מכל האזור על מנת לקחת חלק בחוויה ייחודית.</p>
+	<p>מסיבת בריכה ענקית לרגל חג השבועות</p>
+  </div>
+</article>
+
+<footer>
+  <p><a target="_blank" href="https://www.facebook.com/by.kantri">הצטרפו אלינו בפייסבוק</a> | <a href="about.html">אודות</a> | <a href="contact.html">צור קשר</a> | <a href="events.html">ארועים</a> | <a target="_blank" href="http://www.beit-yitzhak.org.il">אתר בית יצחק</a></p>
+</footer>
+</body>
+</html>

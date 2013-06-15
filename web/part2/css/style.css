@@ -1,0 +1,441 @@
+/* CSS RESET */
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,textarea,p,blockquote,th,td { 
+  margin:0;
+  padding:0;
+}
+table {
+  border-collapse:collapse;
+  border-spacing:0;
+}
+fieldset,img { 
+  border:0;
+}
+address,caption,cite,code,dfn,em,strong,th,var {
+  font-style:normal;
+  font-weight:normal;
+}
+ol,ul {
+  list-style:none;
+}
+caption,th {
+  text-align:left;
+}
+h1,h2,h3,h4,h5,h6 {
+  font-size:100%;
+  font-weight:normal;
+}
+q:before,q:after {
+  content:'';
+}
+abbr,acronym { 
+  border:0;
+}
+html {
+  overflow-y: scroll;
+}
+
+body {
+  background: #fbfdf6;
+  font-family: Arial;
+  font-size: 90%;
+  color: #000000;
+  margin: 20px auto;
+  line-height: 1.0em;
+  width: 1100px;
+}
+
+a:link, a:visited {
+  font-family: Arial;
+  font-weight:bold;
+  color:#c17086;
+  text-decoration:none;
+
+  font-size:1.2em;
+}
+
+
+h1, h2, h3, h4, h5, h6{
+  font-family:Helvetica, Arial, sans-serif;
+  font-size:1.5em;
+  letter-spacing:-0.06em;
+  text-transform:uppercase;
+  font-weight:normal;
+}
+h1 {
+  font-size: 4em;
+}
+
+h2 {
+  font-size: 3em;
+}
+
+h3 {
+  font-size: 2em;
+}
+
+h4 {
+  font-size: 1em;
+}
+
+a img {
+  border:none;
+}
+
+.hide {
+  display: none;
+}
+
+/* forms */
+form {
+  font-size: 1.2em;
+}
+form > ul {
+  width: 400px;
+  text-align: right;
+}
+form > ul > li {
+  margin-bottom: 8px;
+}
+form > ul > li > label {
+  width: 70px;
+  display: inline-block;
+}
+form > ul > li input[type="text"], 
+form > ul > li input[type="tel"],
+form > ul > li input[type="email"],
+form > ul > li select {
+  width: 240px;
+  height: 25px;
+  vertical-align: middle;
+  padding-right: 5px;
+  font-size: 1em;
+}
+form > ul > li select {
+  width: 248px;
+}
+form > ul > li textarea {
+  width: 240px;
+  height: 50px;
+  vertical-align: middle;
+  padding-right: 5px;
+  font-size: 1em;
+}
+form > ul > li input[type="submit"] {
+  font-size: 1em;
+  min-width: 248px;
+  height: 30px;
+  padding: 5px;
+}
+
+
+
+header, section, article, footer {
+  padding:10px 20px 20px;
+  margin:10px;
+  border:1px solid #e7e2d7;
+  border-radius:8px;
+  -webkit-border-radius:.8em;
+  -moz-border-radius:.8em;
+  background:#fff url(../img/sprites.png) repeat-x 0px -120px;
+}
+
+header {
+  display:block;
+  position:relative;
+  text-align:right;
+  background:#fff url(../img/menu_top/1.jpg) no-repeat;	 
+  background-size: cover;
+  height:240px;
+  overflow: hidden;
+}
+
+header img {
+  position:absolute;
+  left:20px;
+  top:18px;
+}
+
+header h1 {
+  margin-top: 40px;
+  margin-right: 30px;
+  font-size: 4em;
+  text-transform: none;
+  letter-spacing: 0em;
+  text-align: right;
+  color: #ffffff;
+  -webkit-text-stroke: 1px rgba(09, 06, 91, 0.6);
+  -webkit-text-fill-color:#FFF;
+  letter-spacing:-2px;
+}
+
+header h2 {
+  margin:-10px 0px 20px;
+  font-size:1.3em;
+  text-align:center
+}
+
+nav {
+  text-align:right;
+  display:block;
+  background-color: rgba(09, 06, 91, 0.6);
+  width: 1080px;
+  height: 30px;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+nav ul {
+  list-style-type: none;
+  display: inline-block;
+  height: 30px;
+}
+
+nav li {
+  line-height: 30px;
+  vertical-align: middle;
+  padding: 0 15px;
+  display: inline;
+  border-left: 1px dotted white;
+}
+nav li:last-child {
+  border-left: 0;
+}
+
+nav a:link, nav a:visited {
+  font-size:1.4em;
+  font-weight:normal;
+  text-decoration:none;
+  color: white;
+}
+nav a:hover{
+  color:orange;
+}
+
+section {
+  float:right;
+  width:188px;
+  text-align:right;
+  position:relative;
+}
+
+section h1, section h2, section h3, section h4, section h5, section h6 {
+  line-height: 24px;
+  color: rgba(09, 06, 91, 0.6);
+  padding: 9px 10px 10px 10px;
+  margin: 13px -10px;	
+  text-shadow: 0 1px 0 #403232;
+  font-size: 2em;
+  opacity: 0.9;
+}
+
+section ul {
+  padding:0px;
+  list-style:none;
+  border-top:1px solid #e7e2d7;
+  margin:14px 0px;
+
+}
+
+section li {
+  margin:0px;
+  padding:0px;
+  list-style:none;
+
+}
+
+section li a:link, section li a:visited {
+  width:96%;
+  padding:3px 1%;
+  border-bottom:1px solid #e7e2d7;
+  display: inline-block;
+
+}
+
+section li a:hover, section > a:hover {
+  background: #f2f1ec;
+}
+
+article {   
+  float: left;
+  width: 785px;
+  min-height: 500px;
+}
+
+article h1 {
+  opacity: 0.9;
+  color: rgba(09, 06, 91, 0.6);
+  padding:7px 10px 12px 30px;
+  margin-bottom: 20px;
+  text-shadow:0 1px 0 #403232;
+}
+
+article h2, article h3, article h4, article h5, article h6  {
+  
+   color: rgba(09, 06, 91, 0.6);
+  padding:7px 10px 12px 30px;
+  text-shadow:0 2px 0 #913951;
+}
+
+article img {
+  border: 1px solid grey;
+  margin-bottom: 5px;
+  max-width: 790px;
+}
+
+
+article p {
+  margin-bottom: 10px;
+  line-height: 1.2em;
+  font-size: 1.2em;
+}
+
+.hidden { 
+  display: none;
+}
+
+.unhidden {
+  display: block;
+}
+
+/* footer */
+footer {
+  display: block;
+  clear: both !important;
+  width: 1040px;
+  padding-bottom: 0px;
+  height: 23px;
+  text-align: center;
+}
+
+footer p {
+  margin: -5px;
+}
+
+footer a {
+  margin: 0px 5px;
+}
+
+/* main page */
+
+#mainpage {
+  width: 1035px;
+  text-align: center;
+}
+
+/* contact */
+
+#contact {
+  width: 1035px;
+  float: right;
+}
+
+form{
+	margin-top:15px;
+	}
+
+#contact form > ul {
+  margin-right: 20px;
+}
+
+/* gallery */
+#general {
+  padding-left: 15px;
+}
+article#gallery > div > img {
+  height: 179px;
+  width: 239px;
+  border: 1px solid grey;
+  margin: 0 5px 5px 0;
+}
+
+/* login */
+#login {
+  width: 1035px;
+  float: right;
+}
+
+/* swimming */
+article#swimming img {
+  float: left;
+}
+
+/* gym */
+#gym ul {
+  list-style-type: circle;
+  margin-right: 18px;
+  margin-bottom: 10px;
+}
+#gym ul li {
+  font-size: 1.2em;
+  margin-bottom: 5px;
+}
+article#gym img {
+  float: left;
+  display: block;
+}
+#gym_main img {
+  width: 60%;
+}
+/* classes */
+
+article#classes img {
+  float: left;
+  margin-right: 15px;
+
+}
+#tennis ul {
+  list-style-type: circle;
+  margin-right: 18px;
+  margin-bottom: 10px;
+}
+#tennis ul li {
+  font-size: 1.2em;
+  margin-bottom: 5px;
+}
+
+#spinning img, #zomba img, #zomba img,#pilates img{
+	height:70%;
+	width:70%;
+}
+
+/*facilities*/
+article#facilities img{
+  float: left;
+  margin-right: 15px;
+ }
+#summerpool img,#indoorpool img,#swimming-kids img{
+	width:60%;
+	height:60%;
+	
+}
+
+
+#articles img , #classes_main img, #coaches img, #rules img, #hours img, #events_main img, #sauna img, #babypool img, #machines img {
+  width: 100%;
+}
+
+
+div.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    opacity: 0.7;
+    display: none;
+}
+img.overlay {
+    position: fixed;
+    z-index: 10000;
+    top: 50%;
+    left: 50%;
+    display: none;
+}
+/* header */
+#header {
+cursor: pointer;
+}
+
