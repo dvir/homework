@@ -1,0 +1,403 @@
+1.
+section .data
+    msg: db "The string is: %s, concatenated %s", 10, 0
+    msgLen: equ $ - msg
+
+section .bss
+    str: resb 4
+    strstr: resb 8
+
+section .text
+    extern printf
+    global main
+
+%macro concat_and_print 1
+    push ebp
+    mov ebp, esp
+    pusha
+    
+    mov ebx, str
+    mov ecx, strstr
+    mov eax, %1
+
+.loop1:
+    mov byte [ebx], al
+    mov byte [ecx], al
+    inc ebx
+    inc ecx
+    shr eax, 8
+    
+    cmp al, 0
+    jne .loop1
+
+.next:
+    mov eax, %1
+
+.loop2:
+    mov byte [ecx], al
+    inc ecx
+    shr eax, 8
+    cmp al, 0
+    jne .loop2
+
+    push strstr
+    push str
+    push msg
+    call printf
+    add esp, 12
+
+    popa
+    mov esp, ebp
+    pop ebp
+%endmacro
+
+2.
+section .data
+    msg: db "The string is: %s, concatenated %s", 10, 0
+    msgLen: equ $ - msg
+
+section .bss
+    str: resb 4
+    strstr: resb 8
+
+section .text
+    extern printf
+    global main
+    
+    get_my_loc:
+        call next_i
+    next_i: pop edx
+        ret
+
+%macro concat_and_print 1
+    push ebp
+    mov ebp, esp
+    pusha
+
+    call get_my_loc
+    sub edx, next_i
+    add edx, str
+    mov ebx, edx
+
+    call get_my_loc
+    sub edx, next_i
+    add edx, strstr
+    mov ecx, edx
+
+    mov eax, %1
+
+.loop1:
+    mov byte [ebx], al
+    mov byte [ecx], al
+    inc ebx
+    inc ecx
+    shr eax, 8
+    
+    cmp al, 0
+    jne .loop1
+
+.next:
+    mov eax, %1
+
+.loop2:
+    mov byte [ecx], al
+    inc ecx
+    shr eax, 8
+    cmp al, 0
+    jne .loop2
+
+    call get_my_loc
+    sub edx, next_i
+    add edx, str
+    push edx
+
+    call get_my_loc
+    sub edx, next_i
+    add edx, strstr
+    push edx
+
+    call get_my_loc
+    sub edx, next_i
+    add edx, msg
+    push edx
+    call printf
+    add esp, 12
+
+    popa
+    mov esp, ebp
+    pop ebp
+%endmacro
+
+3.
+
+4.
+    i. neg eax
+    ii. not eax
+        inc eax
+    iii. imul eax, -1
+
+5.
+    %define LEFT 0
+    %define MIDDLE 4
+    %define RIGHT 8
+    %define VALUE 12
+
+    section .text
+        global sum_tree
+
+    sum_tree:
+        push ebp
+        mov ebp, esp
+        sub esp, 4
+        pusha
+
+        ; local sum variable
+        mov dword [ebp-4], 0
+
+        cmp dword [ebp+8], 0
+        je .end
+
+        mov edx, dword [ebp+8]
+        mov ebx, dword [edx + VALUE]
+        mov dword [ebp-4], ebx
+
+        push dword [edx + LEFT]
+        call sum_tree
+        add esp, 4
+        add dword [ebp-4], eax
+        
+        push dword [edx + MIDDLE]
+        call sum_tree
+        add esp, 4
+        add dword [ebp-4], eax
+    
+        push dword [edx + RIGHT]
+        call sum_tree
+        add esp, 4
+        add dword [ebp-4], eax
+
+    .end:
+        popa
+        add esp, 4
+        mov eax, dword [ebp-4]
+        mov esp, ebp
+        pop ebp
+        ret
+
+6. 3 memory accesses - 2 as a result of a dword operation in line 2, due to the
+possibility that a dword may span over two memory words, and 1 more for the xor
+due to the fact this is a byte operation, which may reside in only one memory
+word.
+
+7.
+    Memory layout:
+    yy uu 00 ff 00 00 zz uu
+    
+    Desired layout:
+    01 uu 01 00 00 00 01 uu
+
+    a. 
+    mov dword [y], 0x00010001
+    mov byte [z], 1
+
+    b.
+    MOVE.L #$01000100, (y)
+    MOVE.B #$01, (z)
+
+8.
+    1. The code swaps |ecx| amount of bytes between the memory address pointed
+    by ESI and EDI.
+    2.
+      L:MOV    AX, [ESI]
+        XOR    [EDI], AX
+        XOR    AX, [EDI]
+        XOR    [ESI], AX
+        ADD    ESI, 2
+        ADD    EDI, 2
+        DEC    ECX
+        LOOP   L, ECX
+
+9.
+F:  MOVE.L   D0, -(A7)     ; D0 to memory - predecrement mode
+    SUBQ.L   #2, D0        ; Subtract immediate - long (32 bit) operand
+    BMI      N             ; Branch (jump) if result was negative
+    JSR      F             ; CALL subroutine F (push PC then jump to F)
+    ADD.L   (A7)+, D2      ; Signed add memory (postincrement) 
+                           ; with D2, result in D2
+    ADD.L   D2, D2         ; Signed add D2 to D2, result in D2
+    RTS                    ; Return from procedure/subroutine
+N:  MOVE.L   (A7)+, D0     ; Move memory to D0 - postincrement mode
+    MOVEQ.L  #2, D2        ; Move immediate to D2
+    RTS
+
+    What happens if we execute an instruction JSR F, with D0=0? D0=1, D0=2? 
+    Other values of D0 (call that value k)?
+
+    D0=0:
+        We push 0 to the stack, subtract 2 from D0 which results in -2. It's
+        negative so we jump to N, pop 0 to D0 and set D2=2.
+        D0=0, D2=2.
+
+    D0=1:
+        Same as D0=0 (push 1 pop 1), just that we end up with D0=1.
+        D0=1, D2=2.
+
+    D0=2:
+        Push 2 to the stack, subtract 2 from D0 which results in 0. It's -not-
+        negative so we recursively call F with D0=0, which results in D0=0 and
+        D2=2 from our previous calculations.
+        We then pop 2 from the stack and adding it to D2, which results in
+        D2=2+2=4, add D2 to itself, which results in
+        D2=2*D2=2*4=8. Result: D0=0, D2=8.
+
+    D0=k:
+        In general, we push k to the stack, subtract 2 from D0 which results in
+        D0=k-2, and while k >= 2 we recursively call F with D0=k-2, until D0=0
+        or D0=1 which results in D0=0, D2=2, and then we recurse back, adding
+        that step's D0 starting value to D2, and then multiply it.
+        The result in D2 is the recursion:
+            a_0 = 2
+            a_1 = 2
+            a_k = 2*(k+a_(k-2)) = 2k+2a_(k-2)
+
+        D0=0, D2=a_D0
+
+10.
+    a.
+        delete:
+            cmp ecx, 31
+            jg .higher
+            mov edx, [BitTbl + 4*ecx]
+            not edx
+            and eax, edx
+
+            jmp .end
+        .higher:
+            sub ecx, 31
+            
+            mov edx, [BitTbl + 4*ecx]
+            not edx
+            and ebx, edx
+
+        .end:
+
+    b.
+        member:
+            cmp ecx, 31
+            jg .higher
+            test eax, [BitTbl + 4*ecx]
+
+            jmp .end
+        .higher:
+            sub ecx, 31
+            test ebx, [BitTbl + 4*ecx]
+
+        .end:
+
+    c. 
+        parity:
+            mov edx, eax
+            xor edx, ebx
+
+    d.
+        intersection:
+            and edx, ebx
+            and ecx, eax
+
+    e.
+        difference:
+            mov esi, ebx
+            and esi, edx
+            sub edx, esi
+
+            mov esi, eax
+            and esi, ecx
+            sub ecx, esi
+11.
+    Option (3) will result in the fastest execution (70 seconds):
+    (1) will reduce the execution of both parameters by 20%, so in total it will
+    now run in 80 seconds instead of 100 seconds.
+
+    (2) will reduce the execution of MMX instructions by 30%, so it will execute
+    in 56 seconds instead of 80 seconds, and with the arithmetic still taking 20
+    seconds we are down to, in total, 76 seconds of execution.
+
+    (3) will reduce MMX by 50%, from 80 seconds to 40 seconds, and increase
+    arithmetic by 50% from 20 seconds to 30 seconds, and in total - 40+30 = 70
+    seconds.
+
+12.
+    The best optimization to MMX will result in a 75% improvement, from 4 cycles
+    per instruction to 1 cycle.
+    So, from 80 seconds we get 80*0.25 = 20, and in total, with the arithmetic
+    execution time, we end up with 40 seconds execution time.
+
+13.
+    a. 4
+    b. 4-1 = 3
+    c. floor((4-1)/2) = 1
+    d. 4-1 = 3
+
+    e. 11 | 11110100
+        a. 5
+        b. 5-1 = 4
+        c. floor((5-1)/2) = 2
+        d. 5-1 = 4
+
+    f. 
+    Example calculation:
+    1011001 0
+    11
+    ---------
+    0111001 0
+     11
+    ---------
+    0001001 0
+       11
+    ---------
+    0000101 0
+        11
+    ---------
+    0000011 0
+         11 0
+    ---------
+    0000000 0
+
+    In general:
+    x1, x2, x3, .., xn, 0
+    1   1
+    ----------------
+    x1 XOR 1, x2 XOR 1, x3, .., xn, 0
+
+
+    if x1 x2 = 11, both get turned off, resulting in number of bits set to
+        decrease by 2.
+    if x1 x2 = 10 or 01, they switch to 01 and 10 accordingly, resulting in
+        number of bits set to be unchanged.
+
+    if x1 x2 = 00, they are left unchanged, so the number of bits set doesn't
+        change.
+
+    Bottom line: we may decrease the number of bits set by 2, but never less or
+    more, so the number we end up with has the same parity as the original
+    number. Also, since the algorithm will continue until the first n-1 bits are
+    0, we are left only with 1 bit of remainder. Since it has the same
+    parity as the original number, if it's 0 the number of bits set was even,
+    and if it's 1 it was odd. This is exactly like the even parity algorithm.
+
+14.
+    a. 0x24 = 36 
+    b. Executable
+    c. 0x8 = 8
+    d. The program header table starts at offset 0x34 (and of course, the first
+    program header). Looking at that offset, we can see the program header type
+    is 6 = PT_PHDR, which specifies the location and
+    size of the program header table itself, both in the file and in the memory
+    image of the program.
+    e. 0x1450
+
+15.
+    Nothing, since i is decreased to 1 on the first while, and each child
+    forks from that point, having i=1, the condition (i&2) will never be
+    satisified (the 2nd bit in i is never set).
+    The answer is, of course, unique.
