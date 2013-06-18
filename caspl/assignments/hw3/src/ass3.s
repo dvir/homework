@@ -42,6 +42,9 @@ _start:
         call create_state
         add esp, 4
 
+        cmp eax, 0
+        jne .state_parse_error
+
         push dword [ebp+12]
         call strlen
         add esp, 4
@@ -105,13 +108,17 @@ _start:
 .too_few_cells:
 .too_many_cells:
 .wrong_parameter_count:
+.state_parse_error:
     ; error occurred!
     mov eax, sys_write
     mov ebx, stdout
     mov ecx, error_msg 
     mov edx, 23 
     int 80h
-    jmp .end
+
+    mov eax, sys_exit
+    mov ebx, 1
+    int 80h
 
 .end:
         ;; exit
@@ -218,6 +225,7 @@ create_state:
     ; arguments:
     ; [ebp+8] - string pointer to initial state
 
+    mov ebx, 0
     mov ecx, [ebp+8]
     mov edx, 0
 .loop:    
@@ -225,13 +233,25 @@ create_state:
     je .end
 
     mov al, byte [ecx]
+
+    cmp al, '0'
+    jl .error
+
+    cmp al, '1'
+    jg .error
+
     mov byte [state+edx], al
     
     inc edx
     inc ecx
     jmp .loop
+    
+.error:
+    mov ebx, 1
 .end:
+    mov dword [result], ebx
     popa
+    mov eax, dword [result]
     mov esp, ebp
     pop ebp
     ret
