@@ -129,6 +129,49 @@ section .text
 %endmacro
 
 3.
+section .data
+
+l: cmp    ebx, 0
+    jz     end
+    cmp    eax, [ebx+4]
+    mov    ebx, [ebx]
+    jnz    l
+end:
+
+This code iterates on a linked list with a next property and some sort of value,
+until the end of the list (element is null) or the value of the link equals to
+eax. So in general, we are searching for a specific value in a linked list.
+
+section .data
+    
+labels1:
+    DD end
+    DD c
+labels2:
+    DD end
+    DD l
+
+l:  
+    mov edx, 0
+    mov ecx, -1  ; all ones
+    add ecx, ebx ; adding anything != 0 to all ones will result in a carry.
+    adc dh, 0    ; if we have any carry, that means the number is not 0
+                 ; so adding the carry will result in dh=1 if non-zero and
+                 ; dh=0 otherwise.
+    shr edx, 6   ; will result in either edx = 4 or edx = 0.
+    jmp dword [labels1 + edx]
+
+c:               ; we get here when ebx != 0
+    mov edx, 0
+    mov ecx, -1
+    mov esi, eax ; esi = eax
+    sub esi, [ebx+4] ; esi = eax - value
+    add ecx, esi     ; if esi is zero, there won't be any carry.
+                     ; in any other case, there will be carry.
+    adc dh, 0
+    shr edx, 6
+    jmp dword [labels2 + edx]
+end:
 
 4.
     i. neg eax
