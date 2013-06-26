@@ -1,51 +1,77 @@
 1.
 section .data
-    msg: db "The string is: %s, concatenated %s", 10, 0
-    msgLen: equ $ - msg
-
-section .bss
-    str: resb 4
-    strstr: resb 8
-
-section .text
-    extern printf
-    global main
+    msg1: db "The string is: "
+    msg1Len: equ $ - msg
+    msg2: db ", concatenated "
+    msg2Len: equ $ - msg2
 
 %macro concat_and_print 1
     push ebp
     mov ebp, esp
     pusha
+    sub esp, 4 ; [ebp-4] - local parameter holding the current char to print
     
-    mov ebx, str
-    mov ecx, strstr
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, msg1
+	mov edx, msg1Len
+	int 80h
+    
     mov eax, %1
 
-.loop1:
-    mov byte [ebx], al
-    mov byte [ecx], al
-    inc ebx
-    inc ecx
+%%loop1:
+    cmp al, 0
+    je %%next
+    
+    mov [ebp-4], al
+    pushad
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, ebp
+    sub ecx, 4
+	mov edx, 1
+	int 80h
+    popad
+    
+    shr eax, 8    
+    jmp %%loop1
+
+%%next:
+    push ebx
+    push ecx
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, msg2
+	mov edx, msg2Len
+	int 80h
+    pop ecx
+    pop ebx
+    
+    mov ecx, 2
+%%loop2:
+    cmp ecx, 0
+    je %%end
+    dec ecx
+
+    mov eax, %1
+%%inner_loop2:
+    cmp al, 0
+    je %%loop2
+    
+    mov [ebp-4], al
+    pushad
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, ebp ; give ebp-4 as argument
+    sub ecx, 4
+    mov edx, 1
+	int 80h
+    popad    
     shr eax, 8
     
-    cmp al, 0
-    jne .loop1
+    jmp %%loop2
 
-.next:
-    mov eax, %1
-
-.loop2:
-    mov byte [ecx], al
-    inc ecx
-    shr eax, 8
-    cmp al, 0
-    jne .loop2
-
-    push strstr
-    push str
-    push msg
-    call printf
-    add esp, 12
-
+%%end:
     popa
     mov esp, ebp
     pop ebp
