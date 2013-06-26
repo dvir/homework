@@ -105,6 +105,7 @@ form > ul > li > label {
   display: inline-block;
 }
 form > ul > li input[type="number"], 
+form > ul > li input[type="datetime-local"], 
 form > ul > li input[type="password"], 
 form > ul > li input[type="text"], 
 form > ul > li input[type="tel"],
@@ -146,7 +147,7 @@ form#post_message > ul > li select {
 }
 form#post_message > ul > li input[type="submit"] {
   width: 190px;
-  min-width: auto;
+  min-width: 0;
 }
 form#post_message > ul > li textarea {
   width: 182px;
@@ -345,7 +346,7 @@ footer a {
 
 /* notification */
 article#notification {
-  min-height: auto;
+  min-height: 0;
 }
 
 /* main page */
@@ -358,7 +359,7 @@ article#notification {
 /* contact */
 
 #contact {
-  width: 1035px;
+  /*width: 1035px;*/
   float: right;
 }
 
@@ -416,6 +417,11 @@ article#gallery > div > img {
   margin-top: 10px;
   display: inline-block;
   margin-right: 10px;
+}
+
+/* event */
+#events div > span.close {
+  float: left;
 }
 
 /* profile */
@@ -532,3 +538,14 @@ img.overlay {
 cursor: pointer;
 }
 
+/* admin */
+#admin_customers table thead td,
+#admin_contact table thead td
+{
+  font-weight: bold;
+}
+#admin_customers table tbody td,
+#admin_contact table tbody td
+{
+  height: 30px;
+}

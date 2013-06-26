@@ -1,7 +1,12 @@
+<?php
+$subject = isset($contactSubject) ? $contactSubject : (isset($_REQUEST["subject"]) ? $_REQUEST["subject"] : null);
+?>
+<aside>                
+    <?php                                  
+    include("announcements.php");                                                                 
+    ?>                                                                   
+</aside>  
 <article id="contact">
-    <?php if ($success) { ?>
-        <h2>בקשה התקבלה. נחזור אליך בהקדם!</h2>
-    <?php } else { ?>
   <div id="contact_main" class="unhidden">
     <h2>טופס יצירת קשר</h2>
     <form action="index.php?page=contact" method="POST" class="contact">
@@ -9,7 +14,8 @@
         <li>
         <label>נושא<font color="red" size="2">*</font>: 
           <select name="subject" id="select-subject">
-            <option value="gym">חדר כושר</option>
+            <option value="gym" <?php if ($subject == "gym") { ?>selected="selected"<?php } ?>>הרשמה לחדר כושר</option>
+            <option value="swimming" <?php if ($subject == "swimming") { ?>selected="selected"<?php } ?>>הרשמה לביה"ס לשחייה</option>
             <option value="diet">דיאטנית</option>
             <option value="pool">בריכה</option>
             <option value="classes">חוגים</option>
@@ -28,5 +34,4 @@
         <li><input type="submit" name="contact" value="השאר פרטים ונחזור אליך בהקדם!" /></li>
       </ul>
     </div>
-    <?php } ?>
-  </article>
+</article>

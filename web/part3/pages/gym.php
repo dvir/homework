@@ -2,6 +2,7 @@
     <section>
       <a href="javascript:void(0);" onclick="javascript:unhide('gym_main');"><h2>חדר כושר</h2></a>
       <ul>
+        <li><a href="index.php?page=contact&subject=gym">הרשמה</a></li>
         <li><a href="javascript:void(0);" onclick="javascript:unhide('machines');">מכשירים</a></li>
         <li><a href="javascript:void(0);" onclick="javascript:unhide('coaches');">מאמנים</a></li>
         <li><a href="javascript:void(0);" onclick="javascript:unhide('special-offer');">מבצע חדש!</a></li>

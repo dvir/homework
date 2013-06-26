@@ -17,13 +17,11 @@ if (!file_exists("./pages/".$page.".php")) {
 
 include("header.php");
 
-if (!empty($notification)) {
 ?>
-<article id="notification">
+<article id="notification" <?php if (empty($notification)) { ?>style="display: none;"<?php } ?>>
     <h3><?php echo $notification;?></h3>
 </article>    
 <?php
-}
 
 include("./pages/".$page.".php");
 

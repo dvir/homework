@@ -4,7 +4,7 @@
       <ul>
         <li><a href="javascript:void(0);" onclick="javascript:unhide('staff');">סגל בית הספר</a></li>
         <li><a href="javascript:void(0);" onclick="javascript:unhide('swimming-kids');">שחייה למתחילים</a></li>
-        <li><a href="contact.html">הרשמה</a></li>
+        <li><a href="index.php?page=contact&subject=swimming">הרשמה</a></li>
       </ul>
     </section>
 

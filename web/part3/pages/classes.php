@@ -1,13 +1,13 @@
 <?php
+    $showId = null;
     $section = "classes_main";
     if ($success && isset($_POST["create_class"])) {
-        $section = "create_class";
-    }
-    if ($success && isset($_POST["search_classes"])) {
+        $section = "class";
+        $showId = $newClassId;
+    } else if ($success && isset($_POST["search_classes"])) {
         $section = "search_classes";
-    }
-    $showId = null;
-    if (isset($_GET["id"])) {
+    } else if ($success && isset($_REQUEST["delete-class"])) {
+    } else if (isset($_GET["id"])) {
         $section = "class";
         $showId = $_GET["id"];
     }
@@ -37,20 +37,22 @@
 ?>
 <aside>
     <section>
+      <a href="javascript:void(0);" onclick="javascript:unhide('search_classes');"><h2>חיפוש חוגים</h2></a>
+    </section>
+
+    <?php if (isset($_SESSION["user"]) && $_SESSION["user"]["type"] != 0) { ?>
+    <section>
+      <a href="javascript:void(0);" onclick="javascript:unhide('create_class');"><h2>פתיחת חוג</h2></a>
+    </section>
+    <?php } ?>
+    
+    <section>
       <a href="javascript:void(0);" onclick="javascript:unhide('classes_main');"><h2>חוגים</h2></a>
       <ul>
         <?php foreach ($classes as $class) { ?>
         <li><a href="javascript:void(0);" onclick="javascript:unhide('class-<?php echo $class["id"];?>');"><?php echo $class["name"];?></a></li>
         <?php } ?>
       </ul>
-    </section>
-    
-    <section>
-      <a href="javascript:void(0);" onclick="javascript:unhide('search_classes');"><h2>חיפוש חוגים</h2></a>
-    </section>
-
-    <section>
-      <a href="javascript:void(0);" onclick="javascript:unhide('create_class');"><h2>פתיחת חוג</h2></a>
     </section>
 
     <?php
@@ -63,11 +65,12 @@
     <h3>חיפוש חוגים בקאנטרי</h3>
         <form action="index.php?page=classes" method="POST">
             <ul>    
-            <li><label>שם החוג: <input type="text" name="name" placeholder="שם מלא או חלק משם החוג" <?php if (isset($_POST["name"])) { echo 'value="'.$_POST["name"].'"'; } ?> /></label></li>
+            <li><label>שם החוג: <input type="text" id="class_name" name="name" placeholder="שם מלא או חלק משם החוג" <?php if (isset($_POST["name"])) { echo 'value="'.$_POST["name"].'"'; } ?> /></label></li>
                 <li>
                     <label>יום בשבוע:
                         <?php $day = isset($_POST["day"]) ? $_POST["day"] : null; ?>
                         <select name="day" id="class_day">
+                            <option value="0" <?php if ($day == 0 || empty($day)) echo 'selected="selected"';?>>הכל</option>
                             <option value="1" <?php if ($day == 1) echo 'selected="selected"';?>>יום ראשון</option>
                             <option value="2" <?php if ($day == 2) echo 'selected="selected"';?>>יום שני</option>
                             <option value="3" <?php if ($day == 3) echo 'selected="selected"';?>>יום שלישי</option>
@@ -80,26 +83,28 @@
                 </li>
                 <li>
                     <label>שעת התחלה:
-                        <?php $hour_start = isset($_POST["hour_start"]) ? $_POST["hour_start"] : null; ?>
+                        <?php $hour_start = isset($_POST["hour_start"]) ? $_POST["hour_start"] : -1; ?>
                         <select name="hour_start" id="class_hour_start">
+                            <option value="-1" <?php if ($hour_start == -1) echo 'selected="selected"';?>>הכל</option>
                             <?php for ($i = 0; $i < 24; ++$i) { ?>
-                            <option value="<?php echo $i;?>" <?php if (($hour_start == null && $i == 16) || $hour_start == $i) echo 'selected="selected"';?>><?php echo str_pad($i, 2, "0", STR_PAD_LEFT);?>:00</option>
+                            <option value="<?php echo $i;?>" <?php if ($hour_start == $i) echo 'selected="selected"';?>><?php echo str_pad($i, 2, "0", STR_PAD_LEFT);?>:00</option>
                             <?php } ?>
                         </select>       
                     </label>
                 </li>
                 <li>
                     <label>שעת סיום:
-                        <?php $hour_end = isset($_POST["hour_end"]) ? $_POST["hour_end"] : null; ?>
+                        <?php $hour_end = isset($_POST["hour_end"]) ? $_POST["hour_end"] : -1; ?>
                         <select name="hour_end" id="class_hour_end">
+                            <option value="-1" <?php if ($hour_end == -1) echo 'selected="selected"';?>>הכל</option>
                             <?php for ($i = 0; $i < 24; ++$i) { ?>
-                            <option value="<?php echo $i;?>" <?php if (($hour_end == null && $i == 18) || $hour_end == $i) echo 'selected="selected"';?>><?php echo str_pad($i, 2, "0", STR_PAD_LEFT);?>:00</option>
+                            <option value="<?php echo $i;?>" <?php if ($hour_end == $i) echo 'selected="selected"';?>><?php echo str_pad($i, 2, "0", STR_PAD_LEFT);?>:00</option>
                             <?php } ?>
                         </select>       
                     </label>
                 </li>
                 <li>
-                    <label>מחיר:
+                    <label>מחיר מקסימלי:
                     <input type="number" min="0" name="price" placeholder="מחיר מקסימלי לשיעור" <?php if (isset($_POST["price"])) { echo 'value="'.$_POST["price"].'"'; } ?> />
                     </label>
                 </li>
@@ -186,7 +191,7 @@
   <?php foreach ($classes as $class) { ?>
   <div>
   <div id="class-<?php echo $class["id"];?>" class="class <?php if ($section = "class" && $showId == $class["id"]) echo "un";?>hidden">
-    <?php if (isset($_SESSION["user"]) && $_SESSION["user"]["id"] == $class["teacher_id"]) { ?>
+    <?php if (isset($_SESSION["user"]) && ($_SESSION["user"]["id"] == $class["teacher_id"] || $_SESSION["user"]["type"] == 2)) { ?>
     <span class="close"><a href="javascript:void(0);" class="edit">עדכן</a>&nbsp;<a onclick="return confirm('האם אתה בטוח שברצונך למחוק את החוג?');" href="index.php?page=<?php echo $page;?>&delete-class&id=<?php echo $class["id"];?>">מחק</a></span>
     <?php } ?>
 
@@ -215,7 +220,7 @@
 
                 ?>
                 <a href="javascript:void(0);" class="class-unregister" <?php if (!$registered) { echo 'style="display: none;"'; } ?>>בטל הרשמה</a>
-                <a href="javascript:void(0);" class="class-register" <?php if ($registered || count($class["participants"]) > $class["capacity"]) { echo 'style="display: none;"'; } ?>>הרשם לחוג</a>
+                <a href="javascript:void(0);" class="class-register" <?php if ($registered || count($class["participants"]) >= $class["capacity"]) { echo 'style="display: none;"'; } ?>>הרשם לחוג</a>
                 <?php
             }
       ?>

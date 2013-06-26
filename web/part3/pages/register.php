@@ -4,9 +4,6 @@
     ?>
 </aside>
 <article id="register">
-    <?php if ($success) { ?>
-        <h2>הרישום לקאנטרי בוצע בהצלחה. ברוך הבא!</h2>
-    <?php } else { ?>
     <div id="register_main" class="unhidden">
         <h2>הרשמה לקאנטרי</h2>
         <form action="index.php?page=register" method="POST">
@@ -23,5 +20,4 @@
             </ul>
         </form>
     </div>
-    <?php } ?>
 </article>
