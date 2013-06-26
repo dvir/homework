@@ -240,10 +240,14 @@ word.
     01 01 00 01
 
     a. 
-    mov dword [y], 0x01000101
+    mov dword [y], 0x01010001
+    
+    Although y will be positioned in an even position, it may still not be 4-divisable, and therefore the data may span
+    on two memory blocks. Without the fetch, setting it will take two memory operations in the worst case, and the fetch 
+    may take 3 memory operations, so in total - 5 memory operations in the worst case.
 
     b.
-    MOVE.L #$01010001 (y)
+    MOVE.L #$01000101 (y)
 
 8.
     1. The code swaps |ecx| amount of bytes between the memory address pointed
