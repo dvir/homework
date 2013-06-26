@@ -268,10 +268,18 @@ end:
         pop ebp
         ret
 
-6. 3 memory accesses - 2 as a result of a dword operation in line 2, due to the
-possibility that a dword may span over two memory words, and 1 more for the xor
-due to the fact this is a byte operation, which may reside in only one memory
-word.
+6. 
+   1) add edx, (to_printf-next_i)
+   6 bytes of opcode + operands, only fetch - 3 memory accesses in the worst case.
+   
+   2) inc dword [myarray + ebx*4 + eax]
+   7 bytes of opcode + operands - fetch might be 3 memory accesses, read - 2 memory accesses in the worst case,
+   write is another 2. total: 7 memory accesses.
+   
+   3) xor al, [myarray]
+   Fetch: 3 memory accesses (6 bytes).
+   Read: 1 memory accesses - we are reading only one byte.
+   Total: 4 memory accesses.
 
 7.
     Memory layout:
