@@ -234,18 +234,16 @@ word.
 
 7.
     Memory layout:
-    yy uu 00 ff 00 00 zz uu
+    yy 00 ff zz
     
     Desired layout:
-    01 uu 01 00 00 00 01 uu
+    01 01 00 01
 
     a. 
-    mov dword [y], 0x00010001
-    mov byte [z], 1
+    mov dword [y], 0x01000101
 
     b.
-    MOVE.L #$01000100, (y)
-    MOVE.B #$01, (z)
+    MOVE.L #$01010001 (y)
 
 8.
     1. The code swaps |ecx| amount of bytes between the memory address pointed
