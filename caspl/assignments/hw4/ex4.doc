@@ -391,7 +391,11 @@ N:  MOVE.L   (A7)+, D0     ; Move memory to D0 - postincrement mode
     c. 
         parity:
             mov edx, eax
-            xor edx, ebx
+            xor edx, ebx ; xor between the two 32 bits halves of the set
+            mov ecx, edx
+            shr ecx, 16
+            xor dx, cx   ; xor between the 16 bit halves of the result
+            xor dl, dh   ; xor between the 8 bit halves of the result - now the parity flag should be properly set
 
     d.
         intersection:
